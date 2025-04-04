@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import NewAttendantDialog from "@/components/attendants/NewAttendantDialog";
 import DeleteAttendantDialog from "@/components/attendants/DeleteAttendantDialog";
+import EditAttendantDialog from "@/components/attendants/EditAttendantDialog";
 
 interface Attendant {
   id: number;
@@ -32,6 +33,7 @@ export default function Attendants() {
   const [loading, setLoading] = useState(true);
   const [newAttendantDialogOpen, setNewAttendantDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedAttendant, setSelectedAttendant] = useState<Attendant | null>(null);
 
   const fetchAttendants = async () => {
@@ -48,7 +50,13 @@ export default function Attendants() {
         throw error;
       }
 
-      setAttendants(data as Attendant[]);
+      // Make sure to handle the porcentagem field
+      const typedData = data.map(item => ({
+        ...item,
+        porcentagem: item.porcentagem || 0
+      })) as Attendant[];
+
+      setAttendants(typedData);
     } catch (error) {
       console.error("Erro ao buscar atendentes:", error);
       toast({
@@ -83,6 +91,11 @@ export default function Attendants() {
     setDeleteDialogOpen(true);
   };
 
+  const handleEditClick = (attendant: Attendant) => {
+    setSelectedAttendant(attendant);
+    setEditDialogOpen(true);
+  };
+
   const handleDeleteConfirm = async () => {
     if (!selectedAttendant) return;
     
@@ -108,6 +121,12 @@ export default function Attendants() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleAttendantUpdated = () => {
+    fetchAttendants();
+    setEditDialogOpen(false);
+    setSelectedAttendant(null);
   };
 
   return (
@@ -147,11 +166,20 @@ export default function Attendants() {
                     <TableCell>
                       {new Date(attendant.criado_em).toLocaleDateString("pt-BR")}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditClick(attendant)}
+                        title="Editar"
+                      >
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteClick(attendant)}
+                        title="Excluir"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -175,6 +203,13 @@ export default function Attendants() {
         onOpenChange={setDeleteDialogOpen}
         attendant={selectedAttendant}
         onConfirm={handleDeleteConfirm}
+      />
+
+      <EditAttendantDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        attendant={selectedAttendant}
+        onAttendantUpdated={handleAttendantUpdated}
       />
     </div>
   );
