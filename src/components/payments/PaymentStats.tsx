@@ -1,6 +1,7 @@
 
-import { DollarSign, CreditCard, UserCheck } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DollarSign, CreditCard, UserCheck, InfoIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PaymentStatsProps {
   totalPayments: number;
@@ -19,7 +20,19 @@ export function PaymentStats({
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Pagamentos</CardTitle>
+          <div className="flex items-center">
+            <CardTitle className="text-sm font-medium">Total de Pagamentos</CardTitle>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 ml-2 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Somente pagamentos concluídos</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -30,11 +43,24 @@ export function PaymentStats({
               `R$ ${totalPayments.toFixed(2)}`
             )}
           </div>
+          <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Comissão dos Atendentes</CardTitle>
+          <div className="flex items-center">
+            <CardTitle className="text-sm font-medium">Comissão dos Atendentes</CardTitle>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 ml-2 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Somente pagamentos concluídos</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -45,11 +71,24 @@ export function PaymentStats({
               `R$ ${attendantCommission.toFixed(2)}`
             )}
           </div>
+          <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Valor a Receber do Tripeiro</CardTitle>
+          <div className="flex items-center">
+            <CardTitle className="text-sm font-medium">Valor a Receber do Tripeiro</CardTitle>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InfoIcon className="h-4 w-4 ml-2 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Somente pagamentos concluídos</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -60,6 +99,7 @@ export function PaymentStats({
               `R$ ${tripeiroReceivable.toFixed(2)}`
             )}
           </div>
+          <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
         </CardContent>
       </Card>
     </div>

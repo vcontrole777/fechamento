@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,7 +105,10 @@ export function usePayments() {
       };
     }
 
-    return payments.reduce((acc, payment) => {
+    // Filter only completed payments for totals calculation
+    const completedPayments = payments.filter(payment => payment.status === "concluido");
+
+    return completedPayments.reduce((acc, payment) => {
       const totalPayment = Number(payment.valor);
       const tripeiroCommission = totalPayment * (payment.porcentagem_tripeiro / 100);
       const tripeiroReceivable = totalPayment - tripeiroCommission;
