@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +40,7 @@ export type Payment = {
 export type PaymentFilters = {
   attendantIds: number[];
   tripeiroIds: number[];
-  statuses: string[];
+  statuses: ("concluido" | "pendente" | "bloqueado")[];
 };
 
 export function usePayments() {
@@ -95,7 +94,6 @@ export function usePayments() {
     },
   });
 
-  // Calculate totals
   const calculateTotals = () => {
     if (!payments || payments.length === 0) {
       return {
@@ -134,7 +132,6 @@ export function usePayments() {
     netTotal
   } = calculateTotals();
 
-  // Dialog actions
   const openAddPaymentDialog = () => setIsAddingPayment(true);
   const closeAddPaymentDialog = () => setIsAddingPayment(false);
   
@@ -156,7 +153,6 @@ export function usePayments() {
     setIsDeletingPayment(false);
   };
 
-  // Update filters
   const updateFilters = (newFilters: Partial<PaymentFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };

@@ -22,10 +22,11 @@ import { cn } from "@/lib/utils";
 import { useAttendantsAndTripeiros } from "./hooks/useAttendantsAndTripeiros";
 import { Separator } from "@/components/ui/separator";
 
+// Define the status options with proper typing
 const statusOptions = [
-  { label: "Pendente", value: "pendente" },
-  { label: "Concluído", value: "concluido" },
-  { label: "Bloqueado", value: "bloqueado" },
+  { label: "Pendente", value: "pendente" as const },
+  { label: "Concluído", value: "concluido" as const },
+  { label: "Bloqueado", value: "bloqueado" as const },
 ];
 
 interface PaymentFiltersComponentProps {
@@ -42,7 +43,7 @@ export function PaymentFiltersComponent({
 
   const [selectedAttendantIds, setSelectedAttendantIds] = useState<number[]>(filters.attendantIds);
   const [selectedTripeiroIds, setSelectedTripeiroIds] = useState<number[]>(filters.tripeiroIds);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(filters.statuses);
+  const [selectedStatuses, setSelectedStatuses] = useState<("concluido" | "pendente" | "bloqueado")[]>(filters.statuses);
 
   // Apply filters when selection changes
   useEffect(() => {
@@ -65,7 +66,7 @@ export function PaymentFiltersComponent({
     );
   };
 
-  const handleStatusSelection = (value: string) => {
+  const handleStatusSelection = (value: "concluido" | "pendente" | "bloqueado") => {
     setSelectedStatuses((current) =>
       current.includes(value) ? current.filter((status) => status !== value) : [...current, value]
     );
