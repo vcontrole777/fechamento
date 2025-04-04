@@ -15,6 +15,8 @@ import {
   LogOut,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth"; 
+import { toast } from "@/hooks/use-toast";
 
 interface SidebarProps {
   className?: string;
@@ -22,6 +24,7 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const { signOut } = useAuth();
 
   const menuItems = [
     { name: "Painel", icon: BarChart3, path: "/" },
@@ -32,6 +35,22 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Fechamento", icon: FileBarChart, path: "/fechamento" },
     { name: "Minha Conta", icon: User, path: "/minha-conta" },
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logout realizado",
+        description: "Você saiu da sua conta com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao sair",
+        description: "Ocorreu um erro ao tentar sair.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <aside
@@ -85,6 +104,7 @@ export function Sidebar({ className }: SidebarProps) {
             "w-full flex items-center gap-2 text-sidebar-foreground hover:bg-sidebar-muted",
             collapsed && "justify-center"
           )}
+          onClick={handleSignOut}
         >
           <LogOut className="h-5 w-5" />
           {!collapsed && <span>Sair</span>}
