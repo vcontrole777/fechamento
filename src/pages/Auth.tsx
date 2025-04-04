@@ -67,6 +67,10 @@ const Auth = () => {
 
       if (equipeError) throw equipeError;
 
+      if (!equipeData) {
+        throw new Error("Não foi possível criar a equipe");
+      }
+
       const equipeId = equipeData.id;
 
       // 2. Registrar o usuário com os metadados
@@ -101,7 +105,7 @@ const Auth = () => {
         // 4. Atualizar o perfil com o id_equipe
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({ id_equipe: equipeId })
+          .update({ id_equipe: equipeId, nome: nome })
           .eq("id", data.user.id);
 
         if (profileError) throw profileError;
@@ -113,6 +117,7 @@ const Auth = () => {
       });
 
     } catch (error: any) {
+      console.error("Erro completo:", error);
       toast({
         title: "Erro ao registrar",
         description: error.message,
