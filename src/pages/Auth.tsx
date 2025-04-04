@@ -82,6 +82,7 @@ const Auth = () => {
       console.log("Equipe criada com id:", equipeId);
 
       // 2. Registrar o usuário com os metadados
+      // Importante: Passamos o id_equipe como string, mas o trigger vai converter para integer
       console.log("Registrando usuário:", email);
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -89,7 +90,7 @@ const Auth = () => {
         options: {
           data: {
             nome,
-            id_equipe: equipeId,
+            id_equipe: equipeId.toString(),
           },
         },
       });
@@ -122,9 +123,6 @@ const Auth = () => {
         throw pessoaError;
       }
       
-      // 4. Skip updating the profiles table directly, as this should be handled by the trigger
-      // Instead, let's just show success message since all other steps completed successfully
-
       toast({
         title: "Registro realizado com sucesso",
         description: "Confira seu email para confirmar o cadastro.",
