@@ -33,6 +33,14 @@ export default function Payments() {
     closeDeletePaymentDialog,
   } = usePayments();
 
+  // Format currency in Brazilian style (R$ 1.000,00)
+  const formatCurrency = (value: number): string => {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -48,6 +56,7 @@ export default function Payments() {
         attendantCommission={totalAttendantCommission}
         tripeiroReceivable={totalTripeiroReceivable}
         isLoading={isLoading}
+        formatCurrency={formatCurrency}
       />
 
       <div className="space-y-4">
@@ -65,6 +74,7 @@ export default function Payments() {
             payments={payments}
             onEditClick={openEditPaymentDialog}
             onDeleteClick={openDeletePaymentDialog}
+            formatCurrency={formatCurrency}
           />
         ) : (
           <EmptyPaymentsState onAddClick={openAddPaymentDialog} />

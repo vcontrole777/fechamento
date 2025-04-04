@@ -29,10 +29,10 @@ export default function Expenses() {
   } = useExpenses();
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
+    return value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value);
+    });
   };
 
   return (
@@ -74,6 +74,7 @@ export default function Expenses() {
               expenses={expenses}
               onEdit={openEditExpenseDialog}
               onDelete={openDeleteExpenseDialog}
+              formatCurrency={formatCurrency}
             />
           ) : (
             <EmptyExpensesState />

@@ -8,6 +8,7 @@ interface PaymentStatsProps {
   attendantCommission: number;
   tripeiroReceivable: number;
   isLoading: boolean;
+  formatCurrency: (value: number) => string;
 }
 
 export function PaymentStats({
@@ -15,6 +16,7 @@ export function PaymentStats({
   attendantCommission,
   tripeiroReceivable,
   isLoading,
+  formatCurrency,
 }: PaymentStatsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -40,7 +42,7 @@ export function PaymentStats({
             {isLoading ? (
               <div className="h-8 w-24 animate-pulse rounded bg-muted"></div>
             ) : (
-              `R$ ${totalPayments.toFixed(2)}`
+              formatCurrency(totalPayments)
             )}
           </div>
           <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
@@ -68,7 +70,7 @@ export function PaymentStats({
             {isLoading ? (
               <div className="h-8 w-24 animate-pulse rounded bg-muted"></div>
             ) : (
-              `R$ ${attendantCommission.toFixed(2)}`
+              formatCurrency(attendantCommission)
             )}
           </div>
           <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
@@ -96,7 +98,7 @@ export function PaymentStats({
             {isLoading ? (
               <div className="h-8 w-24 animate-pulse rounded bg-muted"></div>
             ) : (
-              `R$ ${tripeiroReceivable.toFixed(2)}`
+              formatCurrency(tripeiroReceivable)
             )}
           </div>
           <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>

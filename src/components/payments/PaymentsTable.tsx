@@ -18,12 +18,14 @@ interface PaymentsTableProps {
   payments: Payment[];
   onEditClick: (payment: Payment) => void;
   onDeleteClick: (payment: Payment) => void;
+  formatCurrency: (value: number) => string;
 }
 
 export default function PaymentsTable({
   payments,
   onEditClick,
   onDeleteClick,
+  formatCurrency,
 }: PaymentsTableProps) {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -78,7 +80,7 @@ export default function PaymentsTable({
                 <TableCell>
                   {format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR })}
                 </TableCell>
-                <TableCell>R$ {Number(payment.valor).toFixed(2)}</TableCell>
+                <TableCell>{formatCurrency(Number(payment.valor))}</TableCell>
                 <TableCell>
                   {payment.atendente?.nome || "N/A"}
                 </TableCell>
