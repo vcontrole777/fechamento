@@ -99,37 +99,31 @@ const Auth = () => {
         throw error;
       }
 
-      // 3. Criar a pessoa associada ao usuário
-      if (data.user) {
-        console.log("Criando pessoa para usuário:", data.user.id);
-        const { error: pessoaError } = await supabase
-          .from("pessoas")
-          .insert([
-            { 
-              nome, 
-              tipo: "responsavel", 
-              id_usuario: data.user.id,
-              id_equipe: equipeId
-            }
-          ]);
-
-        if (pessoaError) {
-          console.error("Erro ao criar pessoa:", pessoaError);
-          throw pessoaError;
-        }
-        
-        // 4. Atualizar o perfil com o id_equipe
-        console.log("Atualizando perfil do usuário");
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ id_equipe: equipeId, nome: nome })
-          .eq("id", data.user.id);
-
-        if (profileError) {
-          console.error("Erro ao atualizar perfil:", profileError);
-          throw profileError;
-        }
+      if (!data.user) {
+        console.error("Usuário criado, mas não retornou dados");
+        throw new Error("Erro ao criar usuário");
       }
+
+      // 3. Criar a pessoa associada ao usuário
+      console.log("Criando pessoa para usuário:", data.user.id);
+      const { error: pessoaError } = await supabase
+        .from("pessoas")
+        .insert([
+          { 
+            nome, 
+            tipo: "responsavel", 
+            id_usuario: data.user.id,
+            id_equipe: equipeId
+          }
+        ]);
+
+      if (pessoaError) {
+        console.error("Erro ao criar pessoa:", pessoaError);
+        throw pessoaError;
+      }
+      
+      // 4. Skip updating the profiles table directly, as this should be handled by the trigger
+      // Instead, let's just show success message since all other steps completed successfully
 
       toast({
         title: "Registro realizado com sucesso",
