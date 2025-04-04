@@ -58,22 +58,31 @@ const Auth = () => {
     setAuthLoading(true);
 
     try {
+      console.log("Iniciando processo de registro");
+      
       // 1. Criar a equipe primeiro
+      console.log("Criando equipe:", nomeEquipe);
       const { data: equipeData, error: equipeError } = await supabase
         .from("equipes")
         .insert([{ nome: nomeEquipe }])
         .select('id')
         .single();
 
-      if (equipeError) throw equipeError;
+      if (equipeError) {
+        console.error("Erro ao criar equipe:", equipeError);
+        throw equipeError;
+      }
 
       if (!equipeData) {
+        console.error("Equipe criada, mas não retornou dados");
         throw new Error("Não foi possível criar a equipe");
       }
 
       const equipeId = equipeData.id;
+      console.log("Equipe criada com id:", equipeId);
 
       // 2. Registrar o usuário com os metadados
+      console.log("Registrando usuário:", email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -85,10 +94,14 @@ const Auth = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao registrar usuário:", error);
+        throw error;
+      }
 
       // 3. Criar a pessoa associada ao usuário
       if (data.user) {
+        console.log("Criando pessoa para usuário:", data.user.id);
         const { error: pessoaError } = await supabase
           .from("pessoas")
           .insert([
@@ -100,15 +113,22 @@ const Auth = () => {
             }
           ]);
 
-        if (pessoaError) throw pessoaError;
+        if (pessoaError) {
+          console.error("Erro ao criar pessoa:", pessoaError);
+          throw pessoaError;
+        }
         
         // 4. Atualizar o perfil com o id_equipe
+        console.log("Atualizando perfil do usuário");
         const { error: profileError } = await supabase
           .from("profiles")
           .update({ id_equipe: equipeId, nome: nome })
           .eq("id", data.user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Erro ao atualizar perfil:", profileError);
+          throw profileError;
+        }
       }
 
       toast({
@@ -117,7 +137,7 @@ const Auth = () => {
       });
 
     } catch (error: any) {
-      console.error("Erro completo:", error);
+      console.error("Erro completo no registro:", error);
       toast({
         title: "Erro ao registrar",
         description: error.message,
