@@ -22,6 +22,7 @@ interface Attendant {
   nome: string;
   id_equipe: number;
   criado_em: string;
+  porcentagem: number;
 }
 
 export default function Attendants() {
@@ -133,6 +134,7 @@ export default function Attendants() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
+                  <TableHead>Comissão</TableHead>
                   <TableHead>Data de Cadastro</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -141,6 +143,7 @@ export default function Attendants() {
                 {attendants.map((attendant) => (
                   <TableRow key={attendant.id}>
                     <TableCell className="font-medium">{attendant.nome}</TableCell>
+                    <TableCell>{attendant.porcentagem || 0}%</TableCell>
                     <TableCell>
                       {new Date(attendant.criado_em).toLocaleDateString("pt-BR")}
                     </TableCell>

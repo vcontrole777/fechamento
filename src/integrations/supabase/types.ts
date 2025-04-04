@@ -143,6 +143,7 @@ export type Database = {
           id_equipe: number
           id_usuario: string | null
           nome: string
+          porcentagem: number | null
           tipo: Database["public"]["Enums"]["tipo_pessoa"]
         }
         Insert: {
@@ -151,6 +152,7 @@ export type Database = {
           id_equipe: number
           id_usuario?: string | null
           nome: string
+          porcentagem?: number | null
           tipo: Database["public"]["Enums"]["tipo_pessoa"]
         }
         Update: {
@@ -159,6 +161,7 @@ export type Database = {
           id_equipe?: number
           id_usuario?: string | null
           nome?: string
+          porcentagem?: number | null
           tipo?: Database["public"]["Enums"]["tipo_pessoa"]
         }
         Relationships: [
