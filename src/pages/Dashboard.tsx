@@ -18,26 +18,34 @@ export default function Dashboard() {
     financialStats,
   } = useDashboardData();
 
+  // Format currency in Brazilian style (R$ 1.000,00)
+  const formatCurrency = (value: number): string => {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Faturamento Total"
-          value={isLoading ? "Carregando..." : `R$ ${financialStats.totalRevenue.toFixed(2)}`}
+          value={isLoading ? "Carregando..." : formatCurrency(financialStats.totalRevenue)}
           icon={Banknote}
           trend={financialStats.revenueTrend}
           className="bg-gradient-to-br from-accent/10 to-accent/5"
         />
         <StatCard
           title="Gastos"
-          value={isLoading ? "Carregando..." : `R$ ${financialStats.totalExpenses.toFixed(2)}`}
+          value={isLoading ? "Carregando..." : formatCurrency(financialStats.totalExpenses)}
           icon={TrendingDown}
           trend={financialStats.expensesTrend}
           className="bg-gradient-to-br from-destructive/10 to-destructive/5"
         />
         <StatCard
           title="Lucro Líquido"
-          value={isLoading ? "Carregando..." : `R$ ${financialStats.netProfit.toFixed(2)}`}
+          value={isLoading ? "Carregando..." : formatCurrency(financialStats.netProfit)}
           icon={TrendingUp}
           trend={financialStats.profitTrend}
           className="bg-gradient-to-br from-success/10 to-success/5"

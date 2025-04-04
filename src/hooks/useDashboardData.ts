@@ -216,7 +216,10 @@ function formatRecentPayments(payments) {
     id: payment.id.toString(),
     name: payment.atendente?.nome || "Não atribuído",
     type: payment.tipo === "pix" ? "PIX" : "Boleto",
-    amount: `R$ ${Number(payment.valor).toFixed(2)}`,
+    amount: payment.valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }),
     status: payment.status === "concluido" ? "completed" : 
             payment.status === "pendente" ? "pending" : "failed",
     date: format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR })
@@ -229,7 +232,10 @@ function formatRecentExpenses(expenses) {
     id: expense.id.toString(),
     name: expense.responsavel?.nome || expense.descricao,
     type: "Despesa",
-    amount: `R$ ${Number(expense.valor).toFixed(2)}`,
+    amount: expense.valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }),
     status: "completed",
     date: format(new Date(expense.data), "dd/MM/yyyy", { locale: ptBR })
   }));
