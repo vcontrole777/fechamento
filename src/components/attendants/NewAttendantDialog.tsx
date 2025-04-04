@@ -24,9 +24,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Slider } from "@/components/ui/slider";
 
 const formSchema = z.object({
   nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
+  porcentagem: z.number().min(0, "Porcentagem mínima é 0%").max(100, "Porcentagem máxima é 100%"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -50,6 +52,7 @@ export default function NewAttendantDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nome: "",
+      porcentagem: 10, // Valor padrão de 10%
     },
   });
 
@@ -77,6 +80,7 @@ export default function NewAttendantDialog({
           nome: data.nome,
           tipo: "atendente",
           id_equipe: profileData.id_equipe,
+          porcentagem: data.porcentagem, // Adicionando a porcentagem
         },
       ]);
 
@@ -102,7 +106,7 @@ export default function NewAttendantDialog({
         <DialogHeader>
           <DialogTitle>Adicionar Novo Atendente</DialogTitle>
           <DialogDescription>
-            Adicione um novo atendente à sua equipe. Preencha o nome do atendente abaixo.
+            Adicione um novo atendente à sua equipe. Preencha o nome do atendente e defina sua porcentagem de comissão.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -120,6 +124,31 @@ export default function NewAttendantDialog({
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="porcentagem"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Porcentagem de comissão: {field.value}%</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      <Slider
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={(value) => field.onChange(value[0])}
+                        className="flex-grow"
+                      />
+                      <span className="w-12 text-center">{field.value}%</span>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <DialogFooter>
               <Button
                 type="button"
