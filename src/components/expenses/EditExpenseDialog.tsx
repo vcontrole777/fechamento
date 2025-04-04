@@ -120,6 +120,7 @@ export default function EditExpenseDialog({
         valor: values.valor,
         data: format(values.data, "yyyy-MM-dd"),
         id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : null,
+        // We don't need to update id_equipe since it's already set and shouldn't change
       })
       .eq("id", expense.id);
 

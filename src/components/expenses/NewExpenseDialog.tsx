@@ -97,11 +97,26 @@ export default function NewExpenseDialog({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Get the user's equipe_id
+    const { data: userData, error: userError } = await supabase.rpc('get_user_equipe_id');
+    
+    if (userError) {
+      toast({
+        title: "Erro ao obter informações do usuário",
+        description: userError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const id_equipe = userData;
+
     const { data, error } = await supabase.from("despesas").insert({
       descricao: values.descricao,
       valor: values.valor,
       data: format(values.data, "yyyy-MM-dd"),
       id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : null,
+      id_equipe: id_equipe,
     });
 
     if (error) {
