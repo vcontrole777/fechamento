@@ -1,77 +1,24 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useAttendants, Attendant } from "@/hooks/useAttendants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Plus } from "lucide-react";
+import AttendantsTable from "@/components/attendants/AttendantsTable";
+import EmptyAttendantsState from "@/components/attendants/EmptyAttendantsState";
 import NewAttendantDialog from "@/components/attendants/NewAttendantDialog";
 import DeleteAttendantDialog from "@/components/attendants/DeleteAttendantDialog";
 import EditAttendantDialog from "@/components/attendants/EditAttendantDialog";
 
-interface Attendant {
-  id: number;
-  nome: string;
-  id_equipe: number;
-  criado_em: string;
-  porcentagem: number;
-}
-
 export default function Attendants() {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [attendants, setAttendants] = useState<Attendant[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { attendants, loading, fetchAttendants, deleteAttendant } = useAttendants();
+  
   const [newAttendantDialogOpen, setNewAttendantDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedAttendant, setSelectedAttendant] = useState<Attendant | null>(null);
-
-  const fetchAttendants = async () => {
-    try {
-      setLoading(true);
-      
-      const { data, error } = await supabase
-        .from("pessoas")
-        .select("*")
-        .eq("tipo", "atendente")
-        .order("nome");
-
-      if (error) {
-        throw error;
-      }
-
-      // Make sure to handle the porcentagem field
-      const typedData = data.map(item => ({
-        ...item,
-        porcentagem: item.porcentagem || 0
-      })) as Attendant[];
-
-      setAttendants(typedData);
-    } catch (error) {
-      console.error("Erro ao buscar atendentes:", error);
-      toast({
-        title: "Erro ao carregar atendentes",
-        description: "Não foi possível carregar a lista de atendentes.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAttendants();
-  }, []);
 
   const handleOpenNewAttendantDialog = () => {
     setNewAttendantDialogOpen(true);
@@ -99,22 +46,15 @@ export default function Attendants() {
   const handleDeleteConfirm = async () => {
     if (!selectedAttendant) return;
     
-    try {
-      const { error } = await supabase
-        .from("pessoas")
-        .delete()
-        .eq("id", selectedAttendant.id);
-      
-      if (error) throw error;
-      
-      fetchAttendants();
+    const result = await deleteAttendant(selectedAttendant.id);
+    
+    if (result.success) {
       setDeleteDialogOpen(false);
       toast({
         title: "Atendente removido",
         description: "O atendente foi removido com sucesso.",
       });
-    } catch (error) {
-      console.error("Erro ao remover atendente:", error);
+    } else {
       toast({
         title: "Erro ao remover atendente",
         description: "Não foi possível remover o atendente.",
@@ -142,52 +82,13 @@ export default function Attendants() {
           {loading ? (
             <div className="flex justify-center p-4">Carregando atendentes...</div>
           ) : attendants.length === 0 ? (
-            <div className="text-center p-4">
-              <p className="text-muted-foreground">Nenhum atendente encontrado.</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Clique no botão "Novo Atendente" para adicionar um atendente.
-              </p>
-            </div>
+            <EmptyAttendantsState />
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Comissão</TableHead>
-                  <TableHead>Data de Cadastro</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attendants.map((attendant) => (
-                  <TableRow key={attendant.id}>
-                    <TableCell className="font-medium">{attendant.nome}</TableCell>
-                    <TableCell>{attendant.porcentagem || 0}%</TableCell>
-                    <TableCell>
-                      {new Date(attendant.criado_em).toLocaleDateString("pt-BR")}
-                    </TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditClick(attendant)}
-                        title="Editar"
-                      >
-                        <Pencil className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteClick(attendant)}
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <AttendantsTable 
+              attendants={attendants}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
           )}
         </CardContent>
       </Card>
