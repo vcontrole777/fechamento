@@ -11,6 +11,7 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 import Auth from "./pages/Auth";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Attendants from "./pages/Attendants";
 
 // Create a new QueryClient instance inside the component
 const App = () => {
@@ -35,7 +36,7 @@ const App = () => {
               >
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/pagamentos" element={<PlaceholderPage title="Pagamentos" />} />
-                <Route path="/atendentes" element={<PlaceholderPage title="Atendentes" />} />
+                <Route path="/atendentes" element={<Attendants />} />
                 <Route path="/tripeiros" element={<PlaceholderPage title="Tripeiros" />} />
                 <Route path="/despesas" element={<PlaceholderPage title="Despesas" />} />
                 <Route path="/fechamento" element={<PlaceholderPage title="Fechamento" />} />
