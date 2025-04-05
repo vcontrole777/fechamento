@@ -1,0 +1,69 @@
+
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { Payment, PaymentFilters, DateRange } from "@/types/payment.types";
+import { format } from "date-fns";
+
+export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) {
+  return useQuery({
+    queryKey: ["payments", filters, dateRange],
+    queryFn: async () => {
+      // Format dates properly for database query (YYYY-MM-DD)
+      const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
+      const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
+      
+      console.log("Fetching payments with date range:", {
+        from: fromDate,
+        to: toDate
+      });
+      
+      let query = supabase
+        .from("pagamentos")
+        .select(`
+          *,
+          atendente:pessoas!pagamentos_id_atendente_fkey(nome, porcentagem),
+          tripeiro:pessoas!pagamentos_id_tripeiro_fkey(nome, porcentagem)
+        `);
+
+      // Apply filters
+      if (filters.attendantIds.length > 0) {
+        query = query.in("id_atendente", filters.attendantIds);
+      }
+      
+      if (filters.tripeiroIds.length > 0) {
+        query = query.in("id_tripeiro", filters.tripeiroIds);
+      }
+      
+      if (filters.statuses.length > 0) {
+        query = query.in("status", filters.statuses);
+      }
+      
+      // Apply date range filter with exact date matching
+      if (fromDate) {
+        console.log("Filtering payments from date:", fromDate);
+        query = query.gte('data', fromDate);
+      }
+      
+      if (toDate) {
+        console.log("Filtering payments to date:", toDate);
+        query = query.lte('data', toDate);
+      }
+
+      query = query.order("data", { ascending: false });
+
+      const { data, error } = await query;
+
+      if (error) {
+        toast({
+          title: "Erro ao carregar pagamentos",
+          description: error.message,
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data as Payment[];
+    },
+  });
+}
