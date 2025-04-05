@@ -42,6 +42,7 @@ export function TripeiroReceivablesTable({
           <TableRow>
             <TableHead>Tripeiro</TableHead>
             <TableHead>Pagamentos</TableHead>
+            <TableHead>Total</TableHead>
             <TableHead className="text-right">Valor a Receber</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,6 +51,7 @@ export function TripeiroReceivablesTable({
             <TableRow key={tripeiro.id}>
               <TableCell className="font-medium">{tripeiro.nome}</TableCell>
               <TableCell>{tripeiro.paymentsCount}</TableCell>
+              <TableCell>{formatCurrency(tripeiro.paymentsCount * (tripeiro.totalReceivable / tripeiro.paymentsCount))}</TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(tripeiro.totalReceivable)}
               </TableCell>
@@ -60,6 +62,7 @@ export function TripeiroReceivablesTable({
           <TableRow>
             <TableCell className="font-bold">Total</TableCell>
             <TableCell className="font-bold">{totalPayments}</TableCell>
+            <TableCell className="font-bold">{formatCurrency(totalReceivable)}</TableCell>
             <TableCell className="text-right font-bold">
               {formatCurrency(totalReceivable)}
             </TableCell>

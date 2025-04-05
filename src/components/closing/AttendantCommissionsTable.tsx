@@ -42,6 +42,7 @@ export function AttendantCommissionsTable({
           <TableRow>
             <TableHead>Atendente</TableHead>
             <TableHead>Pagamentos</TableHead>
+            <TableHead>Total</TableHead>
             <TableHead className="text-right">Comissão</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,6 +51,7 @@ export function AttendantCommissionsTable({
             <TableRow key={attendant.id}>
               <TableCell className="font-medium">{attendant.nome}</TableCell>
               <TableCell>{attendant.paymentsCount}</TableCell>
+              <TableCell>{formatCurrency(attendant.paymentsCount * (attendant.totalCommission / attendant.paymentsCount))}</TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(attendant.totalCommission)}
               </TableCell>
@@ -60,6 +62,7 @@ export function AttendantCommissionsTable({
           <TableRow>
             <TableCell className="font-bold">Total</TableCell>
             <TableCell className="font-bold">{totalPayments}</TableCell>
+            <TableCell className="font-bold">{formatCurrency(totalCommission)}</TableCell>
             <TableCell className="text-right font-bold">
               {formatCurrency(totalCommission)}
             </TableCell>
