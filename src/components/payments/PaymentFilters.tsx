@@ -37,7 +37,7 @@ export function PaymentFiltersComponent({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <FilterPopover
           filters={filters}
           selectedAttendantIds={selectedAttendantIds}

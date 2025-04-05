@@ -58,16 +58,20 @@ export default function Payments() {
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-        <DateFilter onFilterChange={handleDateFilterChange} />
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <DateFilter onFilterChange={handleDateFilterChange} />
+        </div>
         
-        <PaymentStats
-          totalPayments={totalPayments}
-          attendantCommission={totalAttendantCommission}
-          tripeiroReceivable={totalTripeiroReceivable}
-          isLoading={isLoading}
-          formatCurrency={formatCurrency}
-        />
+        <div className="w-full flex justify-center">
+          <PaymentStats
+            totalPayments={totalPayments}
+            attendantCommission={totalAttendantCommission}
+            tripeiroReceivable={totalTripeiroReceivable}
+            isLoading={isLoading}
+            formatCurrency={formatCurrency}
+          />
+        </div>
       </div>
 
       <div className="space-y-4">

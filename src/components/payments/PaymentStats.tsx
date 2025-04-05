@@ -19,7 +19,7 @@ export function PaymentStats({
   formatCurrency,
 }: PaymentStatsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-3 w-full max-w-4xl">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center">
@@ -48,6 +48,7 @@ export function PaymentStats({
           <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
         </CardContent>
       </Card>
+      
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center">
@@ -76,6 +77,7 @@ export function PaymentStats({
           <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
         </CardContent>
       </Card>
+      
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center">

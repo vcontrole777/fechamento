@@ -43,7 +43,7 @@ export default function Expenses() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Despesas</h1>
         <Button onClick={openAddExpenseDialog}>
@@ -52,10 +52,11 @@ export default function Expenses() {
         </Button>
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <DateFilter onFilterChange={handleDateFilterChange} />
-        <div className="grid gap-6 md:grid-cols-1">
-          <Card>
+        
+        <div className="w-full md:w-auto">
+          <Card className="w-full md:w-64">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">
                 Total de Despesas
@@ -65,6 +66,9 @@ export default function Expenses() {
               <div className="text-2xl font-bold">
                 {formatCurrency(totalExpenses)}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Soma de todas as despesas no período
+              </p>
             </CardContent>
           </Card>
         </div>
