@@ -193,6 +193,7 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
                     locale={ptBR}
                     disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                     initialFocus
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
