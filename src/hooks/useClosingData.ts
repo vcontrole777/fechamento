@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { DateRange } from "@/components/common/DateFilter";
+import { DateRange } from "@/types/payment.types";
 import { startOfDay, endOfDay, format } from "date-fns";
 import { usePaymentsQuery } from "./payments/usePaymentsQuery";
 import { useExpensesQuery } from "./useDashboardQueries";

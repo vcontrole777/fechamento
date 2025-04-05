@@ -41,5 +41,5 @@ export type PaymentFilters = {
 
 export type DateRange = {
   from: Date | null;
-  to: Date | null;
+  to?: Date | null;
 };

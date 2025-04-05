@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { DateRange } from "@/components/common/DateFilter";
+import { DateRange } from "@/types/payment.types";
 import { format } from "date-fns";
 
 // Fetch payments data with date range filtering
