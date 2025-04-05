@@ -39,7 +39,7 @@ export default function Expenses() {
   };
 
   const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
-    console.log("Date filter changed:", {
+    console.log("Date filter changed on Expenses page:", {
       from: newDateRange.from ? newDateRange.from.toISOString() : null,
       to: newDateRange.to ? newDateRange.to.toISOString() : null,
       option

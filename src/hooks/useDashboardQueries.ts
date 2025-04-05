@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -13,9 +12,13 @@ export function usePaymentsQuery(dateRange: DateRange) {
   return useQuery({
     queryKey: ["dashboard-payments", dateRange],
     queryFn: async () => {
+      const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
+      const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
+      
       console.log("Fetching dashboard payments with date range:", {
-        from: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
-        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null
+        from: fromDate,
+        to: toDate,
+        timezone: TIMEZONE
       });
       
       let query = supabase
@@ -28,15 +31,11 @@ export function usePaymentsQuery(dateRange: DateRange) {
         .order("data", { ascending: false });
 
       // Apply date range filter
-      if (dateRange.from) {
-        // Format date to YYYY-MM-DD for SQL comparison
-        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+      if (fromDate) {
         query = query.gte('data', fromDate);
       }
       
-      if (dateRange.to) {
-        // Format date to YYYY-MM-DD for SQL comparison
-        const toDate = format(dateRange.to, 'yyyy-MM-dd');
+      if (toDate) {
         query = query.lte('data', toDate);
       }
 
@@ -61,9 +60,13 @@ export function useExpensesQuery(dateRange: DateRange) {
   return useQuery({
     queryKey: ["dashboard-expenses", dateRange],
     queryFn: async () => {
+      const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
+      const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
+      
       console.log("Fetching dashboard expenses with date range:", {
-        from: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
-        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null
+        from: fromDate,
+        to: toDate,
+        timezone: TIMEZONE
       });
       
       let query = supabase
@@ -75,15 +78,13 @@ export function useExpensesQuery(dateRange: DateRange) {
         .order("data", { ascending: false });
 
       // Apply date range filter
-      if (dateRange.from) {
-        // Format date to YYYY-MM-DD for SQL comparison
-        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+      if (fromDate) {
+        console.log("Filtering from date:", fromDate);
         query = query.gte('data', fromDate);
       }
       
-      if (dateRange.to) {
-        // Format date to YYYY-MM-DD for SQL comparison
-        const toDate = format(dateRange.to, 'yyyy-MM-dd');
+      if (toDate) {
+        console.log("Filtering to date:", toDate);
         query = query.lte('data', toDate);
       }
 

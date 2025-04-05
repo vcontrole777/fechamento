@@ -39,9 +39,13 @@ export function useExpenses() {
   const { data: expenses, isLoading, refetch } = useQuery({
     queryKey: ["expenses", dateRange],
     queryFn: async () => {
+      // Format dates for database query (YYYY-MM-DD)
+      const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
+      const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
+      
       console.log("Fetching expenses with date range:", {
-        from: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
-        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
+        from: fromDate,
+        to: toDate,
         timezone: TIMEZONE
       });
       
@@ -52,18 +56,14 @@ export function useExpenses() {
           responsavel:pessoas(nome)
         `);
       
-      // Apply date range filter with proper date boundaries
-      if (dateRange.from) {
-        // Format date to YYYY-MM-DD for SQL comparison
-        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
-        console.log("Filtering from date:", fromDate);
+      // Apply date range filter with proper date format for SQL
+      if (fromDate) {
+        console.log("Filtering expenses from date:", fromDate);
         query = query.gte('data', fromDate);
       }
       
-      if (dateRange.to) {
-        // Format date to YYYY-MM-DD for SQL comparison
-        const toDate = format(dateRange.to, 'yyyy-MM-dd');
-        console.log("Filtering to date:", toDate);
+      if (toDate) {
+        console.log("Filtering expenses to date:", toDate);
         query = query.lte('data', toDate);
       }
       
@@ -109,17 +109,17 @@ export function useExpenses() {
   };
 
   const updateDateRange = (range: DateRange) => {
-    console.log("Updating date range:", {
-      from: range.from ? format(range.from, 'yyyy-MM-dd') : null,
-      to: range.to ? format(range.to, 'yyyy-MM-dd') : null,
-      timezone: TIMEZONE
-    });
-    
-    // Ensure we have proper start/end of day boundaries in São Paulo timezone
+    // Instead of converting to São Paulo timezone here, ensure the correct
+    // dates are applied directly as is without adding timezone information
     const newRange: DateRange = {
       from: range.from ? startOfDay(range.from) : null,
       to: range.to ? endOfDay(range.to) : null
     };
+    
+    console.log("Updating date range:", {
+      from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
+      to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null
+    });
     
     setDateRange(newRange);
   };

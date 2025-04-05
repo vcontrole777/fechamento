@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
@@ -37,7 +38,8 @@ interface DateFilterProps {
 
 export function DateFilter({ onFilterChange }: DateFilterProps) {
   // Get current date in Brazil timezone
-  const today = toZonedTime(new Date(), TIMEZONE);
+  const now = new Date();
+  const today = toZonedTime(now, TIMEZONE);
   
   const [date, setDate] = useState<DateRange>({
     from: startOfDay(today),
@@ -55,7 +57,8 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
     setSelectedOption(option);
     
     // Get current date in Brazil timezone
-    const today = toZonedTime(new Date(), TIMEZONE);
+    const now = new Date();
+    const today = toZonedTime(now, TIMEZONE);
     
     switch (option) {
       case "today":
@@ -169,10 +172,12 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
                   from: range.from ? startOfDay(range.from) : null,
                   to: range.to ? endOfDay(range.to) : null
                 };
+                
                 console.log("Calendar selected date range:", {
-                  from: newRange.from ? format(newRange.from, 'yyyy-MM-dd HH:mm:ss') : null,
-                  to: newRange.to ? format(newRange.to, 'yyyy-MM-dd HH:mm:ss') : null,
+                  from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
+                  to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null,
                 });
+                
                 setDate(newRange);
                 setSelectedOption("custom");
               }
