@@ -6,12 +6,14 @@ import { ClosingSummary, TripeiroSummary, AttendantSummary } from "@/hooks/useCl
 import { DateRange } from "@/types/payment.types";
 import { formatClosingForWhatsApp } from "@/utils/formatClosingForWhatsApp";
 import { toast } from "@/hooks/use-toast";
+import { Expense } from "@/hooks/expenses/useExpensesQuery";
 
 interface CopyToWhatsAppButtonProps {
   closingSummary: ClosingSummary;
   tripeiroSummaries: TripeiroSummary[];
   attendantSummaries: AttendantSummary[];
   dateRange: DateRange;
+  expenses: Expense[];
   isLoading: boolean;
 }
 
@@ -20,6 +22,7 @@ export function CopyToWhatsAppButton({
   tripeiroSummaries,
   attendantSummaries,
   dateRange,
+  expenses,
   isLoading
 }: CopyToWhatsAppButtonProps) {
   const [hasCopied, setHasCopied] = useState(false);
@@ -30,7 +33,8 @@ export function CopyToWhatsAppButton({
         closingSummary,
         tripeiroSummaries,
         attendantSummaries,
-        dateRange
+        dateRange,
+        expenses
       );
       
       await navigator.clipboard.writeText(formattedText);

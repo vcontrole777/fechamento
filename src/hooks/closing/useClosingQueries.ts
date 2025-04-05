@@ -2,6 +2,7 @@
 import { usePaymentsQuery } from "../payments/usePaymentsQuery";
 import { useExpensesQuery } from "../expenses/useExpensesQuery";
 import { DateRange } from "@/types/payment.types";
+import { Expense } from "../expenses/useExpensesQuery";
 
 export function useClosingQueries(dateRange: DateRange) {
   // Fetch payments data using the existing query hooks

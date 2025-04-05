@@ -4,7 +4,7 @@ import { DateRange } from "@/types/payment.types";
 import { startOfDay, endOfDay, format } from "date-fns";
 import { useClosingQueries } from "./closing/useClosingQueries";
 import { useClosingCalculations } from "./closing/useClosingCalculations";
-import { Payment } from "@/types/payment.types";
+import { Expense } from "./expenses/useExpensesQuery";
 
 export type { TripeiroSummary, AttendantSummary, ClosingSummary } from "./closing/useClosingCalculations";
 
@@ -49,6 +49,7 @@ export function useClosingData() {
     closingSummary,
     tripeiroSummaries,
     attendantSummaries,
+    expenses,
     dateRange,
     updateDateRange,
   };

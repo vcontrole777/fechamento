@@ -3,12 +3,14 @@ import { ClosingSummary, TripeiroSummary, AttendantSummary } from "@/hooks/useCl
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DateRange } from "@/types/payment.types";
+import { Expense } from "@/hooks/expenses/useExpensesQuery";
 
 export function formatClosingForWhatsApp(
   closingSummary: ClosingSummary,
   tripeiroSummaries: TripeiroSummary[],
   attendantSummaries: AttendantSummary[],
-  dateRange: DateRange
+  dateRange: DateRange,
+  expenses: Expense[] = []
 ): string {
   // Format currency in Brazilian style (R$ 1.000,00)
   const formatCurrency = (value: number): string => {
@@ -53,6 +55,16 @@ export function formatClosingForWhatsApp(
     whatsappText += `*COMISSÕES (ATENDENTES)*\n`;
     attendantSummaries.forEach((attendant) => {
       whatsappText += `${attendant.nome}: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
+    });
+    whatsappText += `\n`;
+  }
+  
+  // Add expenses data
+  if (expenses.length > 0) {
+    whatsappText += `*DESPESAS*\n`;
+    expenses.forEach((expense) => {
+      const responsavelName = expense.responsavel?.nome ? ` (${expense.responsavel.nome})` : '';
+      whatsappText += `${format(new Date(expense.data), "dd/MM/yyyy")}: ${formatCurrency(Number(expense.valor))} - ${expense.descricao}${responsavelName}\n`;
     });
   }
 

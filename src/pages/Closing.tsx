@@ -14,6 +14,7 @@ export default function Closing() {
     closingSummary,
     tripeiroSummaries,
     attendantSummaries,
+    expenses,
     dateRange,
     updateDateRange,
   } = useClosingData();
@@ -48,6 +49,7 @@ export default function Closing() {
           closingSummary={closingSummary}
           tripeiroSummaries={tripeiroSummaries}
           attendantSummaries={attendantSummaries}
+          expenses={expenses}
           dateRange={dateRange}
           isLoading={isLoading}
         />
