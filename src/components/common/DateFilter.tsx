@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { utcToZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -38,7 +38,7 @@ interface DateFilterProps {
 
 export function DateFilter({ onFilterChange }: DateFilterProps) {
   // Get current date in Brazil timezone
-  const today = utcToZonedTime(new Date(), TIMEZONE);
+  const today = toZonedTime(new Date(), TIMEZONE);
   
   const [date, setDate] = useState<DateRange>({
     from: startOfDay(today),
@@ -56,7 +56,7 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
     setSelectedOption(option);
     
     // Get current date in Brazil timezone
-    const today = utcToZonedTime(new Date(), TIMEZONE);
+    const today = toZonedTime(new Date(), TIMEZONE);
     
     switch (option) {
       case "today":
@@ -167,8 +167,8 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
               if (range) {
                 // Make sure we set the full day range (beginning to end of day)
                 // and use Brazil timezone
-                const newFrom = range.from ? utcToZonedTime(range.from, TIMEZONE) : utcToZonedTime(new Date(), TIMEZONE);
-                const newTo = range.to ? utcToZonedTime(range.to, TIMEZONE) : undefined;
+                const newFrom = range.from ? toZonedTime(range.from, TIMEZONE) : toZonedTime(new Date(), TIMEZONE);
+                const newTo = range.to ? toZonedTime(range.to, TIMEZONE) : undefined;
                 
                 const newRange = {
                   from: startOfDay(newFrom),

@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format, startOfDay, endOfDay } from "date-fns";
-import { zonedTimeToUtc, utcToZonedTime } from "date-fns-tz";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
 // Brazil São Paulo timezone
 const TIMEZONE = "America/Sao_Paulo";
@@ -29,7 +30,7 @@ export function useExpenses() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   
   // Initialize with today's date in Brazil timezone
-  const today = utcToZonedTime(new Date(), TIMEZONE);
+  const today = toZonedTime(new Date(), TIMEZONE);
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay(today),
     to: endOfDay(today)
@@ -116,8 +117,8 @@ export function useExpenses() {
     
     // Convert dates to São Paulo timezone and set proper day boundaries
     setDateRange({
-      from: range.from ? startOfDay(utcToZonedTime(range.from, TIMEZONE)) : startOfDay(utcToZonedTime(new Date(), TIMEZONE)),
-      to: range.to ? endOfDay(utcToZonedTime(range.to, TIMEZONE)) : endOfDay(utcToZonedTime(new Date(), TIMEZONE))
+      from: range.from ? startOfDay(toZonedTime(range.from, TIMEZONE)) : startOfDay(toZonedTime(new Date(), TIMEZONE)),
+      to: range.to ? endOfDay(toZonedTime(range.to, TIMEZONE)) : endOfDay(toZonedTime(new Date(), TIMEZONE))
     });
   };
 

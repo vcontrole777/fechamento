@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -5,7 +6,7 @@ import { z } from "zod";
 import { CalendarIcon } from "lucide-react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { utcToZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ export default function EditExpenseDialog({
     defaultValues: {
       descricao: "",
       valor: undefined,
-      data: utcToZonedTime(new Date(), TIMEZONE),
+      data: toZonedTime(new Date(), TIMEZONE),
       id_responsavel: undefined,
     },
   });
@@ -83,7 +84,7 @@ export default function EditExpenseDialog({
   useEffect(() => {
     if (expense) {
       const parsedDate = parse(expense.data, "yyyy-MM-dd", new Date());
-      const zonedDate = utcToZonedTime(parsedDate, TIMEZONE);
+      const zonedDate = toZonedTime(parsedDate, TIMEZONE);
       
       form.reset({
         descricao: expense.descricao,

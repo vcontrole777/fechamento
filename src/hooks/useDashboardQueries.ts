@@ -1,9 +1,10 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format } from "date-fns";
-import { utcToZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 // Brazil São Paulo timezone
 const TIMEZONE = "America/Sao_Paulo";
