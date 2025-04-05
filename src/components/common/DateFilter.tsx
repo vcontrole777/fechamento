@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
@@ -17,7 +18,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type DateFilterOption = "custom" | "today" | "yesterday";
+export type DateFilterOption = 
+  | "today" 
+  | "yesterday" 
+  | "last7days" 
+  | "last15days" 
+  | "last30days" 
+  | "custom";
+
 export type DateRange = { from: Date; to?: Date };
 
 interface DateFilterProps {
@@ -40,19 +48,38 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
   const handleOptionSelect = (option: DateFilterOption) => {
     setSelectedOption(option);
     
+    const today = new Date();
+    
     switch (option) {
       case "today":
-        const today = new Date();
         setDate({
           from: startOfDay(today),
           to: endOfDay(today),
         });
         break;
       case "yesterday":
-        const yesterday = subDays(new Date(), 1);
+        const yesterday = subDays(today, 1);
         setDate({
           from: startOfDay(yesterday),
           to: endOfDay(yesterday),
+        });
+        break;
+      case "last7days":
+        setDate({
+          from: startOfDay(subDays(today, 6)),
+          to: endOfDay(today),
+        });
+        break;
+      case "last15days":
+        setDate({
+          from: startOfDay(subDays(today, 14)),
+          to: endOfDay(today),
+        });
+        break;
+      case "last30days":
+        setDate({
+          from: startOfDay(subDays(today, 29)),
+          to: endOfDay(today),
         });
         break;
       case "custom":
@@ -66,6 +93,9 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
   const formatDateRange = () => {
     if (selectedOption === "today") return "Hoje";
     if (selectedOption === "yesterday") return "Ontem";
+    if (selectedOption === "last7days") return "Últimos 7 dias";
+    if (selectedOption === "last15days") return "Últimos 15 dias";
+    if (selectedOption === "last30days") return "Últimos 30 dias";
     
     if (date.from) {
       if (date.to) {
@@ -91,6 +121,15 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleOptionSelect("yesterday")}>
             Ontem
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleOptionSelect("last7days")}>
+            Últimos 7 dias
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleOptionSelect("last15days")}>
+            Últimos 15 dias
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleOptionSelect("last30days")}>
+            Últimos 30 dias
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => handleOptionSelect("custom")}>
@@ -124,6 +163,7 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
             }}
             numberOfMonths={2}
             locale={ptBR}
+            className="pointer-events-auto"
           />
         </PopoverContent>
       </Popover>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { usePayments } from "@/hooks/usePayments";
 import { Button } from "@/components/ui/button";
