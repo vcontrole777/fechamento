@@ -51,7 +51,7 @@ export function useExpenses() {
           responsavel:pessoas(nome)
         `);
       
-      // Apply date range filter with proper date format for SQL
+      // Apply date filter with exact dates
       if (fromDate) {
         console.log("Filtering expenses from date:", fromDate);
         query = query.gte('data', fromDate);
@@ -104,7 +104,7 @@ export function useExpenses() {
   };
 
   const updateDateRange = (range: DateRange) => {
-    // Apply the date range directly, ensuring we have proper start and end of day
+    // Apply the date range directly using startOfDay and endOfDay
     const newRange: DateRange = {
       from: range.from ? startOfDay(range.from) : null,
       to: range.to ? endOfDay(range.to) : null

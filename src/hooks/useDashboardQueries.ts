@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -9,6 +10,7 @@ export function usePaymentsQuery(dateRange: DateRange) {
   return useQuery({
     queryKey: ["dashboard-payments", dateRange],
     queryFn: async () => {
+      // Format dates properly for database query (YYYY-MM-DD)
       const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
       const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
       
@@ -56,6 +58,7 @@ export function useExpensesQuery(dateRange: DateRange) {
   return useQuery({
     queryKey: ["dashboard-expenses", dateRange],
     queryFn: async () => {
+      // Format dates properly for database query (YYYY-MM-DD)
       const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
       const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
       
@@ -72,14 +75,14 @@ export function useExpensesQuery(dateRange: DateRange) {
         `)
         .order("data", { ascending: false });
 
-      // Apply date range filter
+      // Apply date range filter - exact date matching
       if (fromDate) {
-        console.log("Filtering from date:", fromDate);
+        console.log("Filtering expenses from date:", fromDate);
         query = query.gte('data', fromDate);
       }
       
       if (toDate) {
-        console.log("Filtering to date:", toDate);
+        console.log("Filtering expenses to date:", toDate);
         query = query.lte('data', toDate);
       }
 

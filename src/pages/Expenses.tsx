@@ -10,6 +10,7 @@ import NewExpenseDialog from "@/components/expenses/NewExpenseDialog";
 import EditExpenseDialog from "@/components/expenses/EditExpenseDialog";
 import DeleteExpenseDialog from "@/components/expenses/DeleteExpenseDialog";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
+import { format } from "date-fns";
 
 export default function Expenses() {
   const {
@@ -40,8 +41,8 @@ export default function Expenses() {
 
   const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
     console.log("Date filter changed on Expenses page:", {
-      from: newDateRange.from ? newDateRange.from.toISOString() : null,
-      to: newDateRange.to ? newDateRange.to.toISOString() : null,
+      from: newDateRange.from ? format(newDateRange.from, 'yyyy-MM-dd') : null,
+      to: newDateRange.to ? format(newDateRange.to, 'yyyy-MM-dd') : null,
       option
     });
     updateDateRange(newDateRange);

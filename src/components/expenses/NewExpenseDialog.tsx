@@ -23,9 +23,9 @@ export default function NewExpenseDialog({
 }: NewExpenseDialogProps) {
   const { addExpense } = useAddExpense();
 
-  // Default to today's date without timezone conversion
+  // Use current date with correct timezone
   const defaultValues: Partial<ExpenseFormValues> = {
-    data: new Date(),
+    data: new Date(), // This will be converted to YYYY-MM-DD in the submit handler
   };
 
   const handleSubmit = async (values: ExpenseFormValues) => {

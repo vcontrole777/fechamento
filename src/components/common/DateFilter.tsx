@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
@@ -32,11 +33,11 @@ interface DateFilterProps {
 }
 
 export function DateFilter({ onFilterChange }: DateFilterProps) {
-  // Get current date without timezone conversion
-  const today = new Date();
+  // Create today date at beginning of day
+  const today = startOfDay(new Date());
   
   const [date, setDate] = useState<DateRange>({
-    from: startOfDay(today),
+    from: today,
     to: endOfDay(today),
   });
   const [selectedOption, setSelectedOption] = useState<DateFilterOption>("today");
@@ -50,18 +51,20 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
   const handleOptionSelect = (option: DateFilterOption) => {
     setSelectedOption(option);
     
-    // Get current date without timezone conversion
-    const today = new Date();
+    // Always use current time for calculations
+    const currentDate = new Date();
+    const todayStart = startOfDay(currentDate);
+    const todayEnd = endOfDay(currentDate);
     
     switch (option) {
       case "today":
         setDate({
-          from: startOfDay(today),
-          to: endOfDay(today),
+          from: todayStart,
+          to: todayEnd,
         });
         break;
       case "yesterday":
-        const yesterday = subDays(today, 1);
+        const yesterday = subDays(currentDate, 1);
         setDate({
           from: startOfDay(yesterday),
           to: endOfDay(yesterday),
@@ -69,20 +72,20 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
         break;
       case "last7days":
         setDate({
-          from: startOfDay(subDays(today, 6)),
-          to: endOfDay(today),
+          from: startOfDay(subDays(currentDate, 6)),
+          to: todayEnd,
         });
         break;
       case "last15days":
         setDate({
-          from: startOfDay(subDays(today, 14)),
-          to: endOfDay(today),
+          from: startOfDay(subDays(currentDate, 14)),
+          to: todayEnd,
         });
         break;
       case "last30days":
         setDate({
-          from: startOfDay(subDays(today, 29)),
-          to: endOfDay(today),
+          from: startOfDay(subDays(currentDate, 29)),
+          to: todayEnd,
         });
         break;
       case "custom":
