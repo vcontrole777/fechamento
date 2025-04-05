@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toZonedTime } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -18,9 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-// Brazil São Paulo timezone
-const TIMEZONE = "America/Sao_Paulo";
 
 export type DateFilterOption = 
   | "today" 
@@ -37,9 +32,8 @@ interface DateFilterProps {
 }
 
 export function DateFilter({ onFilterChange }: DateFilterProps) {
-  // Get current date in Brazil timezone
-  const now = new Date();
-  const today = toZonedTime(now, TIMEZONE);
+  // Get current date without timezone conversion
+  const today = new Date();
   
   const [date, setDate] = useState<DateRange>({
     from: startOfDay(today),
@@ -56,9 +50,8 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
   const handleOptionSelect = (option: DateFilterOption) => {
     setSelectedOption(option);
     
-    // Get current date in Brazil timezone
-    const now = new Date();
-    const today = toZonedTime(now, TIMEZONE);
+    // Get current date without timezone conversion
+    const today = new Date();
     
     switch (option) {
       case "today":

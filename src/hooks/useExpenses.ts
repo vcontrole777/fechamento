@@ -5,10 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format, startOfDay, endOfDay } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
-
-// Brazil São Paulo timezone
-const TIMEZONE = "America/Sao_Paulo";
 
 export type Expense = {
   id: number;
@@ -29,8 +25,8 @@ export function useExpenses() {
   const [isDeletingExpense, setIsDeletingExpense] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   
-  // Initialize with today's date in Brazil timezone
-  const today = toZonedTime(new Date(), TIMEZONE);
+  // Initialize with current date
+  const today = new Date();
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay(today),
     to: endOfDay(today)
@@ -45,8 +41,7 @@ export function useExpenses() {
       
       console.log("Fetching expenses with date range:", {
         from: fromDate,
-        to: toDate,
-        timezone: TIMEZONE
+        to: toDate
       });
       
       let query = supabase
@@ -109,8 +104,7 @@ export function useExpenses() {
   };
 
   const updateDateRange = (range: DateRange) => {
-    // Instead of converting to São Paulo timezone here, ensure the correct
-    // dates are applied directly as is without adding timezone information
+    // Apply the date range directly, ensuring we have proper start and end of day
     const newRange: DateRange = {
       from: range.from ? startOfDay(range.from) : null,
       to: range.to ? endOfDay(range.to) : null

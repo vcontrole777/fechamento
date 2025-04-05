@@ -2,7 +2,6 @@
 import React from "react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toZonedTime } from "date-fns-tz";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -14,9 +13,6 @@ import {
 import { ExpenseForm } from "./ExpenseForm";
 import { ExpenseFormValues } from "./schemas/expenseFormSchema";
 import { type Expense } from "@/hooks/useExpenses";
-
-// Brazil São Paulo timezone
-const TIMEZONE = "America/Sao_Paulo";
 
 interface EditExpenseDialogProps {
   expense: Expense | null;
@@ -43,14 +39,10 @@ export default function EditExpenseDialog({
       const parsedDate = parse(expense.data, "yyyy-MM-dd", new Date());
       console.log("Parsed date:", parsedDate);
       
-      // Convert to São Paulo timezone
-      const zonedDate = toZonedTime(parsedDate, TIMEZONE);
-      console.log("Zoned date:", zonedDate);
-      
       return {
         descricao: expense.descricao,
         valor: expense.valor,
-        data: zonedDate,
+        data: parsedDate,
         id_responsavel: expense.id_responsavel?.toString(),
       };
     } catch (error) {
@@ -59,7 +51,7 @@ export default function EditExpenseDialog({
       return {
         descricao: expense.descricao,
         valor: expense.valor,
-        data: toZonedTime(new Date(), TIMEZONE),
+        data: new Date(),
         id_responsavel: expense.id_responsavel?.toString(),
       };
     }

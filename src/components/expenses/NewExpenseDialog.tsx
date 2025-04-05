@@ -9,10 +9,6 @@ import {
 import { ExpenseForm } from "./ExpenseForm";
 import { useAddExpense } from "./hooks/useAddExpense";
 import { ExpenseFormValues } from "./schemas/expenseFormSchema";
-import { toZonedTime } from "date-fns-tz";
-
-// Brazil São Paulo timezone
-const TIMEZONE = "America/Sao_Paulo";
 
 interface NewExpenseDialogProps {
   open: boolean;
@@ -27,9 +23,9 @@ export default function NewExpenseDialog({
 }: NewExpenseDialogProps) {
   const { addExpense } = useAddExpense();
 
-  // Default to today's date in Brazil timezone
+  // Default to today's date without timezone conversion
   const defaultValues: Partial<ExpenseFormValues> = {
-    data: toZonedTime(new Date(), TIMEZONE),
+    data: new Date(),
   };
 
   const handleSubmit = async (values: ExpenseFormValues) => {

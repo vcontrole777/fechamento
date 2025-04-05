@@ -4,9 +4,6 @@ import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format } from "date-fns";
 
-// Brazil São Paulo timezone
-const TIMEZONE = "America/Sao_Paulo";
-
 // Fetch payments data with date range filtering
 export function usePaymentsQuery(dateRange: DateRange) {
   return useQuery({
@@ -17,8 +14,7 @@ export function usePaymentsQuery(dateRange: DateRange) {
       
       console.log("Fetching dashboard payments with date range:", {
         from: fromDate,
-        to: toDate,
-        timezone: TIMEZONE
+        to: toDate
       });
       
       let query = supabase
@@ -65,8 +61,7 @@ export function useExpensesQuery(dateRange: DateRange) {
       
       console.log("Fetching dashboard expenses with date range:", {
         from: fromDate,
-        to: toDate,
-        timezone: TIMEZONE
+        to: toDate
       });
       
       let query = supabase
