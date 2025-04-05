@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { utcToZonedTime } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -17,6 +18,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+// Brazil São Paulo timezone
+const TIMEZONE = "America/Sao_Paulo";
 
 export type DateFilterOption = 
   | "today" 
@@ -33,9 +37,12 @@ interface DateFilterProps {
 }
 
 export function DateFilter({ onFilterChange }: DateFilterProps) {
+  // Get current date in Brazil timezone
+  const today = utcToZonedTime(new Date(), TIMEZONE);
+  
   const [date, setDate] = useState<DateRange>({
-    from: startOfDay(new Date()),
-    to: endOfDay(new Date()),
+    from: startOfDay(today),
+    to: endOfDay(today),
   });
   const [selectedOption, setSelectedOption] = useState<DateFilterOption>("today");
   const [open, setOpen] = useState(false);
@@ -48,7 +55,8 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
   const handleOptionSelect = (option: DateFilterOption) => {
     setSelectedOption(option);
     
-    const today = new Date();
+    // Get current date in Brazil timezone
+    const today = utcToZonedTime(new Date(), TIMEZONE);
     
     switch (option) {
       case "today":
@@ -158,9 +166,13 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
             onSelect={(range) => {
               if (range) {
                 // Make sure we set the full day range (beginning to end of day)
+                // and use Brazil timezone
+                const newFrom = range.from ? utcToZonedTime(range.from, TIMEZONE) : utcToZonedTime(new Date(), TIMEZONE);
+                const newTo = range.to ? utcToZonedTime(range.to, TIMEZONE) : undefined;
+                
                 const newRange = {
-                  from: range.from ? startOfDay(range.from) : startOfDay(new Date()),
-                  to: range.to ? endOfDay(range.to) : undefined,
+                  from: startOfDay(newFrom),
+                  to: newTo ? endOfDay(newTo) : undefined,
                 };
                 setDate(newRange);
                 setSelectedOption("custom");

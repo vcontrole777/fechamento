@@ -1,10 +1,13 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format, startOfDay, endOfDay } from "date-fns";
+import { zonedTimeToUtc, utcToZonedTime } from "date-fns-tz";
+
+// Brazil São Paulo timezone
+const TIMEZONE = "America/Sao_Paulo";
 
 export type Expense = {
   id: number;
@@ -24,9 +27,12 @@ export function useExpenses() {
   const [isEditingExpense, setIsEditingExpense] = useState(false);
   const [isDeletingExpense, setIsDeletingExpense] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  
+  // Initialize with today's date in Brazil timezone
+  const today = utcToZonedTime(new Date(), TIMEZONE);
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfDay(new Date()),
-    to: endOfDay(new Date())
+    from: startOfDay(today),
+    to: endOfDay(today)
   });
 
   const { data: expenses, isLoading, refetch } = useQuery({
@@ -34,7 +40,8 @@ export function useExpenses() {
     queryFn: async () => {
       console.log("Fetching expenses with date range:", {
         from: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
-        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null
+        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
+        timezone: TIMEZONE
       });
       
       let query = supabase
@@ -103,12 +110,14 @@ export function useExpenses() {
   const updateDateRange = (range: DateRange) => {
     console.log("Updating date range:", {
       from: range.from ? format(range.from, 'yyyy-MM-dd') : null,
-      to: range.to ? format(range.to, 'yyyy-MM-dd') : null
+      to: range.to ? format(range.to, 'yyyy-MM-dd') : null,
+      timezone: TIMEZONE
     });
     
+    // Convert dates to São Paulo timezone and set proper day boundaries
     setDateRange({
-      from: range.from ? startOfDay(range.from) : startOfDay(new Date()),
-      to: range.to ? endOfDay(range.to) : endOfDay(new Date())
+      from: range.from ? startOfDay(utcToZonedTime(range.from, TIMEZONE)) : startOfDay(utcToZonedTime(new Date(), TIMEZONE)),
+      to: range.to ? endOfDay(utcToZonedTime(range.to, TIMEZONE)) : endOfDay(utcToZonedTime(new Date(), TIMEZONE))
     });
   };
 

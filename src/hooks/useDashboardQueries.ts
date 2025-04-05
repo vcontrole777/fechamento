@@ -1,9 +1,12 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format } from "date-fns";
+import { utcToZonedTime } from "date-fns-tz";
+
+// Brazil São Paulo timezone
+const TIMEZONE = "America/Sao_Paulo";
 
 // Fetch payments data with date range filtering
 export function usePaymentsQuery(dateRange: DateRange) {
@@ -21,11 +24,15 @@ export function usePaymentsQuery(dateRange: DateRange) {
 
       // Apply date range filter
       if (dateRange.from) {
-        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+        // Use Brazil timezone for date comparison
+        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+        query = query.gte('data', fromDate);
       }
       
       if (dateRange.to) {
-        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+        // Use Brazil timezone for date comparison
+        const toDate = format(dateRange.to, 'yyyy-MM-dd');
+        query = query.lte('data', toDate);
       }
 
       const { data, error } = await query;
@@ -59,11 +66,15 @@ export function useExpensesQuery(dateRange: DateRange) {
 
       // Apply date range filter
       if (dateRange.from) {
-        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+        // Use Brazil timezone for date comparison
+        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+        query = query.gte('data', fromDate);
       }
       
       if (dateRange.to) {
-        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+        // Use Brazil timezone for date comparison
+        const toDate = format(dateRange.to, 'yyyy-MM-dd');
+        query = query.lte('data', toDate);
       }
 
       const { data, error } = await query;
