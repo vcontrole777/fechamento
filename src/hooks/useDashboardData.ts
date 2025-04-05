@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { DateRange } from "@/components/common/DateFilter";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, format } from "date-fns";
 import { 
   usePaymentsQuery, 
   useExpensesQuery,
@@ -19,9 +19,10 @@ import {
 } from "@/utils/dashboardFormatters";
 
 export function useDashboardData() {
+  const today = new Date();
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfDay(new Date()),
-    to: endOfDay(new Date())
+    from: startOfDay(today),
+    to: endOfDay(today)
   });
 
   // Fetch data using the refactored query hooks
@@ -38,7 +39,17 @@ export function useDashboardData() {
   const financialStats = calculateFinancialStats(payments || [], expenses || []);
 
   const updateDateRange = (range: DateRange) => {
-    setDateRange(range);
+    const newRange: DateRange = {
+      from: range.from ? startOfDay(range.from) : null,
+      to: range.to ? endOfDay(range.to) : null
+    };
+    
+    console.log("Updating dashboard date range:", {
+      from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
+      to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null
+    });
+    
+    setDateRange(newRange);
   };
 
   return {

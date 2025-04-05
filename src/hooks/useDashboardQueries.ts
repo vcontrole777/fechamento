@@ -28,7 +28,7 @@ export function usePaymentsQuery(dateRange: DateRange) {
         `)
         .order("data", { ascending: false });
 
-      // Apply date range filter
+      // Apply date range filter with exact date matching
       if (fromDate) {
         query = query.gte('data', fromDate);
       }

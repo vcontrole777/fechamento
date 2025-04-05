@@ -104,13 +104,13 @@ export function useExpenses() {
   };
 
   const updateDateRange = (range: DateRange) => {
-    // Apply the date range directly using startOfDay and endOfDay
+    // Make sure we're using startOfDay and endOfDay correctly
     const newRange: DateRange = {
       from: range.from ? startOfDay(range.from) : null,
       to: range.to ? endOfDay(range.to) : null
     };
     
-    console.log("Updating date range:", {
+    console.log("Updating date range in useExpenses:", {
       from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
       to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null
     });

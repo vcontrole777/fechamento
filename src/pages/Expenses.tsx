@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,12 @@ export default function Expenses() {
     openDeleteExpenseDialog,
     closeDeleteExpenseDialog,
   } = useExpenses();
+
+  // Force refetch when component mounts
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString("pt-BR", {

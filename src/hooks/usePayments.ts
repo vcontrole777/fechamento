@@ -64,6 +64,15 @@ export function usePayments() {
   const { data: payments, isLoading, refetch } = useQuery({
     queryKey: ["payments", filters, dateRange],
     queryFn: async () => {
+      // Format dates properly for database query (YYYY-MM-DD)
+      const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
+      const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
+      
+      console.log("Fetching payments with date range:", {
+        from: fromDate,
+        to: toDate
+      });
+      
       let query = supabase
         .from("pagamentos")
         .select(`
@@ -85,13 +94,15 @@ export function usePayments() {
         query = query.in("status", filters.statuses);
       }
       
-      // Apply date range filter
-      if (dateRange.from) {
-        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+      // Apply date range filter with exact date matching
+      if (fromDate) {
+        console.log("Filtering payments from date:", fromDate);
+        query = query.gte('data', fromDate);
       }
       
-      if (dateRange.to) {
-        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+      if (toDate) {
+        console.log("Filtering payments to date:", toDate);
+        query = query.lte('data', toDate);
       }
 
       query = query.order("data", { ascending: false });
@@ -178,7 +189,18 @@ export function usePayments() {
   };
 
   const updateDateRange = (range: DateRange) => {
-    setDateRange(range);
+    // Make sure we're using startOfDay and endOfDay correctly
+    const newRange: DateRange = {
+      from: range.from ? startOfDay(range.from) : null,
+      to: range.to ? endOfDay(range.to) : null
+    };
+    
+    console.log("Updating date range in usePayments:", {
+      from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
+      to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null
+    });
+    
+    setDateRange(newRange);
   };
 
   return {

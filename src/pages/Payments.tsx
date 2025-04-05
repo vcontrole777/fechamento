@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useEffect } from "react";
 import { usePayments } from "@/hooks/usePayments";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -10,6 +11,7 @@ import DeletePaymentDialog from "@/components/payments/DeletePaymentDialog";
 import EmptyPaymentsState from "@/components/payments/EmptyPaymentsState";
 import { PaymentFiltersComponent } from "@/components/payments/PaymentFilters";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
+import { format } from "date-fns";
 
 export default function Payments() {
   const {
@@ -35,6 +37,12 @@ export default function Payments() {
     closeDeletePaymentDialog,
   } = usePayments();
 
+  // Force refetch when component mounts
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Format currency in Brazilian style (R$ 1.000,00)
   const formatCurrency = (value: number): string => {
     return value.toLocaleString('pt-BR', {
@@ -44,6 +52,11 @@ export default function Payments() {
   };
 
   const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
+    console.log("Date filter changed on Payments page:", {
+      from: newDateRange.from ? format(newDateRange.from, 'yyyy-MM-dd') : null,
+      to: newDateRange.to ? format(newDateRange.to, 'yyyy-MM-dd') : null,
+      option
+    });
     updateDateRange(newDateRange);
   };
 

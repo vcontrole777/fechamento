@@ -6,15 +6,15 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { addDays, format } from "date-fns"
+import { addDays, format, startOfDay, endOfDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
 export function DateRangePicker({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 30),
+    from: startOfDay(new Date()),
+    to: endOfDay(addDays(new Date(), 30)),
   })
 
   return (
@@ -50,7 +50,17 @@ export function DateRangePicker({
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={setDate}
+            onSelect={(selectedDate) => {
+              if (selectedDate) {
+                const newRange = {
+                  from: selectedDate.from ? startOfDay(selectedDate.from) : null,
+                  to: selectedDate.to ? endOfDay(selectedDate.to) : null,
+                };
+                setDate(newRange);
+              } else {
+                setDate(undefined);
+              }
+            }}
             numberOfMonths={2}
             locale={ptBR}
             className="pointer-events-auto"

@@ -163,7 +163,7 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
             selected={date as any}
             onSelect={(range) => {
               if (range) {
-                // Preserve the full day boundaries (start and end of day)
+                // Ensure we use startOfDay for from and endOfDay for to
                 const newRange = {
                   from: range.from ? startOfDay(range.from) : null,
                   to: range.to ? endOfDay(range.to) : null
