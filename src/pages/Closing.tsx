@@ -4,6 +4,7 @@ import { useClosingData } from "@/hooks/useClosingData";
 import { ClosingSummary } from "@/components/closing/ClosingSummary";
 import { TripeiroReceivablesTable } from "@/components/closing/TripeiroReceivablesTable";
 import { AttendantCommissionsTable } from "@/components/closing/AttendantCommissionsTable";
+import { CopyToWhatsAppButton } from "@/components/closing/CopyToWhatsAppButton";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { format } from "date-fns";
 
@@ -43,6 +44,13 @@ export default function Closing() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Fechamento</h1>
+        <CopyToWhatsAppButton 
+          closingSummary={closingSummary}
+          tripeiroSummaries={tripeiroSummaries}
+          attendantSummaries={attendantSummaries}
+          dateRange={dateRange}
+          isLoading={isLoading}
+        />
       </div>
 
       <div className="flex flex-col space-y-4">
