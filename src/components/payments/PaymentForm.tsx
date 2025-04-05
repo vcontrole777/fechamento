@@ -32,6 +32,7 @@ import { paymentFormSchema, PaymentFormValues } from "./schemas/paymentFormSchem
 import { Payment } from "@/hooks/usePayments";
 import { useAttendantsAndTripeiros } from "./hooks/useAttendantsAndTripeiros";
 import { useState, useEffect } from "react";
+import { Slider } from "@/components/ui/slider";
 
 interface PaymentFormProps {
   onSubmit: (
@@ -47,6 +48,8 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   const { attendants, tripeiros } = useAttendantsAndTripeiros();
   const [selectedAttendantPercentage, setSelectedAttendantPercentage] = useState<number>(0);
   const [selectedTripeiroPercentage, setSelectedTripeiroPercentage] = useState<number>(0);
+  const [useCustomTripeiroPercentage, setUseCustomTripeiroPercentage] = useState<boolean>(false);
+  const [customTripeiroPercentage, setCustomTripeiroPercentage] = useState<number>(0);
   const [calculationPreview, setCalculationPreview] = useState<{
     totalValue: number;
     tripeiroCommission: number;
@@ -97,12 +100,33 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
       const tripeiro = tripeiros.find(t => t.id.toString() === tripeiroId);
       if (tripeiro) {
         setSelectedTripeiroPercentage(tripeiro.porcentagem);
+        if (!useCustomTripeiroPercentage) {
+          setCustomTripeiroPercentage(tripeiro.porcentagem);
+        }
       }
     }
 
     // Calculate payment values
-    updateCalculationPreview(totalValue, selectedTripeiroPercentage, selectedAttendantPercentage);
-  }, [form.watch("id_atendente"), form.watch("id_tripeiro"), form.watch("valor"), attendants, tripeiros, selectedAttendantPercentage, selectedTripeiroPercentage]);
+    const tripeiroPercentageToUse = useCustomTripeiroPercentage ? customTripeiroPercentage : selectedTripeiroPercentage;
+    updateCalculationPreview(totalValue, tripeiroPercentageToUse, selectedAttendantPercentage);
+  }, [
+    form.watch("id_atendente"), 
+    form.watch("id_tripeiro"), 
+    form.watch("valor"), 
+    attendants, 
+    tripeiros, 
+    selectedAttendantPercentage, 
+    useCustomTripeiroPercentage, 
+    customTripeiroPercentage,
+    selectedTripeiroPercentage
+  ]);
+
+  // Update calculation when custom percentage changes
+  useEffect(() => {
+    const totalValue = form.watch("valor");
+    const tripeiroPercentageToUse = useCustomTripeiroPercentage ? customTripeiroPercentage : selectedTripeiroPercentage;
+    updateCalculationPreview(totalValue, tripeiroPercentageToUse, selectedAttendantPercentage);
+  }, [customTripeiroPercentage, useCustomTripeiroPercentage]);
 
   const updateCalculationPreview = (totalValue: number, tripeiroPercentage: number, attendantPercentage: number) => {
     if (!totalValue) return;
@@ -121,8 +145,16 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
     });
   };
 
+  const handleSliderChange = (value: number[]) => {
+    setCustomTripeiroPercentage(value[0]);
+  };
+
   const handleSubmit = (values: PaymentFormValues) => {
-    onSubmit(values, selectedAttendantPercentage, selectedTripeiroPercentage);
+    const tripeiroPercentageToSubmit = useCustomTripeiroPercentage 
+      ? customTripeiroPercentage 
+      : selectedTripeiroPercentage;
+    
+    onSubmit(values, selectedAttendantPercentage, tripeiroPercentageToSubmit);
   };
 
   return (
@@ -228,7 +260,11 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
               <FormItem>
                 <FormLabel>Tripeiro</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    // Reset custom percentage when changing tripeiros
+                    setUseCustomTripeiroPercentage(false);
+                  }}
                   defaultValue={field.value}
                   value={field.value}
                 >
@@ -250,6 +286,45 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
             )}
           />
         </div>
+
+        {form.watch("id_tripeiro") && (
+          <div className="space-y-4 p-4 bg-muted/50 rounded-md">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="custom-percentage"
+                checked={useCustomTripeiroPercentage}
+                onChange={(e) => setUseCustomTripeiroPercentage(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label htmlFor="custom-percentage" className="text-sm font-medium">
+                Personalizar porcentagem do tripeiro
+              </label>
+            </div>
+
+            {useCustomTripeiroPercentage && (
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm">Porcentagem: {customTripeiroPercentage}%</span>
+                  <span className="text-sm font-medium">
+                    (Padrão: {selectedTripeiroPercentage}%)
+                  </span>
+                </div>
+                <Slider
+                  value={[customTripeiroPercentage]}
+                  min={0}
+                  max={50}
+                  step={0.5}
+                  onValueChange={handleSliderChange}
+                />
+                <div className="flex gap-2 justify-between text-xs text-muted-foreground">
+                  <span>0%</span>
+                  <span>50%</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -302,20 +377,20 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
           <div className="mt-4 p-4 bg-muted rounded-md space-y-2">
             <h3 className="font-semibold text-sm">Prévia do Cálculo:</h3>
             <div className="grid grid-cols-2 text-sm">
-              <div>Comissão Tripeiro ({selectedTripeiroPercentage}%):</div>
-              <div>R$ {calculationPreview.tripeiroCommission.toFixed(2)}</div>
+              <div>Comissão Tripeiro ({useCustomTripeiroPercentage ? customTripeiroPercentage : selectedTripeiroPercentage}%):</div>
+              <div>R$ {calculationPreview.tripeiroCommission.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
             </div>
             <div className="grid grid-cols-2 text-sm">
               <div>Valor a Receber do Tripeiro:</div>
-              <div>R$ {calculationPreview.tripeiroReceivable.toFixed(2)}</div>
+              <div>R$ {calculationPreview.tripeiroReceivable.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
             </div>
             <div className="grid grid-cols-2 text-sm">
               <div>Comissão Atendente ({selectedAttendantPercentage}%):</div>
-              <div>R$ {calculationPreview.attendantCommission.toFixed(2)}</div>
+              <div>R$ {calculationPreview.attendantCommission.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
             </div>
             <div className="grid grid-cols-2 text-sm font-semibold">
               <div>Valor Líquido:</div>
-              <div>R$ {calculationPreview.netValue.toFixed(2)}</div>
+              <div>R$ {calculationPreview.netValue.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
             </div>
           </div>
         )}
