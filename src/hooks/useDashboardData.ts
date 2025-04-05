@@ -1,16 +1,22 @@
-
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { format, subMonths } from "date-fns";
+import { format, subMonths, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { DateRange } from "@/components/common/DateFilter";
 
 export function useDashboardData() {
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfDay(new Date()),
+    to: endOfDay(new Date())
+  });
+
   // Fetch all payments
   const { data: payments, isLoading: isLoadingPayments } = useQuery({
-    queryKey: ["dashboard-payments"],
+    queryKey: ["dashboard-payments", dateRange],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("pagamentos")
         .select(`
           *,
@@ -18,6 +24,17 @@ export function useDashboardData() {
           tripeiro:pessoas!pagamentos_id_tripeiro_fkey(nome, porcentagem)
         `)
         .order("data", { ascending: false });
+
+      // Apply date range filter
+      if (dateRange.from) {
+        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+      }
+      
+      if (dateRange.to) {
+        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         toast({
@@ -34,15 +51,26 @@ export function useDashboardData() {
 
   // Fetch all expenses
   const { data: expenses, isLoading: isLoadingExpenses } = useQuery({
-    queryKey: ["dashboard-expenses"],
+    queryKey: ["dashboard-expenses", dateRange],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("despesas")
         .select(`
           *,
           responsavel:pessoas(nome)
         `)
         .order("data", { ascending: false });
+
+      // Apply date range filter
+      if (dateRange.from) {
+        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+      }
+      
+      if (dateRange.to) {
+        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         toast({
@@ -98,6 +126,10 @@ export function useDashboardData() {
   // Calculate financial numbers
   const financialStats = calculateFinancialStats(payments || [], expenses || []);
 
+  const updateDateRange = (range: DateRange) => {
+    setDateRange(range);
+  };
+
   return {
     isLoading: isLoadingPayments || isLoadingExpenses || isLoadingAttendants,
     topAttendants,
@@ -106,6 +138,8 @@ export function useDashboardData() {
     recentPayments,
     recentExpenses,
     financialStats,
+    dateRange,
+    updateDateRange,
   };
 }
 

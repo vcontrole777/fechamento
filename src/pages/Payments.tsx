@@ -10,6 +10,7 @@ import EditPaymentDialog from "@/components/payments/EditPaymentDialog";
 import DeletePaymentDialog from "@/components/payments/DeletePaymentDialog";
 import EmptyPaymentsState from "@/components/payments/EmptyPaymentsState";
 import { PaymentFiltersComponent } from "@/components/payments/PaymentFilters";
+import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 
 export default function Payments() {
   const {
@@ -19,7 +20,9 @@ export default function Payments() {
     totalAttendantCommission,
     totalTripeiroReceivable,
     filters,
+    dateRange,
     updateFilters,
+    updateDateRange,
     refetch,
     isAddingPayment,
     isEditingPayment,
@@ -41,6 +44,10 @@ export default function Payments() {
     });
   };
 
+  const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
+    updateDateRange(newDateRange);
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -51,13 +58,17 @@ export default function Payments() {
         </Button>
       </div>
 
-      <PaymentStats
-        totalPayments={totalPayments}
-        attendantCommission={totalAttendantCommission}
-        tripeiroReceivable={totalTripeiroReceivable}
-        isLoading={isLoading}
-        formatCurrency={formatCurrency}
-      />
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+        <DateFilter onFilterChange={handleDateFilterChange} />
+        
+        <PaymentStats
+          totalPayments={totalPayments}
+          attendantCommission={totalAttendantCommission}
+          tripeiroReceivable={totalTripeiroReceivable}
+          isLoading={isLoading}
+          formatCurrency={formatCurrency}
+        />
+      </div>
 
       <div className="space-y-4">
         <PaymentFiltersComponent 

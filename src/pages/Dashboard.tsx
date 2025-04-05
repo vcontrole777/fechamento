@@ -6,6 +6,7 @@ import { LineChartComponent } from "@/components/dashboard/LineChartComponent";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { TopAttendants } from "@/components/dashboard/TopAttendants";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 
 export default function Dashboard() {
   const {
@@ -16,6 +17,8 @@ export default function Dashboard() {
     recentPayments,
     recentExpenses,
     financialStats,
+    dateRange,
+    updateDateRange,
   } = useDashboardData();
 
   // Format currency in Brazilian style (R$ 1.000,00)
@@ -26,8 +29,17 @@ export default function Dashboard() {
     });
   };
 
+  const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
+    updateDateRange(newDateRange);
+  };
+
   return (
     <div className="flex flex-col gap-6 p-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <DateFilter onFilterChange={handleDateFilterChange} />
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Faturamento Total"

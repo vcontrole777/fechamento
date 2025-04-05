@@ -9,12 +9,15 @@ import ExpensesTable from "@/components/expenses/ExpensesTable";
 import NewExpenseDialog from "@/components/expenses/NewExpenseDialog";
 import EditExpenseDialog from "@/components/expenses/EditExpenseDialog";
 import DeleteExpenseDialog from "@/components/expenses/DeleteExpenseDialog";
+import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 
 export default function Expenses() {
   const {
     expenses,
     isLoading,
     totalExpenses,
+    dateRange,
+    updateDateRange,
     refetch,
     isAddingExpense,
     isEditingExpense,
@@ -35,6 +38,10 @@ export default function Expenses() {
     });
   };
 
+  const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
+    updateDateRange(newDateRange);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -45,19 +52,22 @@ export default function Expenses() {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total de Despesas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(totalExpenses)}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex justify-between items-center">
+        <DateFilter onFilterChange={handleDateFilterChange} />
+        <div className="grid gap-6 md:grid-cols-1">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total de Despesas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(totalExpenses)}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <Card>

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { DateRange } from "@/components/common/DateFilter";
+import { format, startOfDay, endOfDay } from "date-fns";
 
 export type Attendant = {
   id: number;
@@ -54,9 +56,13 @@ export function usePayments() {
     tripeiroIds: [],
     statuses: [],
   });
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfDay(new Date()),
+    to: endOfDay(new Date())
+  });
 
   const { data: payments, isLoading, refetch } = useQuery({
-    queryKey: ["payments", filters],
+    queryKey: ["payments", filters, dateRange],
     queryFn: async () => {
       let query = supabase
         .from("pagamentos")
@@ -64,8 +70,7 @@ export function usePayments() {
           *,
           atendente:pessoas!pagamentos_id_atendente_fkey(nome, porcentagem),
           tripeiro:pessoas!pagamentos_id_tripeiro_fkey(nome, porcentagem)
-        `)
-        .order("data", { ascending: false });
+        `);
 
       // Apply filters
       if (filters.attendantIds.length > 0) {
@@ -79,6 +84,17 @@ export function usePayments() {
       if (filters.statuses.length > 0) {
         query = query.in("status", filters.statuses);
       }
+      
+      // Apply date range filter
+      if (dateRange.from) {
+        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+      }
+      
+      if (dateRange.to) {
+        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+      }
+
+      query = query.order("data", { ascending: false });
 
       const { data, error } = await query;
 
@@ -161,6 +177,10 @@ export function usePayments() {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
+  const updateDateRange = (range: DateRange) => {
+    setDateRange(range);
+  };
+
   return {
     payments,
     isLoading,
@@ -169,7 +189,9 @@ export function usePayments() {
     totalTripeiroReceivable,
     netTotal,
     filters,
+    dateRange,
     updateFilters,
+    updateDateRange,
     refetch,
     isAddingPayment,
     isEditingPayment,

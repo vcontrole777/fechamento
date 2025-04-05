@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { DateRange } from "@/components/common/DateFilter";
+import { format, startOfDay, endOfDay } from "date-fns";
 
 export type Expense = {
   id: number;
@@ -22,17 +24,33 @@ export function useExpenses() {
   const [isEditingExpense, setIsEditingExpense] = useState(false);
   const [isDeletingExpense, setIsDeletingExpense] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfDay(new Date()),
+    to: endOfDay(new Date())
+  });
 
   const { data: expenses, isLoading, refetch } = useQuery({
-    queryKey: ["expenses"],
+    queryKey: ["expenses", dateRange],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("despesas")
         .select(`
           *,
           responsavel:pessoas(nome)
-        `)
-        .order("data", { ascending: false });
+        `);
+      
+      // Apply date range filter
+      if (dateRange.from) {
+        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+      }
+      
+      if (dateRange.to) {
+        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+      }
+      
+      query = query.order("data", { ascending: false });
+
+      const { data, error } = await query;
 
       if (error) {
         toast({
@@ -70,10 +88,16 @@ export function useExpenses() {
     setIsDeletingExpense(false);
   };
 
+  const updateDateRange = (range: DateRange) => {
+    setDateRange(range);
+  };
+
   return {
     expenses,
     isLoading,
     totalExpenses,
+    dateRange,
+    updateDateRange,
     refetch,
     isAddingExpense,
     isEditingExpense,
