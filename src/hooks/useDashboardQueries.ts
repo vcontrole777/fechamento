@@ -75,7 +75,7 @@ export function useExpensesQuery(dateRange: DateRange) {
         `)
         .order("data", { ascending: false });
 
-      // Apply date range filter - exact date matching
+      // Apply date filter with exact date matching
       if (fromDate) {
         console.log("Filtering expenses from date:", fromDate);
         query = query.gte('data', fromDate);
