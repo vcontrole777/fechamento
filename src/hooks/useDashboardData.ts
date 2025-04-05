@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -291,8 +292,27 @@ function calculateFinancialStats(payments, expenses) {
     0
   );
   
-  // Calculate net profit
-  const netProfit = totalRevenue - totalExpenses;
+  // Calculate tripeiro and attendant commissions
+  const commissions = completedPayments.reduce(
+    (acc, payment) => {
+      const totalPayment = Number(payment.valor);
+      const tripeiroPercentage = payment.porcentagem_tripeiro || 0;
+      const atendentePercentage = payment.porcentagem_atendente || 0;
+      
+      const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
+      const atendenteCommission = (totalPayment - tripeiroCommission) * (atendentePercentage / 100);
+      
+      return {
+        tripeiro: acc.tripeiro + tripeiroCommission,
+        atendente: acc.atendente + atendenteCommission
+      };
+    },
+    { tripeiro: 0, atendente: 0 }
+  );
+  
+  // Calculate net profit using the new formula:
+  // Faturamento Total - Comissão do Tripéiro - Comissão do Atendente - Gastos
+  const netProfit = totalRevenue - commissions.tripeiro - commissions.atendente - totalExpenses;
   
   // Calculate trends (comparing with previous period)
   // For simplicity, we'll use a fixed trend value
@@ -308,5 +328,8 @@ function calculateFinancialStats(payments, expenses) {
     revenueTrend,
     expensesTrend,
     profitTrend,
+    paymentsCount: completedPayments.length,
+    expensesCount: expenses.length,
+    commissions
   };
 }

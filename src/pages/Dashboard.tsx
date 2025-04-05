@@ -46,6 +46,7 @@ export default function Dashboard() {
           value={isLoading ? "Carregando..." : formatCurrency(financialStats.totalRevenue)}
           icon={Banknote}
           trend={financialStats.revenueTrend}
+          count={financialStats.paymentsCount}
           className="bg-gradient-to-br from-accent/10 to-accent/5"
         />
         <StatCard
@@ -53,11 +54,13 @@ export default function Dashboard() {
           value={isLoading ? "Carregando..." : formatCurrency(financialStats.totalExpenses)}
           icon={TrendingDown}
           trend={financialStats.expensesTrend}
+          count={financialStats.expensesCount}
           className="bg-gradient-to-br from-destructive/10 to-destructive/5"
         />
         <StatCard
           title="Lucro Líquido"
           value={isLoading ? "Carregando..." : formatCurrency(financialStats.netProfit)}
+          description="Faturamento - Comissões - Gastos"
           icon={TrendingUp}
           trend={financialStats.profitTrend}
           className="bg-gradient-to-br from-success/10 to-success/5"

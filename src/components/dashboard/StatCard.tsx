@@ -10,6 +10,7 @@ interface StatCardProps {
   icon?: LucideIcon;
   trend?: number;
   className?: string;
+  count?: number;
 }
 
 export function StatCard({
@@ -19,6 +20,7 @@ export function StatCard({
   icon: Icon,
   trend,
   className,
+  count,
 }: StatCardProps) {
   return (
     <Card className={cn("overflow-hidden", className)}>
@@ -28,7 +30,12 @@ export function StatCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        {description && (
+        {count !== undefined && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {count} {count === 1 ? 'registro' : 'registros'} no período
+          </p>
+        )}
+        {description && !count && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
         {typeof trend === 'number' && (
