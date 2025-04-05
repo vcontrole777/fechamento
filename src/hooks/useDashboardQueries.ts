@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
 
 // Brazil São Paulo timezone
 const TIMEZONE = "America/Sao_Paulo";
@@ -14,6 +13,11 @@ export function usePaymentsQuery(dateRange: DateRange) {
   return useQuery({
     queryKey: ["dashboard-payments", dateRange],
     queryFn: async () => {
+      console.log("Fetching dashboard payments with date range:", {
+        from: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
+        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null
+      });
+      
       let query = supabase
         .from("pagamentos")
         .select(`
@@ -25,13 +29,13 @@ export function usePaymentsQuery(dateRange: DateRange) {
 
       // Apply date range filter
       if (dateRange.from) {
-        // Use Brazil timezone for date comparison
+        // Format date to YYYY-MM-DD for SQL comparison
         const fromDate = format(dateRange.from, 'yyyy-MM-dd');
         query = query.gte('data', fromDate);
       }
       
       if (dateRange.to) {
-        // Use Brazil timezone for date comparison
+        // Format date to YYYY-MM-DD for SQL comparison
         const toDate = format(dateRange.to, 'yyyy-MM-dd');
         query = query.lte('data', toDate);
       }
@@ -57,6 +61,11 @@ export function useExpensesQuery(dateRange: DateRange) {
   return useQuery({
     queryKey: ["dashboard-expenses", dateRange],
     queryFn: async () => {
+      console.log("Fetching dashboard expenses with date range:", {
+        from: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
+        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null
+      });
+      
       let query = supabase
         .from("despesas")
         .select(`
@@ -67,13 +76,13 @@ export function useExpensesQuery(dateRange: DateRange) {
 
       // Apply date range filter
       if (dateRange.from) {
-        // Use Brazil timezone for date comparison
+        // Format date to YYYY-MM-DD for SQL comparison
         const fromDate = format(dateRange.from, 'yyyy-MM-dd');
         query = query.gte('data', fromDate);
       }
       
       if (dateRange.to) {
-        // Use Brazil timezone for date comparison
+        // Format date to YYYY-MM-DD for SQL comparison
         const toDate = format(dateRange.to, 'yyyy-MM-dd');
         query = query.lte('data', toDate);
       }

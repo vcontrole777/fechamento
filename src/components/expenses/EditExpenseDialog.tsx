@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { ExpenseForm } from "./ExpenseForm";
 import { ExpenseFormValues } from "./schemas/expenseFormSchema";
@@ -37,46 +36,79 @@ export default function EditExpenseDialog({
   const getDefaultValues = (): Partial<ExpenseFormValues> => {
     if (!expense) return {};
     
-    const parsedDate = parse(expense.data, "yyyy-MM-dd", new Date());
-    const zonedDate = toZonedTime(parsedDate, TIMEZONE);
-    
-    return {
-      descricao: expense.descricao,
-      valor: expense.valor,
-      data: zonedDate,
-      id_responsavel: expense.id_responsavel?.toString(),
-    };
+    try {
+      console.log("Parsing expense date:", expense.data);
+      
+      // Parse the date from ISO format (YYYY-MM-DD)
+      const parsedDate = parse(expense.data, "yyyy-MM-dd", new Date());
+      console.log("Parsed date:", parsedDate);
+      
+      // Convert to São Paulo timezone
+      const zonedDate = toZonedTime(parsedDate, TIMEZONE);
+      console.log("Zoned date:", zonedDate);
+      
+      return {
+        descricao: expense.descricao,
+        valor: expense.valor,
+        data: zonedDate,
+        id_responsavel: expense.id_responsavel?.toString(),
+      };
+    } catch (error) {
+      console.error("Error parsing expense date:", error);
+      // Fallback to current date if parsing fails
+      return {
+        descricao: expense.descricao,
+        valor: expense.valor,
+        data: toZonedTime(new Date(), TIMEZONE),
+        id_responsavel: expense.id_responsavel?.toString(),
+      };
+    }
   };
 
   const handleSubmit = async (values: ExpenseFormValues) => {
     if (!expense) return;
 
-    const { error } = await supabase
-      .from("despesas")
-      .update({
-        descricao: values.descricao,
-        valor: values.valor,
-        data: format(values.data, "yyyy-MM-dd"),
-        id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : null,
-      })
-      .eq("id", expense.id);
+    try {
+      console.log("Submitting expense with date:", values.data);
+      
+      // Format date as YYYY-MM-DD for storage
+      const formattedDate = format(values.data, "yyyy-MM-dd");
+      console.log("Formatted date for storage:", formattedDate);
 
-    if (error) {
+      const { error } = await supabase
+        .from("despesas")
+        .update({
+          descricao: values.descricao,
+          valor: values.valor,
+          data: formattedDate,
+          id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : null,
+        })
+        .eq("id", expense.id);
+
+      if (error) {
+        toast({
+          title: "Erro ao atualizar despesa",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Despesa atualizada",
+        description: "A despesa foi atualizada com sucesso.",
+      });
+
+      onOpenChange(false);
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating expense:", error);
       toast({
         title: "Erro ao atualizar despesa",
-        description: error.message,
+        description: "Ocorreu um erro ao atualizar a despesa.",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Despesa atualizada",
-      description: "A despesa foi atualizada com sucesso.",
-    });
-
-    onOpenChange(false);
-    onSuccess();
   };
 
   return (

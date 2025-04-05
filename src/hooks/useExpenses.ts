@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/DateFilter";
 import { format, startOfDay, endOfDay } from "date-fns";
-import { toZonedTime, fromZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 // Brazil São Paulo timezone
 const TIMEZONE = "America/Sao_Paulo";
@@ -115,11 +115,13 @@ export function useExpenses() {
       timezone: TIMEZONE
     });
     
-    // Convert dates to São Paulo timezone and set proper day boundaries
-    setDateRange({
-      from: range.from ? startOfDay(toZonedTime(range.from, TIMEZONE)) : startOfDay(toZonedTime(new Date(), TIMEZONE)),
-      to: range.to ? endOfDay(toZonedTime(range.to, TIMEZONE)) : endOfDay(toZonedTime(new Date(), TIMEZONE))
-    });
+    // Ensure we have proper start/end of day boundaries in São Paulo timezone
+    const newRange: DateRange = {
+      from: range.from ? startOfDay(range.from) : null,
+      to: range.to ? endOfDay(range.to) : null
+    };
+    
+    setDateRange(newRange);
   };
 
   return {

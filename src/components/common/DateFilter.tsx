@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
@@ -30,7 +29,7 @@ export type DateFilterOption =
   | "last30days" 
   | "custom";
 
-export type DateRange = { from: Date; to?: Date };
+export type DateRange = { from: Date | null; to?: Date | null };
 
 interface DateFilterProps {
   onFilterChange: (dateRange: DateRange, option: DateFilterOption) => void;
@@ -161,26 +160,25 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={date.from}
-            selected={date}
+            defaultMonth={date.from || undefined}
+            selected={date as any}
             onSelect={(range) => {
               if (range) {
-                // Make sure we set the full day range (beginning to end of day)
-                // and use Brazil timezone
-                const newFrom = range.from ? toZonedTime(range.from, TIMEZONE) : toZonedTime(new Date(), TIMEZONE);
-                const newTo = range.to ? toZonedTime(range.to, TIMEZONE) : undefined;
-                
+                // Preserve the full day boundaries (start and end of day)
                 const newRange = {
-                  from: startOfDay(newFrom),
-                  to: newTo ? endOfDay(newTo) : undefined,
+                  from: range.from ? startOfDay(range.from) : null,
+                  to: range.to ? endOfDay(range.to) : null
                 };
+                console.log("Calendar selected date range:", {
+                  from: newRange.from ? format(newRange.from, 'yyyy-MM-dd HH:mm:ss') : null,
+                  to: newRange.to ? format(newRange.to, 'yyyy-MM-dd HH:mm:ss') : null,
+                });
                 setDate(newRange);
                 setSelectedOption("custom");
               }
             }}
             numberOfMonths={2}
             locale={ptBR}
-            className="pointer-events-auto"
           />
         </PopoverContent>
       </Popover>
