@@ -32,6 +32,11 @@ export function useExpenses() {
   const { data: expenses, isLoading, refetch } = useQuery({
     queryKey: ["expenses", dateRange],
     queryFn: async () => {
+      console.log("Fetching expenses with date range:", {
+        from: dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
+        to: dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null
+      });
+      
       let query = supabase
         .from("despesas")
         .select(`
@@ -39,14 +44,18 @@ export function useExpenses() {
           responsavel:pessoas(nome)
         `);
       
-      // Apply date range filter with proper formatting for SQL date comparison
+      // Apply date range filter with proper date boundaries
       if (dateRange.from) {
+        // Format date to YYYY-MM-DD for SQL comparison
         const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+        console.log("Filtering from date:", fromDate);
         query = query.gte('data', fromDate);
       }
       
       if (dateRange.to) {
+        // Format date to YYYY-MM-DD for SQL comparison
         const toDate = format(dateRange.to, 'yyyy-MM-dd');
+        console.log("Filtering to date:", toDate);
         query = query.lte('data', toDate);
       }
       
@@ -63,6 +72,7 @@ export function useExpenses() {
         return [];
       }
 
+      console.log("Received expense data:", data);
       return data as Expense[];
     },
   });
@@ -91,7 +101,15 @@ export function useExpenses() {
   };
 
   const updateDateRange = (range: DateRange) => {
-    setDateRange(range);
+    console.log("Updating date range:", {
+      from: range.from ? format(range.from, 'yyyy-MM-dd') : null,
+      to: range.to ? format(range.to, 'yyyy-MM-dd') : null
+    });
+    
+    setDateRange({
+      from: range.from ? startOfDay(range.from) : startOfDay(new Date()),
+      to: range.to ? endOfDay(range.to) : endOfDay(new Date())
+    });
   };
 
   return {
