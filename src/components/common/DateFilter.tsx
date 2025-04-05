@@ -157,7 +157,12 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
             selected={date}
             onSelect={(range) => {
               if (range) {
-                setDate(range);
+                // Make sure we set the full day range (beginning to end of day)
+                const newRange = {
+                  from: range.from ? startOfDay(range.from) : startOfDay(new Date()),
+                  to: range.to ? endOfDay(range.to) : undefined,
+                };
+                setDate(newRange);
                 setSelectedOption("custom");
               }
             }}

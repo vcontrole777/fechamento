@@ -39,13 +39,15 @@ export function useExpenses() {
           responsavel:pessoas(nome)
         `);
       
-      // Apply date range filter
+      // Apply date range filter with proper formatting for SQL date comparison
       if (dateRange.from) {
-        query = query.gte('data', format(dateRange.from, 'yyyy-MM-dd'));
+        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+        query = query.gte('data', fromDate);
       }
       
       if (dateRange.to) {
-        query = query.lte('data', format(dateRange.to, 'yyyy-MM-dd'));
+        const toDate = format(dateRange.to, 'yyyy-MM-dd');
+        query = query.lte('data', toDate);
       }
       
       query = query.order("data", { ascending: false });
