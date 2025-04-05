@@ -52,25 +52,29 @@ export default function Expenses() {
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-        <DateFilter onFilterChange={handleDateFilterChange} />
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <DateFilter onFilterChange={handleDateFilterChange} />
+        </div>
         
-        <div className="w-full md:w-auto">
-          <Card className="w-full md:w-64">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total de Despesas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatCurrency(totalExpenses)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Soma de todas as despesas no período
-              </p>
-            </CardContent>
-          </Card>
+        <div className="w-full flex justify-center">
+          <div className="grid gap-4 grid-cols-1 max-w-md">
+            <Card className="w-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total de Despesas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(totalExpenses)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Soma de todas as despesas no período
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
