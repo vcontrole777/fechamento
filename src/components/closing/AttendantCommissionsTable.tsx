@@ -7,6 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter
 } from "@/components/ui/table";
 import { AttendantSummary } from "@/hooks/useClosingData";
 
@@ -28,6 +29,10 @@ export function AttendantCommissionsTable({
       </div>
     );
   }
+
+  // Calculate total commission for all attendants
+  const totalCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
+  const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
 
   return (
     <div className="border rounded-md">
@@ -51,6 +56,15 @@ export function AttendantCommissionsTable({
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell className="font-bold">Total</TableCell>
+            <TableCell className="font-bold">{totalPayments}</TableCell>
+            <TableCell className="text-right font-bold">
+              {formatCurrency(totalCommission)}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );

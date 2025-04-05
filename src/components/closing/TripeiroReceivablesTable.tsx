@@ -7,6 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter
 } from "@/components/ui/table";
 import { TripeiroSummary } from "@/hooks/useClosingData";
 
@@ -28,6 +29,10 @@ export function TripeiroReceivablesTable({
       </div>
     );
   }
+
+  // Calculate total receivable for all tripeiros
+  const totalReceivable = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.totalReceivable, 0);
+  const totalPayments = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.paymentsCount, 0);
 
   return (
     <div className="border rounded-md">
@@ -51,6 +56,15 @@ export function TripeiroReceivablesTable({
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell className="font-bold">Total</TableCell>
+            <TableCell className="font-bold">{totalPayments}</TableCell>
+            <TableCell className="text-right font-bold">
+              {formatCurrency(totalReceivable)}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );

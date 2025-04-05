@@ -43,29 +43,40 @@ export function formatClosingForWhatsApp(
   
   // Add tripeiro data
   if (tripeiroSummaries.length > 0) {
+    // Calculate total receivable for all tripeiros
+    const totalReceivable = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.totalReceivable, 0);
+    const totalPayments = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.paymentsCount, 0);
+    
     whatsappText += `*VALORES A RECEBER (TRIPEIROS)*\n`;
     tripeiroSummaries.forEach((tripeiro) => {
       whatsappText += `${tripeiro.nome}: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
     });
-    whatsappText += `\n`;
+    whatsappText += `*TOTAL: ${formatCurrency(totalReceivable)}* (${totalPayments} pagamentos)\n\n`;
   }
   
   // Add attendant data
   if (attendantSummaries.length > 0) {
+    // Calculate total commission for all attendants
+    const totalCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
+    const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
+    
     whatsappText += `*COMISSÕES (ATENDENTES)*\n`;
     attendantSummaries.forEach((attendant) => {
       whatsappText += `${attendant.nome}: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
     });
-    whatsappText += `\n`;
+    whatsappText += `*TOTAL: ${formatCurrency(totalCommission)}* (${totalPayments} pagamentos)\n\n`;
   }
   
   // Add expenses data
   if (expenses.length > 0) {
+    const totalExpenses = expenses.reduce((acc, expense) => acc + Number(expense.valor), 0);
+    
     whatsappText += `*DESPESAS*\n`;
     expenses.forEach((expense) => {
       const responsavelName = expense.responsavel?.nome ? ` (${expense.responsavel.nome})` : '';
       whatsappText += `${format(new Date(expense.data), "dd/MM/yyyy")}: ${formatCurrency(Number(expense.valor))} - ${expense.descricao}${responsavelName}\n`;
     });
+    whatsappText += `*TOTAL: ${formatCurrency(totalExpenses)}*\n`;
   }
 
   return whatsappText;
