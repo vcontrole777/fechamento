@@ -49,7 +49,8 @@ export function formatClosingForWhatsApp(
     
     whatsappText += `*VALORES A RECEBER (TRIPEIROS)*\n`;
     tripeiroSummaries.forEach((tripeiro) => {
-      whatsappText += `${tripeiro.nome}: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
+      const totalValue = tripeiro.paymentsCount * (tripeiro.totalReceivable / tripeiro.paymentsCount);
+      whatsappText += `${tripeiro.nome}: ${formatCurrency(totalValue)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
     });
     whatsappText += `*TOTAL: ${formatCurrency(totalReceivable)}* (${totalPayments} pagamentos)\n\n`;
   }
@@ -62,7 +63,8 @@ export function formatClosingForWhatsApp(
     
     whatsappText += `*COMISSÕES (ATENDENTES)*\n`;
     attendantSummaries.forEach((attendant) => {
-      whatsappText += `${attendant.nome}: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
+      const totalValue = attendant.paymentsCount * (attendant.totalCommission / attendant.paymentsCount);
+      whatsappText += `${attendant.nome}: ${formatCurrency(totalValue)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
     });
     whatsappText += `*TOTAL: ${formatCurrency(totalCommission)}* (${totalPayments} pagamentos)\n\n`;
   }
