@@ -3,6 +3,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,21 +30,17 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { expenseFormSchema, ExpenseFormValues } from "./schemas/expenseFormSchema";
-import { useResponsaveis, Responsavel } from "./hooks/useResponsaveis";
+import { useResponsaveis } from "./hooks/useResponsaveis";
+import { DialogFooter } from "@/components/ui/dialog";
 
 interface ExpenseFormProps {
-  defaultValues?: Partial<ExpenseFormValues>;
+  defaultValues: Partial<ExpenseFormValues>;
   onSubmit: (values: ExpenseFormValues) => Promise<void>;
   submitButtonText?: string;
 }
 
 export function ExpenseForm({
-  defaultValues = {
-    descricao: "",
-    valor: undefined,
-    data: new Date(),
-    id_responsavel: undefined,
-  },
+  defaultValues,
   onSubmit,
   submitButtonText = "Salvar",
 }: ExpenseFormProps) {
@@ -110,7 +107,7 @@ export function ExpenseForm({
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "dd/MM/yyyy")
+                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
                       ) : (
                         <span>Selecione uma data</span>
                       )}
@@ -124,6 +121,7 @@ export function ExpenseForm({
                     selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
+                    locale={ptBR}
                     className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
@@ -141,6 +139,7 @@ export function ExpenseForm({
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
+                value={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -148,7 +147,7 @@ export function ExpenseForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {responsaveis?.map((responsavel: Responsavel) => (
+                  {responsaveis?.map((responsavel) => (
                     <SelectItem
                       key={responsavel.id}
                       value={responsavel.id.toString()}
@@ -162,9 +161,9 @@ export function ExpenseForm({
             </FormItem>
           )}
         />
-        <div className="flex justify-end">
+        <DialogFooter>
           <Button type="submit">{submitButtonText}</Button>
-        </div>
+        </DialogFooter>
       </form>
     </Form>
   );
