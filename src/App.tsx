@@ -15,6 +15,7 @@ import Attendants from "./pages/Attendants";
 import Tripeiros from "./pages/Tripeiros";
 import Expenses from "./pages/Expenses";
 import Payments from "./pages/Payments";
+import Closing from "./pages/Closing";
 
 // Create a new QueryClient instance inside the component
 const App = () => {
@@ -42,7 +43,7 @@ const App = () => {
                 <Route path="/atendentes" element={<Attendants />} />
                 <Route path="/tripeiros" element={<Tripeiros />} />
                 <Route path="/despesas" element={<Expenses />} />
-                <Route path="/fechamento" element={<PlaceholderPage title="Fechamento" />} />
+                <Route path="/fechamento" element={<Closing />} />
                 <Route path="/minha-conta" element={<PlaceholderPage title="Minha Conta" />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
