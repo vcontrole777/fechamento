@@ -6,6 +6,7 @@ export type TripeiroSummary = {
   nome: string;
   totalReceivable: number;
   paymentsCount: number;
+  porcentagemDecimal: number; // Add percentage as decimal
 };
 
 export type AttendantSummary = {
@@ -13,6 +14,7 @@ export type AttendantSummary = {
   nome: string;
   totalCommission: number;
   paymentsCount: number;
+  porcentagemDecimal: number; // Add percentage as decimal
 };
 
 export type ClosingSummary = {
@@ -90,19 +92,22 @@ export function useClosingCalculations() {
       const tripeiroName = payment.tripeiro.nome;
       const paymentAmount = Number(payment.valor);
       const tripeiroPercentage = payment.porcentagem_tripeiro || 0;
-      const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
+      const tripeiroPercentageDecimal = tripeiroPercentage / 100;
+      const tripeiroCommission = paymentAmount * tripeiroPercentageDecimal;
       const tripeiroReceivable = paymentAmount - tripeiroCommission;
       
       if (tripeirosMap.has(tripeiroId)) {
         const existingSummary = tripeirosMap.get(tripeiroId)!;
         existingSummary.totalReceivable += tripeiroReceivable;
         existingSummary.paymentsCount += 1;
+        // We don't need to update the percentage as it should be the same for all payments of this tripeiro
       } else {
         tripeirosMap.set(tripeiroId, {
           id: tripeiroId,
           nome: tripeiroName,
           totalReceivable: tripeiroReceivable,
-          paymentsCount: 1
+          paymentsCount: 1,
+          porcentagemDecimal: tripeiroPercentageDecimal
         });
       }
     });
@@ -128,22 +133,25 @@ export function useClosingCalculations() {
       const paymentAmount = Number(payment.valor);
       const tripeiroPercentage = payment.porcentagem_tripeiro || 0;
       const attendantPercentage = payment.porcentagem_atendente || 0;
+      const attendantPercentageDecimal = attendantPercentage / 100;
       
       // Calculate attendant commission (after tripeiro's commission is removed)
       const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
       const tripeiroReceivable = paymentAmount - tripeiroCommission;
-      const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
+      const attendantCommission = tripeiroReceivable * attendantPercentageDecimal;
       
       if (attendantsMap.has(attendantId)) {
         const existingSummary = attendantsMap.get(attendantId)!;
         existingSummary.totalCommission += attendantCommission;
         existingSummary.paymentsCount += 1;
+        // We don't need to update the percentage as it should be the same for all payments of this attendant
       } else {
         attendantsMap.set(attendantId, {
           id: attendantId,
           nome: attendantName,
           totalCommission: attendantCommission,
-          paymentsCount: 1
+          paymentsCount: 1,
+          porcentagemDecimal: attendantPercentageDecimal
         });
       }
     });

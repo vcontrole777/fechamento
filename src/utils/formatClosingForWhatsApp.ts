@@ -43,46 +43,44 @@ export function formatClosingForWhatsApp(
   
   // Add tripeiro data
   if (tripeiroSummaries.length > 0) {
+    // Calculate total payments value - this is the actual total payment amount
+    const totalPaymentsValue = tripeiroSummaries.reduce((total, tripeiro) => {
+      return total + (tripeiro.totalReceivable / (1 - tripeiro.porcentagemDecimal));
+    }, 0);
+    
     // Calculate total receivable for all tripeiros
     const totalReceivable = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.totalReceivable, 0);
     const totalPayments = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.paymentsCount, 0);
-    const totalValue = tripeiroSummaries.reduce((acc, tripeiro) => {
-      // The total value is calculated by multiplying the payment count with the average payment value
-      const avgValue = tripeiro.totalReceivable / tripeiro.paymentsCount;
-      return acc + (tripeiro.paymentsCount * avgValue);
-    }, 0);
     
     whatsappText += `*VALORES A RECEBER (TRIPEIROS)*\n`;
     tripeiroSummaries.forEach((tripeiro) => {
-      // Calculate the total value correctly
-      const avgValuePerPayment = tripeiro.totalReceivable / tripeiro.paymentsCount;
-      const totalValue = tripeiro.paymentsCount * avgValuePerPayment;
+      // Calculate the total payment value
+      const totalPaymentValue = tripeiro.totalReceivable / (1 - tripeiro.porcentagemDecimal);
       
-      whatsappText += `${tripeiro.nome}: ${formatCurrency(totalValue)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
+      whatsappText += `${tripeiro.nome}: ${formatCurrency(totalPaymentValue)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
     });
-    whatsappText += `*TOTAL: ${formatCurrency(totalValue)}* (${totalPayments} pagamentos)\n\n`;
+    whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsValue)}* (${totalPayments} pagamentos)\n\n`;
   }
   
   // Add attendant data
   if (attendantSummaries.length > 0) {
+    // Calculate total payment value for attendants
+    const totalPaymentsValue = attendantSummaries.reduce((total, attendant) => {
+      return total + (attendant.totalCommission / attendant.porcentagemDecimal);
+    }, 0);
+    
     // Calculate total commission for all attendants
     const totalCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
     const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
-    const totalValue = attendantSummaries.reduce((acc, attendant) => {
-      // The total value is calculated by multiplying the payment count with the average payment value
-      const avgValue = attendant.totalCommission / attendant.paymentsCount;
-      return acc + (attendant.paymentsCount * avgValue);
-    }, 0);
     
     whatsappText += `*COMISSÕES (ATENDENTES)*\n`;
     attendantSummaries.forEach((attendant) => {
-      // Calculate the total value correctly
-      const avgValuePerPayment = attendant.totalCommission / attendant.paymentsCount;
-      const totalValue = attendant.paymentsCount * avgValuePerPayment;
+      // Calculate the total payment value for this attendant
+      const totalPaymentValue = attendant.totalCommission / attendant.porcentagemDecimal;
       
-      whatsappText += `${attendant.nome}: ${formatCurrency(totalValue)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
+      whatsappText += `${attendant.nome}: ${formatCurrency(totalPaymentValue)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
     });
-    whatsappText += `*TOTAL: ${formatCurrency(totalValue)}* (${totalPayments} pagamentos)\n\n`;
+    whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsValue)}* (${totalPayments} pagamentos)\n\n`;
   }
   
   // Add expenses data
