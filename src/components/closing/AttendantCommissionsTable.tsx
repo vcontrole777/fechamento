@@ -10,6 +10,7 @@ import {
   TableFooter
 } from "@/components/ui/table";
 import { AttendantSummary } from "@/hooks/useClosingData";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AttendantCommissionsTableProps {
   attendantSummaries: AttendantSummary[];
@@ -20,6 +21,8 @@ export function AttendantCommissionsTable({
   attendantSummaries, 
   formatCurrency 
 }: AttendantCommissionsTableProps) {
+  const isMobile = useIsMobile();
+
   if (attendantSummaries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg bg-muted/10">
@@ -35,13 +38,13 @@ export function AttendantCommissionsTable({
   const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
 
   return (
-    <div className="border rounded-md">
+    <div className="border rounded-md overflow-x-auto">
       <Table>
         <TableCaption>Comissões a pagar para atendentes no período</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Atendente</TableHead>
-            <TableHead>Pagamentos</TableHead>
+            <TableHead className={isMobile ? "hidden" : ""}>Pagamentos</TableHead>
             <TableHead>Total</TableHead>
             <TableHead className="text-right">Comissão</TableHead>
           </TableRow>
@@ -50,7 +53,7 @@ export function AttendantCommissionsTable({
           {attendantSummaries.map((attendant) => (
             <TableRow key={attendant.id}>
               <TableCell className="font-medium">{attendant.nome}</TableCell>
-              <TableCell>{attendant.paymentsCount}</TableCell>
+              <TableCell className={isMobile ? "hidden" : ""}>{attendant.paymentsCount}</TableCell>
               <TableCell>{formatCurrency(attendant.paymentsCount * (attendant.totalCommission / attendant.paymentsCount))}</TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(attendant.totalCommission)}
@@ -61,7 +64,7 @@ export function AttendantCommissionsTable({
         <TableFooter>
           <TableRow>
             <TableCell className="font-bold">Total</TableCell>
-            <TableCell className="font-bold">{totalPayments}</TableCell>
+            <TableCell className={`font-bold ${isMobile ? "hidden" : ""}`}>{totalPayments}</TableCell>
             <TableCell className="font-bold">{formatCurrency(totalCommission)}</TableCell>
             <TableCell className="text-right font-bold">
               {formatCurrency(totalCommission)}
