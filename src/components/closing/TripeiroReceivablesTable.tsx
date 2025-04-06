@@ -10,6 +10,7 @@ import {
   TableFooter
 } from "@/components/ui/table";
 import { TripeiroSummary } from "@/hooks/useClosingData";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TripeiroReceivablesTableProps {
   tripeiroSummaries: TripeiroSummary[];
@@ -20,6 +21,8 @@ export function TripeiroReceivablesTable({
   tripeiroSummaries, 
   formatCurrency 
 }: TripeiroReceivablesTableProps) {
+  const isMobile = useIsMobile();
+
   if (tripeiroSummaries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg bg-muted/10">
@@ -35,13 +38,13 @@ export function TripeiroReceivablesTable({
   const totalPayments = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.paymentsCount, 0);
 
   return (
-    <div className="border rounded-md">
+    <div className="border rounded-md overflow-x-auto">
       <Table>
         <TableCaption>Valores a pagar para tripeiros no período</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>Tripeiro</TableHead>
-            <TableHead>Pagamentos</TableHead>
+            <TableHead className={isMobile ? "hidden" : ""}>Pagamentos</TableHead>
             <TableHead>Total</TableHead>
             <TableHead className="text-right">Valor a Receber</TableHead>
           </TableRow>
@@ -50,7 +53,7 @@ export function TripeiroReceivablesTable({
           {tripeiroSummaries.map((tripeiro) => (
             <TableRow key={tripeiro.id}>
               <TableCell className="font-medium">{tripeiro.nome}</TableCell>
-              <TableCell>{tripeiro.paymentsCount}</TableCell>
+              <TableCell className={isMobile ? "hidden" : ""}>{tripeiro.paymentsCount}</TableCell>
               <TableCell>{formatCurrency(tripeiro.paymentsCount * (tripeiro.totalReceivable / tripeiro.paymentsCount))}</TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(tripeiro.totalReceivable)}
@@ -61,7 +64,7 @@ export function TripeiroReceivablesTable({
         <TableFooter>
           <TableRow>
             <TableCell className="font-bold">Total</TableCell>
-            <TableCell className="font-bold">{totalPayments}</TableCell>
+            <TableCell className={`font-bold ${isMobile ? "hidden" : ""}`}>{totalPayments}</TableCell>
             <TableCell className="font-bold">{formatCurrency(totalReceivable)}</TableCell>
             <TableCell className="text-right font-bold">
               {formatCurrency(totalReceivable)}
