@@ -9,6 +9,7 @@ import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { GeneratePDFButton } from "@/components/closing/GeneratePDFButton";
 import { format } from "date-fns";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
+import { DateRange } from "@/components/common/date-filter/types";
 
 export default function Closing() {
   const {
@@ -37,7 +38,7 @@ export default function Closing() {
     });
   };
 
-  const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
+  const handleDateFilterChange = (newDateRange: DateRange, option: DateFilterOption) => {
     console.log("Date filter changed on Closing page:", {
       from: newDateRange.from ? format(newDateRange.from, 'yyyy-MM-dd') : null,
       to: newDateRange.to ? format(newDateRange.to, 'yyyy-MM-dd') : null,

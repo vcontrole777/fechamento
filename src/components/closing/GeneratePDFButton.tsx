@@ -6,7 +6,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { DateRange } from "@/components/common/DateFilter";
+import { DateRange } from "@/components/common/date-filter/types";
 import { ClosingSummary, TripeiroSummary, AttendantSummary } from "@/hooks/useClosingData";
 import { Expense } from "@/hooks/expenses/useExpensesQuery";
 
@@ -56,7 +56,7 @@ export function GeneratePDFButton({
       const summaryData = [
         ["Faturamento Total", formatCurrency(closingSummary.totalRevenue)],
         ["Comissão Atendentes", formatCurrency(closingSummary.totalAttendantCommission)],
-        ["A Receber Tripeiros", formatCurrency(closingSummary.totalTripeiroReceivable)],
+        ["A Receber Tripeiros", formatCurrency(closingSummary.totalTripeiroCommission)],
         ["Total Despesas", formatCurrency(closingSummary.totalExpenses)],
         ["Lucro Líquido", formatCurrency(closingSummary.netProfit)],
       ];
@@ -76,8 +76,8 @@ export function GeneratePDFButton({
       doc.text("Valores a Receber (Tripeiros)", 15, tripeiroEndY);
       
       const tripeiroData = tripeiroSummaries.map(tripeiro => [
-        tripeiro.name,
-        formatCurrency(tripeiro.receivable),
+        tripeiro.nome,
+        formatCurrency(tripeiro.totalReceivable),
       ]);
       
       (doc as any).autoTable({
@@ -95,8 +95,8 @@ export function GeneratePDFButton({
       doc.text("Comissões (Atendentes)", 15, attendantEndY);
       
       const attendantData = attendantSummaries.map(attendant => [
-        attendant.name,
-        formatCurrency(attendant.commission),
+        attendant.nome,
+        formatCurrency(attendant.totalCommission),
       ]);
       
       (doc as any).autoTable({
