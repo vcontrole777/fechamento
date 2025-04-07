@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { DateRange } from "@/types/payment.types";
+import { DateRange } from "@/components/common/date-filter/types";
 import { format } from "date-fns";
 
 export type Expense = {

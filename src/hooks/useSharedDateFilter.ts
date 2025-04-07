@@ -1,14 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { startOfDay, endOfDay, format, parse } from "date-fns";
-import { DateFilterOption } from "@/components/common/DateFilter";
+import { startOfDay, endOfDay, format } from "date-fns";
+import { DateFilterOption, DateRange } from "@/components/common/date-filter/types";
 
 // Define the type for our shared date state
 export interface SharedDateState {
-  dateRange: {
-    from: Date | null;
-    to: Date | null;
-  };
+  dateRange: DateRange;
   option: DateFilterOption;
 }
 
@@ -58,7 +55,7 @@ export function useSharedDateFilter() {
   }, [state]);
 
   // Update function that pages will call
-  const updateSharedDateFilter = (dateRange: {from: Date | null, to: Date | null}, option: DateFilterOption) => {
+  const updateSharedDateFilter = (dateRange: DateRange, option: DateFilterOption) => {
     setState({
       dateRange: {
         from: dateRange.from ? startOfDay(dateRange.from) : null,
