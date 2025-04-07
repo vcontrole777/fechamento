@@ -1,1 +1,5 @@
+
 project_id = "nlrvqwoxcwdiivvbnvzw"
+
+[functions.weekly-attendant-ranking]
+verify_jwt = true
