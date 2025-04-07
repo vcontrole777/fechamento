@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { DateRange } from "@/components/common/date-filter/types";
+import { useAuth } from "@/hooks/useAuth";
 
 export type AttendantRanking = {
   position: number;
@@ -19,11 +20,12 @@ export type WeeklyRankingResponse = {
 };
 
 export function useWeeklyAttendantRanking(dateRange: DateRange) {
+  const { user } = useAuth();
   const formattedStartDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
   const formattedEndDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
 
   return useQuery({
-    queryKey: ["weekly-attendant-ranking", formattedStartDate, formattedEndDate],
+    queryKey: ["weekly-attendant-ranking", formattedStartDate, formattedEndDate, user?.id],
     queryFn: async (): Promise<WeeklyRankingResponse> => {
       try {
         console.log("Fetching weekly attendant ranking with date range:", {
@@ -31,11 +33,28 @@ export function useWeeklyAttendantRanking(dateRange: DateRange) {
           endDate: formattedEndDate
         });
 
-        // Get the current team ID from user context (this should ideally come from an auth context)
-        // For now we're using a fixed value, but in a real app this would be dynamic
-        const teamId = 1; // You should replace this with actual team ID from user context
+        // Get the user's team ID from user profile
+        let teamId;
         
-        console.log("Using team ID:", teamId);
+        if (user) {
+          const { data: profileData, error: profileError } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          
+          if (profileError) {
+            console.error("Error fetching user profile:", profileError);
+            throw new Error("Erro ao obter sua equipe");
+          }
+          
+          teamId = profileData?.id_equipe;
+          console.log("Retrieved team ID from user profile:", teamId);
+        }
+        
+        if (!teamId) {
+          throw new Error("Não foi possível determinar sua equipe");
+        }
 
         const { data, error } = await supabase.functions.invoke("weekly-attendant-ranking", {
           body: {
@@ -63,6 +82,6 @@ export function useWeeklyAttendantRanking(dateRange: DateRange) {
         throw error;
       }
     },
-    enabled: Boolean(dateRange.from && dateRange.to),
+    enabled: Boolean(dateRange.from && dateRange.to && user),
   });
 }

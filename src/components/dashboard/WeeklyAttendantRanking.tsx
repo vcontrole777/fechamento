@@ -4,13 +4,15 @@ import { useWeeklyAttendantRanking } from "@/hooks/useWeeklyAttendantRanking";
 import { DateRange } from "@/components/common/date-filter/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Medal, TrendingUp } from "lucide-react";
+import { Medal, TrendingUp, AlertCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface WeeklyAttendantRankingProps {
   dateRange: DateRange;
 }
 
 export function WeeklyAttendantRanking({ dateRange }: WeeklyAttendantRankingProps) {
+  const { user } = useAuth();
   const { data, isLoading, isError } = useWeeklyAttendantRanking(dateRange);
 
   // Format currency in Brazilian style (R$ 1.000,00)
@@ -20,6 +22,25 @@ export function WeeklyAttendantRanking({ dateRange }: WeeklyAttendantRankingProp
       currency: 'BRL',
     });
   };
+
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl flex items-center">
+            <TrendingUp className="h-5 w-5 mr-2" />
+            Ranking Semanal dos Atendentes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-6 text-center text-muted-foreground">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <p>Faça login para visualizar o ranking de atendentes</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -54,7 +75,8 @@ export function WeeklyAttendantRanking({ dateRange }: WeeklyAttendantRankingProp
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-muted-foreground py-4">
+          <p className="text-center text-muted-foreground py-4 flex items-center justify-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
             Ocorreu um erro ao carregar o ranking. Tente novamente mais tarde.
           </p>
         </CardContent>
@@ -75,7 +97,8 @@ export function WeeklyAttendantRanking({ dateRange }: WeeklyAttendantRankingProp
       </CardHeader>
       <CardContent>
         {data.ranking.length === 0 ? (
-          <p className="text-center text-muted-foreground py-4">
+          <p className="text-center text-muted-foreground py-4 flex items-center justify-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
             Nenhum pagamento registrado neste período.
           </p>
         ) : (
