@@ -31,20 +31,30 @@ export function useWeeklyAttendantRanking(dateRange: DateRange) {
           endDate: formattedEndDate
         });
 
+        // Get the current team ID from user context (this should ideally come from an auth context)
+        // For now we're using a fixed value, but in a real app this would be dynamic
+        const teamId = 1; // You should replace this with actual team ID from user context
+        
+        console.log("Using team ID:", teamId);
+
         const { data, error } = await supabase.functions.invoke("weekly-attendant-ranking", {
           body: {
             startDate: formattedStartDate,
             endDate: formattedEndDate,
-            teamId: 1 // You might want to get this dynamically from user context
+            teamId: teamId
           }
         });
 
         if (error) {
+          console.error("Error invoking function:", error);
           throw new Error(error.message);
         }
 
+        console.log("Weekly ranking response:", data);
+        
         return data as WeeklyRankingResponse;
-      } catch (error) {
+      } catch (error: any) {
+        console.error("Weekly ranking error:", error);
         toast({
           title: "Erro ao carregar ranking semanal",
           description: error.message || "Falha ao buscar os dados",

@@ -48,6 +48,13 @@ serve(async (req) => {
       throw new Error("Team ID is required");
     }
 
+    // Debug info about the query parameters
+    console.log("Query parameters:", {
+      teamId: teamId,
+      startDate: formattedStartDate,
+      endDate: formattedEndDate
+    });
+
     // Query to get attendant rankings
     const { data, error } = await supabase
       .from("pagamentos")
@@ -62,13 +69,47 @@ serve(async (req) => {
       .not("id_atendente", "is", null);
     
     if (error) {
+      console.error("Supabase query error:", error);
       throw error;
+    }
+
+    // Log raw data for debugging
+    console.log(`Query returned ${data ? data.length : 0} records`);
+    if (data && data.length > 0) {
+      console.log("Sample record:", data[0]);
+    } else {
+      console.log("No records found for the specified parameters");
+      
+      // Debug query: Check if the team exists
+      const { data: teamData, error: teamError } = await supabase
+        .from("equipes")
+        .select("id, nome")
+        .eq("id", teamId);
+      
+      if (teamError) {
+        console.error("Team lookup error:", teamError);
+      } else {
+        console.log(`Team check: ${teamData && teamData.length > 0 ? "Team exists" : "Team does not exist"}`, teamData);
+      }
+      
+      // Debug query: Check if there are any payments for this team regardless of date
+      const { data: anyPayments, error: paymentsError } = await supabase
+        .from("pagamentos")
+        .select("id, data, valor")
+        .eq("id_equipe", teamId)
+        .limit(5);
+      
+      if (paymentsError) {
+        console.error("Payments lookup error:", paymentsError);
+      } else {
+        console.log(`Any payments check: ${anyPayments && anyPayments.length > 0 ? "Payments exist for this team" : "No payments for this team at all"}`, anyPayments);
+      }
     }
 
     // Process and aggregate the data by attendant
     const attendantMap = new Map();
     
-    data.forEach(payment => {
+    data?.forEach(payment => {
       if (!payment.id_atendente || !payment.atendente) return;
       
       const attendantId = payment.id_atendente;
@@ -98,6 +139,9 @@ serve(async (req) => {
         ...attendant,
       }));
 
+    // Log the final ranking
+    console.log(`Final ranking contains ${ranking.length} attendants`);
+    
     // Return the ranking with date range info
     return new Response(
       JSON.stringify({
