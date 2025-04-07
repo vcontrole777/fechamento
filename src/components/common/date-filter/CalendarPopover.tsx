@@ -39,10 +39,11 @@ export function CalendarPopover({
           selected={date.from && date.to ? { from: date.from, to: date.to } : undefined}
           onSelect={(range) => {
             if (range) {
-              // Ensure we use startOfDay for from and endOfDay for to
+              // For single day selection, set both from and to to the same day
+              // This ensures proper filtering for a single day
               const newRange = {
                 from: range.from ? startOfDay(range.from) : null,
-                to: range.to ? endOfDay(range.to) : null
+                to: range.to ? endOfDay(range.to) : (range.from ? endOfDay(range.from) : null)
               };
               
               console.log("Calendar selected date range:", {

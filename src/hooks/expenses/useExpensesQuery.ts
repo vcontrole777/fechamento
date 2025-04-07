@@ -38,15 +38,22 @@ export function useExpensesQuery(dateRange: DateRange) {
           responsavel:pessoas(nome)
         `);
       
-      // Apply date filter with exact dates
-      if (fromDate) {
-        console.log("Filtering expenses from date:", fromDate);
-        query = query.gte('data', fromDate);
-      }
-      
-      if (toDate) {
-        console.log("Filtering expenses to date:", toDate);
-        query = query.lte('data', toDate);
+      // Apply date filter with exact date matching for same day
+      if (fromDate && toDate && fromDate === toDate) {
+        // If same day, use eq for exact date match
+        console.log("Filtering expenses for exact date:", fromDate);
+        query = query.eq('data', fromDate);
+      } else {
+        // Apply date range filter with inclusive boundaries
+        if (fromDate) {
+          console.log("Filtering expenses from date:", fromDate);
+          query = query.gte('data', fromDate);
+        }
+        
+        if (toDate) {
+          console.log("Filtering expenses to date:", toDate);
+          query = query.lte('data', toDate);
+        }
       }
       
       query = query.order("data", { ascending: false });

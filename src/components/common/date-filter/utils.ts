@@ -1,3 +1,4 @@
+
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DateFilterOption, DateRange } from "./types";
@@ -14,6 +15,10 @@ export function formatDateRangeDisplay(
   
   if (date.from) {
     if (date.to) {
+      // If same date (single day selection), show only one date
+      if (format(date.from, "yyyy-MM-dd") === format(date.to, "yyyy-MM-dd")) {
+        return format(date.from, "dd/MM/yyyy", { locale: ptBR });
+      }
       return `${format(date.from, "dd/MM/yyyy", { locale: ptBR })} - ${format(date.to, "dd/MM/yyyy", { locale: ptBR })}`;
     }
     return format(date.from, "dd/MM/yyyy", { locale: ptBR });
