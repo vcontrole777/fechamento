@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Attendant, Tripeiro } from "@/hooks/usePayments";
+import { Attendant, Tripeiro } from "@/types/payment.types";
 
 export function useAttendantsAndTripeiros() {
   const { data: attendants, isLoading: isLoadingAttendants } = useQuery({

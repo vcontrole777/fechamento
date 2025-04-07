@@ -9,7 +9,7 @@ import {
 import { PaymentForm } from "./PaymentForm";
 import { PaymentFormValues } from "./schemas/paymentFormSchema";
 import { useUpdatePayment } from "./hooks/useUpdatePayment";
-import { Payment } from "@/hooks/usePayments";
+import { Payment } from "@/types/payment.types";
 
 interface EditPaymentDialogProps {
   open: boolean;

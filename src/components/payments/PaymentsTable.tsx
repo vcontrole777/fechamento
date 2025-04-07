@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Payment } from "@/hooks/usePayments";
+import { Payment } from "@/types/payment.types";
 import { Badge } from "@/components/ui/badge";
 
 interface PaymentsTableProps {

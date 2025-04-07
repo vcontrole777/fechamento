@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { paymentFormSchema, PaymentFormValues } from "./schemas/paymentFormSchema";
-import { Payment } from "@/hooks/usePayments";
+import { Payment } from "@/types/payment.types";
 import { useAttendantsAndTripeiros } from "./hooks/useAttendantsAndTripeiros";
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";

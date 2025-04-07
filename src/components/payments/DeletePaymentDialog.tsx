@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Payment } from "@/hooks/usePayments";
+import { Payment } from "@/types/payment.types";
 import { useDeletePayment } from "./hooks/useDeletePayment";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { PaymentFilters } from "@/hooks/usePayments";
+import { PaymentFilters } from "@/types/payment.types";
 import { FilterPopover } from "./filters/FilterPopover";
 import { ActiveFilters } from "./filters/ActiveFilters";
 

@@ -1,26 +1,15 @@
-
-import { useState } from "react";
-import { Check, Filter, X } from "lucide-react";
+import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { PaymentFilters } from "@/hooks/usePayments";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAttendantsAndTripeiros } from "../hooks/useAttendantsAndTripeiros";
 import { statusOptions } from "../constants/statusOptions";
-import { cn } from "@/lib/utils";
+import { PaymentFilters } from "@/types/payment.types";
 
 interface FilterPopoverProps {
   filters: PaymentFilters;
