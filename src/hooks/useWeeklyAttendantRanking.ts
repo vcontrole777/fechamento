@@ -50,6 +50,10 @@ export function useWeeklyAttendantRanking(dateRange: DateRange) {
           
           teamId = profileData?.id_equipe;
           console.log("Retrieved team ID from user profile:", teamId);
+        } else {
+          // Para testes, usando um ID de equipe fixo quando não há usuário logado
+          teamId = 13;
+          console.log("Using fixed team ID for testing:", teamId);
         }
         
         if (!teamId) {
@@ -82,6 +86,6 @@ export function useWeeklyAttendantRanking(dateRange: DateRange) {
         throw error;
       }
     },
-    enabled: Boolean(dateRange.from && dateRange.to && user),
+    enabled: Boolean(dateRange.from && dateRange.to),
   });
 }
