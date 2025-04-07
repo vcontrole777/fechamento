@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { type Expense } from "@/hooks/useExpenses";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ExpensesTableProps {
   expenses: Expense[];
@@ -26,6 +27,8 @@ export default function ExpensesTable({
   onDelete,
   formatCurrency,
 }: ExpensesTableProps) {
+  const isMobile = useIsMobile();
+  
   // Helper function to format the date consistently
   const formatDate = (dateString: string) => {
     console.log("Formatting expense date:", dateString, typeof dateString);
@@ -59,29 +62,33 @@ export default function ExpensesTable({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Data</TableHead>
-            <TableHead>Descrição</TableHead>
-            <TableHead>Responsável</TableHead>
-            <TableHead>Valor</TableHead>
+            <TableHead className={isMobile ? "whitespace-nowrap" : ""}>Data</TableHead>
+            <TableHead className={isMobile ? "whitespace-nowrap" : ""}>Descrição</TableHead>
+            {!isMobile && <TableHead>Responsável</TableHead>}
+            <TableHead className={isMobile ? "whitespace-nowrap" : ""}>Valor</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {expenses.map((expense) => (
             <TableRow key={expense.id}>
-              <TableCell>
+              <TableCell className="whitespace-nowrap">
                 {formatDate(expense.data)}
               </TableCell>
-              <TableCell>{expense.descricao}</TableCell>
-              <TableCell>
-                {expense.responsavel?.nome || "Não atribuído"}
+              <TableCell className={isMobile ? "max-w-[120px] truncate" : ""}>
+                {expense.descricao}
               </TableCell>
+              {!isMobile && (
+                <TableCell>
+                  {expense.responsavel?.nome || "Não atribuído"}
+                </TableCell>
+              )}
               <TableCell>{formatCurrency(Number(expense.valor))}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right whitespace-nowrap">
                 <Button
                   variant="ghost"
                   size="icon"
