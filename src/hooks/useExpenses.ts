@@ -1,9 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { useExpensesQuery, Expense } from "./expenses/useExpensesQuery";
 import { useExpensesDialogState } from "./expenses/useExpensesDialogState";
 import { DateRange } from "@/types/payment.types";
 import { useSharedDateFilter } from "./useSharedDateFilter";
+
+// Export the Expense type from useExpensesQuery
+export type { Expense } from "./expenses/useExpensesQuery";
 
 export function useExpenses() {
   // Use shared date filter instead of local state
