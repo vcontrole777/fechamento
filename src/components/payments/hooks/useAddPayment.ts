@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { PaymentFormValues } from "../schemas/paymentFormSchema";
 
 export function useAddPayment() {
@@ -20,10 +20,14 @@ export function useAddPayment() {
     
     const id_equipe = userData;
 
-    // Log the date before formatting to debug
-    console.log("Original date before formatting:", values.data);
-    const formattedDate = format(values.data, "yyyy-MM-dd");
-    console.log("Formatted date for database:", formattedDate);
+    // Ensure date is a Date object before formatting
+    const paymentDate = values.data instanceof Date ? values.data : new Date(values.data);
+    
+    // Format date in ISO format (YYYY-MM-DD) for database storage
+    const formattedDate = format(paymentDate, "yyyy-MM-dd");
+    
+    console.log("Payment date to be stored:", formattedDate);
+    console.log("Original date object:", paymentDate);
 
     const { data, error } = await supabase.from("pagamentos").insert({
       data: formattedDate,

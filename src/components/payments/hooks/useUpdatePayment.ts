@@ -11,10 +11,14 @@ export function useUpdatePayment() {
     attendantPercentage: number, 
     tripeiroPercentage: number
   ) => {
-    // Log the date before formatting to debug
-    console.log("Original date before formatting:", values.data);
-    const formattedDate = format(values.data, "yyyy-MM-dd");
-    console.log("Formatted date for database:", formattedDate);
+    // Ensure date is a Date object before formatting
+    const paymentDate = values.data instanceof Date ? values.data : new Date(values.data);
+    
+    // Format date in ISO format (YYYY-MM-DD) for database storage
+    const formattedDate = format(paymentDate, "yyyy-MM-dd");
+    
+    console.log("Payment date to be updated:", formattedDate);
+    console.log("Original date object:", paymentDate);
     
     const { data, error } = await supabase
       .from("pagamentos")
