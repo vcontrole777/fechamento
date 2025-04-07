@@ -1,5 +1,4 @@
-
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -57,18 +56,18 @@ export default function PaymentsTable({
     console.log("Formatting date string:", dateString, typeof dateString);
     
     try {
-      // If it's already a date object, use it directly
-      if (dateString instanceof Date) {
-        return format(dateString, "dd/MM/yyyy", { locale: ptBR });
+      // Check if it's a Date object (using type checking instead of instanceof)
+      if (Object.prototype.toString.call(dateString) === '[object Date]') {
+        return format(dateString as unknown as Date, "dd/MM/yyyy", { locale: ptBR });
       }
       
       // Handle ISO date strings (with or without time components)
-      if (dateString.includes('T') || dateString.includes(':')) {
+      if (typeof dateString === 'string' && (dateString.includes('T') || dateString.includes(':'))) {
         return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
       }
       
       // For YYYY-MM-DD format
-      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
         // Manually parse the date to avoid timezone issues
         const [year, month, day] = dateString.split('-').map(Number);
         const date = new Date(year, month - 1, day);
