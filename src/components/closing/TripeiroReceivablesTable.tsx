@@ -36,6 +36,12 @@ export function TripeiroReceivablesTable({
   // Calculate total receivable for all tripeiros
   const totalReceivable = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.totalReceivable, 0);
   const totalPayments = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.paymentsCount, 0);
+  
+  // Calculate the total original payment value before tripeiro commission
+  const totalOriginalPayment = tripeiroSummaries.reduce((acc, tripeiro) => {
+    const originalPaymentValue = tripeiro.totalReceivable / (1 - tripeiro.porcentagemDecimal);
+    return acc + originalPaymentValue;
+  }, 0);
 
   return (
     <div className="border rounded-md overflow-x-auto">
@@ -50,22 +56,27 @@ export function TripeiroReceivablesTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tripeiroSummaries.map((tripeiro) => (
-            <TableRow key={tripeiro.id}>
-              <TableCell className="font-medium">{tripeiro.nome}</TableCell>
-              <TableCell className={isMobile ? "hidden" : ""}>{tripeiro.paymentsCount}</TableCell>
-              <TableCell>{formatCurrency(tripeiro.paymentsCount * (tripeiro.totalReceivable / tripeiro.paymentsCount))}</TableCell>
-              <TableCell className="text-right font-medium">
-                {formatCurrency(tripeiro.totalReceivable)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {tripeiroSummaries.map((tripeiro) => {
+            // Calculate original payment value before tripeiro's commission
+            const originalPaymentValue = tripeiro.totalReceivable / (1 - tripeiro.porcentagemDecimal);
+            
+            return (
+              <TableRow key={tripeiro.id}>
+                <TableCell className="font-medium">{tripeiro.nome}</TableCell>
+                <TableCell className={isMobile ? "hidden" : ""}>{tripeiro.paymentsCount}</TableCell>
+                <TableCell>{formatCurrency(originalPaymentValue)}</TableCell>
+                <TableCell className="text-right font-medium">
+                  {formatCurrency(tripeiro.totalReceivable)}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
         <TableFooter>
           <TableRow>
             <TableCell className="font-bold">Total</TableCell>
             <TableCell className={`font-bold ${isMobile ? "hidden" : ""}`}>{totalPayments}</TableCell>
-            <TableCell className="font-bold">{formatCurrency(totalReceivable)}</TableCell>
+            <TableCell className="font-bold">{formatCurrency(totalOriginalPayment)}</TableCell>
             <TableCell className="text-right font-bold">
               {formatCurrency(totalReceivable)}
             </TableCell>

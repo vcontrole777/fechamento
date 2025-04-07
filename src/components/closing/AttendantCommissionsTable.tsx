@@ -36,6 +36,12 @@ export function AttendantCommissionsTable({
   // Calculate total commission for all attendants
   const totalCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
   const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
+  
+  // Calculate the total payment value after tripeiro's commission but before attendant's commission
+  const totalPaymentAfterTripeiro = attendantSummaries.reduce((acc, attendant) => {
+    const paymentAfterTripeiro = attendant.totalCommission / attendant.porcentagemDecimal;
+    return acc + paymentAfterTripeiro;
+  }, 0);
 
   return (
     <div className="border rounded-md overflow-x-auto">
@@ -50,22 +56,27 @@ export function AttendantCommissionsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {attendantSummaries.map((attendant) => (
-            <TableRow key={attendant.id}>
-              <TableCell className="font-medium">{attendant.nome}</TableCell>
-              <TableCell className={isMobile ? "hidden" : ""}>{attendant.paymentsCount}</TableCell>
-              <TableCell>{formatCurrency(attendant.paymentsCount * (attendant.totalCommission / attendant.paymentsCount))}</TableCell>
-              <TableCell className="text-right font-medium">
-                {formatCurrency(attendant.totalCommission)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {attendantSummaries.map((attendant) => {
+            // Calculate payment value after tripeiro's commission but before attendant's commission
+            const paymentAfterTripeiro = attendant.totalCommission / attendant.porcentagemDecimal;
+            
+            return (
+              <TableRow key={attendant.id}>
+                <TableCell className="font-medium">{attendant.nome}</TableCell>
+                <TableCell className={isMobile ? "hidden" : ""}>{attendant.paymentsCount}</TableCell>
+                <TableCell>{formatCurrency(paymentAfterTripeiro)}</TableCell>
+                <TableCell className="text-right font-medium">
+                  {formatCurrency(attendant.totalCommission)}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
         <TableFooter>
           <TableRow>
             <TableCell className="font-bold">Total</TableCell>
             <TableCell className={`font-bold ${isMobile ? "hidden" : ""}`}>{totalPayments}</TableCell>
-            <TableCell className="font-bold">{formatCurrency(totalCommission)}</TableCell>
+            <TableCell className="font-bold">{formatCurrency(totalPaymentAfterTripeiro)}</TableCell>
             <TableCell className="text-right font-bold">
               {formatCurrency(totalCommission)}
             </TableCell>
