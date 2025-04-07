@@ -1,70 +1,44 @@
+
 import { useState, useEffect } from "react";
-import { format, startOfDay, endOfDay } from "date-fns";
-import { PaymentFilters, DateRange } from "@/types/payment.types";
-import { usePaymentsQuery } from "./payments/usePaymentsQuery";
-import { usePaymentCalculations } from "./payments/usePaymentCalculations";
-import { usePaymentDialogState } from "./payments/usePaymentDialogState";
-import { useSharedDateFilter } from "./useSharedDateFilter";
+import { usePaymentsQuery } from "@/hooks/payments/usePaymentsQuery";
+import { PaymentFilters } from "@/types/payment.types";
+import { DateRange } from "@/components/common/date-filter/types";
 
-export type { Attendant, Tripeiro, Payment } from "@/types/payment.types";
-export type { PaymentFilters } from "@/types/payment.types";
-
-export function usePayments() {
+export function usePayments(initialDateRange: DateRange) {
   const [filters, setFilters] = useState<PaymentFilters>({
-    attendantIds: [],
-    tripeiroIds: [],
+    atendentes: [],
+    tripeiros: [],
+    tipos: [],
     statuses: [],
   });
   
-  const { dateRange: sharedDateRange, updateSharedDateFilter } = useSharedDateFilter();
-  const [dateRange, setDateRange] = useState<DateRange>(sharedDateRange);
+  const [dateRange, setDateRange] = useState<DateRange>(initialDateRange);
+  
+  const {
+    data: payments,
+    isLoading,
+    isError,
+    refetch,
+  } = usePaymentsQuery(filters, dateRange);
 
-  useEffect(() => {
-    setDateRange(sharedDateRange);
-  }, [sharedDateRange]);
-
-  const { data: payments, isLoading, refetch } = usePaymentsQuery(filters, dateRange);
-  const { calculateTotals } = usePaymentCalculations();
-  const dialogState = usePaymentDialogState();
-
-  const { 
-    totalPayments, 
-    totalAttendantCommission, 
-    totalTripeiroReceivable,
-    netTotal
-  } = calculateTotals(payments);
-
-  const updateFilters = (newFilters: Partial<PaymentFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
-
-  const updateDateRange = (range: DateRange) => {
-    // Make sure we're using startOfDay and endOfDay correctly
-    const newRange: DateRange = {
-      from: range.from ? startOfDay(range.from) : null,
-      to: range.to ? endOfDay(range.to) : null
-    };
-    
-    console.log("Updating date range in usePayments:", {
-      from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
-      to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null
+  const clearFilters = () => {
+    setFilters({
+      atendentes: [],
+      tripeiros: [],
+      tipos: [],
+      statuses: [],
     });
-    
-    setDateRange(newRange);
   };
 
   return {
     payments,
     isLoading,
-    totalPayments,
-    totalAttendantCommission,
-    totalTripeiroReceivable,
-    netTotal,
-    filters,
-    dateRange,
-    updateFilters,
-    updateDateRange,
+    isError,
     refetch,
-    ...dialogState
+    filters,
+    setFilters,
+    clearFilters,
+    dateRange,
+    setDateRange,
   };
 }
