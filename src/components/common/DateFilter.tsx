@@ -170,8 +170,8 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
             mode="range"
             defaultMonth={date.from || undefined}
             selected={{
-              from: date.from || undefined,
-              to: date.to || undefined
+              from: date.from ? date.from : undefined,
+              to: date.to ? date.to : undefined
             }}
             onSelect={(range) => {
               if (range) {
