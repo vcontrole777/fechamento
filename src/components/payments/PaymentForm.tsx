@@ -1,7 +1,8 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -66,15 +67,17 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   const getInitialDate = () => {
     if (payment) {
       console.log("Payment date from database:", payment.data);
-      const dateParts = payment.data.split('-');
-      if (dateParts.length === 3) {
-        const year = parseInt(dateParts[0]);
-        const month = parseInt(dateParts[1]) - 1;
-        const day = parseInt(dateParts[2]);
-        console.log(`Creating date from parts: year=${year}, month=${month}, day=${day}`);
-        return new Date(year, month, day);
+      try {
+        // Parse the date string in YYYY-MM-DD format
+        const [year, month, day] = payment.data.split('-').map(num => parseInt(num));
+        console.log(`Creating date from parts: year=${year}, month=${month-1}, day=${day}`);
+        
+        // Create a new date with the year, month (0-indexed), and day
+        return new Date(year, month - 1, day);
+      } catch (error) {
+        console.error("Error parsing date:", error);
+        return new Date();
       }
-      return new Date(payment.data);
     }
     return new Date();
   };
@@ -162,13 +165,23 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   };
 
   const handleSubmit = (values: PaymentFormValues) => {
-    console.log("Submitting date:", values.data);
+    console.log("Submitting form with date:", values.data);
+    // Ensure date is properly recorded as a Date object
+    const date = values.data instanceof Date ? values.data : new Date(values.data);
+    console.log("Date type:", Object.prototype.toString.call(date));
+    console.log("Date year/month/day:", date.getFullYear(), date.getMonth() + 1, date.getDate());
+    
+    // Pass the values with a guaranteed Date object
+    const submissionValues = {
+      ...values,
+      data: date
+    };
     
     const tripeiroPercentageToSubmit = useCustomTripeiroPercentage 
       ? customTripeiroPercentage 
       : selectedTripeiroPercentage;
     
-    onSubmit(values, selectedAttendantPercentage, tripeiroPercentageToSubmit);
+    onSubmit(submissionValues, selectedAttendantPercentage, tripeiroPercentageToSubmit);
   };
 
   return (
@@ -206,6 +219,8 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
                     onSelect={(date) => {
                       if (date) {
                         console.log("Calendar date selected:", date);
+                        console.log("Type of date:", Object.prototype.toString.call(date));
+                        console.log("Date UTC string:", date.toUTCString());
                         field.onChange(date);
                       }
                     }}
