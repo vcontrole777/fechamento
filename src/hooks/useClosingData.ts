@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { DateRange } from "@/types/payment.types";
 import { startOfDay, endOfDay, format } from "date-fns";
 import { useClosingQueries } from "./closing/useClosingQueries";
 import { useClosingCalculations } from "./closing/useClosingCalculations";
 import { useSharedDateFilter } from "./useSharedDateFilter";
 import { Expense } from "./expenses/useExpensesQuery";
+import { DateRange } from "@/components/common/date-filter/types";
 
 export type { TripeiroSummary, AttendantSummary, ClosingSummary } from "./closing/useClosingCalculations";
 

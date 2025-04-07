@@ -1,7 +1,7 @@
 
 import { usePaymentsQuery } from "../payments/usePaymentsQuery";
 import { useExpensesQuery } from "../expenses/useExpensesQuery";
-import { DateRange } from "@/types/payment.types";
+import { DateRange } from "@/components/common/date-filter/types";
 import { Expense } from "../expenses/useExpensesQuery";
 
 export function useClosingQueries(dateRange: DateRange) {
