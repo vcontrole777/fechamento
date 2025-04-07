@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -71,7 +70,15 @@ export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) 
         return [];
       }
 
-      return data as Payment[];
+      console.log("Payments retrieved from database:", data);
+      
+      // Process dates to ensure they're correctly formatted
+      const processedData = data.map(payment => ({
+        ...payment,
+        // Keep the original data field as-is since it's coming from the database correctly
+      }));
+
+      return processedData as Payment[];
     },
   });
 }

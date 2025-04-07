@@ -1,5 +1,5 @@
 
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,37 @@ export default function PaymentsTable({
     }
   };
 
+  const formatDate = (dateString: string) => {
+    console.log("Formatting date string:", dateString, typeof dateString);
+    
+    try {
+      // If it's already a date object, use it directly
+      if (dateString instanceof Date) {
+        return format(dateString, "dd/MM/yyyy", { locale: ptBR });
+      }
+      
+      // Handle ISO date strings (with or without time components)
+      if (dateString.includes('T') || dateString.includes(':')) {
+        return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
+      }
+      
+      // For YYYY-MM-DD format
+      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Manually parse the date to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        console.log("Parsed date:", date.toISOString());
+        return format(date, "dd/MM/yyyy", { locale: ptBR });
+      }
+      
+      // Fallback
+      return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
+    } catch (error) {
+      console.error("Error formatting date:", error, dateString);
+      return dateString; // Return the original string if formatting fails
+    }
+  };
+
   return (
     <div className="rounded-md border overflow-hidden">
       <Table>
@@ -78,7 +109,7 @@ export default function PaymentsTable({
             payments.map((payment) => (
               <TableRow key={payment.id}>
                 <TableCell>
-                  {format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR })}
+                  {formatDate(payment.data)}
                 </TableCell>
                 <TableCell>{formatCurrency(Number(payment.valor))}</TableCell>
                 <TableCell>

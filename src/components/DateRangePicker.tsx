@@ -17,6 +17,16 @@ export function DateRangePicker({
     to: endOfDay(addDays(new Date(), 30)),
   })
 
+  const formatDateDisplay = (date: Date) => {
+    // Ensure consistent date formatting
+    try {
+      return format(date, "dd/MM/yyyy", { locale: ptBR });
+    } catch (error) {
+      console.error("Error formatting date:", error, date);
+      return "Data inválida";
+    }
+  }
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -33,11 +43,11 @@ export function DateRangePicker({
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-                  {format(date.to, "dd/MM/yyyy", { locale: ptBR })}
+                  {formatDateDisplay(date.from)} -{" "}
+                  {formatDateDisplay(date.to)}
                 </>
               ) : (
-                format(date.from, "dd/MM/yyyy", { locale: ptBR })
+                formatDateDisplay(date.from)
               )
             ) : (
               <span>Selecione o período</span>
@@ -52,10 +62,14 @@ export function DateRangePicker({
             selected={date}
             onSelect={(selectedDate) => {
               if (selectedDate) {
+                console.log("Selected date range:", selectedDate);
+                
                 const newRange = {
                   from: selectedDate.from ? startOfDay(selectedDate.from) : null,
                   to: selectedDate.to ? endOfDay(selectedDate.to) : null,
                 };
+                
+                console.log("Normalized date range:", newRange);
                 setDate(newRange);
               } else {
                 setDate(undefined);

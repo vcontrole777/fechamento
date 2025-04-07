@@ -58,9 +58,24 @@ export function DatePickerField({ control }: DatePickerFieldProps) {
                 onSelect={(date) => {
                   if (date) {
                     console.log("Calendar date selected:", date);
-                    console.log("Type of date:", Object.prototype.toString.call(date));
-                    console.log("Date UTC string:", date.toUTCString());
-                    field.onChange(date);
+                    console.log("Selected date components:", {
+                      year: date.getFullYear(),
+                      month: date.getMonth() + 1,
+                      day: date.getDate()
+                    });
+                    
+                    // Create a new date with only the date part to avoid timezone issues
+                    const normalizedDate = new Date(
+                      date.getFullYear(), 
+                      date.getMonth(), 
+                      date.getDate(), 
+                      12, // noon to avoid any timezone issues
+                      0, 
+                      0
+                    );
+                    
+                    console.log("Normalized date:", normalizedDate.toISOString());
+                    field.onChange(normalizedDate);
                   }
                 }}
                 locale={ptBR}
