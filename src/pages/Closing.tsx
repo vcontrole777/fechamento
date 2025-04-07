@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useClosingData } from "@/hooks/useClosingData";
 import { ClosingSummary } from "@/components/closing/ClosingSummary";
@@ -5,6 +6,7 @@ import { TripeiroReceivablesTable } from "@/components/closing/TripeiroReceivabl
 import { AttendantCommissionsTable } from "@/components/closing/AttendantCommissionsTable";
 import { CopyToWhatsAppButton } from "@/components/closing/CopyToWhatsAppButton";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
+import { GeneratePDFButton } from "@/components/closing/GeneratePDFButton";
 import { format } from "date-fns";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
@@ -51,14 +53,25 @@ export default function Closing() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Fechamento</h1>
-        <CopyToWhatsAppButton 
-          closingSummary={closingSummary}
-          tripeiroSummaries={tripeiroSummaries}
-          attendantSummaries={attendantSummaries}
-          expenses={expenses}
-          dateRange={dateRange}
-          isLoading={isLoading}
-        />
+        <div className="flex space-x-2">
+          <GeneratePDFButton
+            closingSummary={closingSummary}
+            tripeiroSummaries={tripeiroSummaries}
+            attendantSummaries={attendantSummaries}
+            expenses={expenses}
+            dateRange={dateRange}
+            isLoading={isLoading}
+            formatCurrency={formatCurrency}
+          />
+          <CopyToWhatsAppButton 
+            closingSummary={closingSummary}
+            tripeiroSummaries={tripeiroSummaries}
+            attendantSummaries={attendantSummaries}
+            expenses={expenses}
+            dateRange={dateRange}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col space-y-4">

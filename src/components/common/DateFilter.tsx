@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
@@ -169,10 +168,7 @@ export function DateFilter({ onFilterChange }: DateFilterProps) {
             initialFocus
             mode="range"
             defaultMonth={date.from || undefined}
-            selected={{
-              from: date.from ? date.from : undefined,
-              to: date.to ? date.to : undefined
-            }}
+            selected={date.from && date.to ? { from: date.from, to: date.to } : undefined}
             onSelect={(range) => {
               if (range) {
                 // Ensure we use startOfDay for from and endOfDay for to
