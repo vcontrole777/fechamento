@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { useExpensesQuery, Expense } from "./expenses/useExpensesQuery";
 import { useExpensesDialogState } from "./expenses/useExpensesDialogState";
-import { DateRange } from "@/types/payment.types";
+import { DateRange } from "@/components/common/date-filter/types";
 import { useSharedDateFilter } from "./useSharedDateFilter";
 
 // Export the Expense type from useExpensesQuery
