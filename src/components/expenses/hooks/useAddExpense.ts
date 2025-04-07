@@ -20,10 +20,15 @@ export function useAddExpense() {
     
     const id_equipe = userData;
 
+    // Log the date before formatting
+    console.log("Original expense date before formatting:", values.data);
+    const formattedDate = format(values.data, "yyyy-MM-dd");
+    console.log("Formatted expense date for database:", formattedDate);
+
     const { data, error } = await supabase.from("despesas").insert({
       descricao: values.descricao,
       valor: values.valor,
-      data: format(values.data, "yyyy-MM-dd"),
+      data: formattedDate,
       id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : null,
       id_equipe: id_equipe,
     });

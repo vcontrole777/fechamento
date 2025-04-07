@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,6 +51,7 @@ export function ExpenseForm({
   const { data: responsaveis, isLoading: isLoadingResponsaveis } = useResponsaveis();
 
   const handleSubmit = async (values: ExpenseFormValues) => {
+    console.log("Submitting expense form with date:", values.data);
     await onSubmit(values);
     form.reset();
   };
@@ -119,7 +119,12 @@ export function ExpenseForm({
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => {
+                      if (date) {
+                        console.log("Calendar date selected for expense:", date);
+                        field.onChange(date);
+                      }
+                    }}
                     initialFocus
                     locale={ptBR}
                     className={cn("p-3 pointer-events-auto")}

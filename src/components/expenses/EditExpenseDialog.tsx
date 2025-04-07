@@ -36,8 +36,26 @@ export default function EditExpenseDialog({
       console.log("Parsing expense date:", expense.data);
       
       // Parse the date from ISO format (YYYY-MM-DD)
+      const dateParts = expense.data.split('-');
+      if (dateParts.length === 3) {
+        // Create date as YYYY-MM-DD to avoid timezone issues
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-based
+        const day = parseInt(dateParts[2]);
+        console.log(`Creating expense date from parts: year=${year}, month=${month}, day=${day}`);
+        const parsedDate = new Date(year, month, day);
+        console.log("Parsed expense date:", parsedDate);
+        return {
+          descricao: expense.descricao,
+          valor: expense.valor,
+          data: parsedDate,
+          id_responsavel: expense.id_responsavel?.toString(),
+        };
+      }
+      
+      // Fallback to standard date parsing
       const parsedDate = parse(expense.data, "yyyy-MM-dd", new Date());
-      console.log("Parsed date:", parsedDate);
+      console.log("Parsed expense date (fallback):", parsedDate);
       
       return {
         descricao: expense.descricao,
@@ -65,7 +83,7 @@ export default function EditExpenseDialog({
       
       // Format date as YYYY-MM-DD for storage
       const formattedDate = format(values.data, "yyyy-MM-dd");
-      console.log("Formatted date for storage:", formattedDate);
+      console.log("Formatted expense date for storage:", formattedDate);
 
       const { error } = await supabase
         .from("despesas")

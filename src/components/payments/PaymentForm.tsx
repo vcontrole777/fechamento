@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
@@ -64,11 +63,27 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
     netValue: 0
   });
 
+  const getInitialDate = () => {
+    if (payment) {
+      console.log("Payment date from database:", payment.data);
+      const dateParts = payment.data.split('-');
+      if (dateParts.length === 3) {
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1;
+        const day = parseInt(dateParts[2]);
+        console.log(`Creating date from parts: year=${year}, month=${month}, day=${day}`);
+        return new Date(year, month, day);
+      }
+      return new Date(payment.data);
+    }
+    return new Date();
+  };
+
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: payment
       ? {
-          data: new Date(payment.data),
+          data: getInitialDate(),
           valor: payment.valor,
           id_atendente: payment.id_atendente?.toString() || undefined,
           id_tripeiro: payment.id_tripeiro?.toString() || undefined,
@@ -83,7 +98,6 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
         },
   });
 
-  // Update selected percentages when attendant or tripeiro changes
   useEffect(() => {
     const attendantId = form.watch("id_atendente");
     const tripeiroId = form.watch("id_tripeiro");
@@ -106,7 +120,6 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
       }
     }
 
-    // Calculate payment values
     const tripeiroPercentageToUse = useCustomTripeiroPercentage ? customTripeiroPercentage : selectedTripeiroPercentage;
     updateCalculationPreview(totalValue, tripeiroPercentageToUse, selectedAttendantPercentage);
   }, [
@@ -121,7 +134,6 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
     selectedTripeiroPercentage
   ]);
 
-  // Update calculation when custom percentage changes
   useEffect(() => {
     const totalValue = form.watch("valor");
     const tripeiroPercentageToUse = useCustomTripeiroPercentage ? customTripeiroPercentage : selectedTripeiroPercentage;
@@ -150,6 +162,8 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   };
 
   const handleSubmit = (values: PaymentFormValues) => {
+    console.log("Submitting date:", values.data);
+    
     const tripeiroPercentageToSubmit = useCustomTripeiroPercentage 
       ? customTripeiroPercentage 
       : selectedTripeiroPercentage;
@@ -189,7 +203,12 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => {
+                      if (date) {
+                        console.log("Calendar date selected:", date);
+                        field.onChange(date);
+                      }
+                    }}
                     locale={ptBR}
                     disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                     initialFocus
@@ -263,7 +282,6 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
-                    // Reset custom percentage when changing tripeiros
                     setUseCustomTripeiroPercentage(false);
                   }}
                   defaultValue={field.value}

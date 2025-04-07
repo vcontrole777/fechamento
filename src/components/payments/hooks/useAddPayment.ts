@@ -20,8 +20,13 @@ export function useAddPayment() {
     
     const id_equipe = userData;
 
+    // Log the date before formatting to debug
+    console.log("Original date before formatting:", values.data);
+    const formattedDate = format(values.data, "yyyy-MM-dd");
+    console.log("Formatted date for database:", formattedDate);
+
     const { data, error } = await supabase.from("pagamentos").insert({
-      data: format(values.data, "yyyy-MM-dd"),
+      data: formattedDate,
       valor: values.valor,
       tipo: values.tipo,
       status: values.status,
