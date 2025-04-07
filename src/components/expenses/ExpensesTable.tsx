@@ -26,6 +26,38 @@ export default function ExpensesTable({
   onDelete,
   formatCurrency,
 }: ExpensesTableProps) {
+  // Helper function to format the date consistently
+  const formatDate = (dateString: string) => {
+    console.log("Formatting expense date:", dateString, typeof dateString);
+    
+    try {
+      // Check if it's a Date object (using type checking instead of instanceof)
+      if (Object.prototype.toString.call(dateString) === '[object Date]') {
+        return format(dateString as unknown as Date, "dd/MM/yyyy", { locale: ptBR });
+      }
+      
+      // Handle ISO date strings (with or without time components)
+      if (typeof dateString === 'string' && (dateString.includes('T') || dateString.includes(':'))) {
+        return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
+      }
+      
+      // For YYYY-MM-DD format
+      if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Manually parse the date to avoid timezone issues
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        console.log("Parsed expense date:", date.toISOString());
+        return format(date, "dd/MM/yyyy", { locale: ptBR });
+      }
+      
+      // Fallback
+      return format(new Date(dateString), "dd/MM/yyyy", { locale: ptBR });
+    } catch (error) {
+      console.error("Error formatting expense date:", error, dateString);
+      return String(dateString); // Return the original string if formatting fails
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -42,7 +74,7 @@ export default function ExpensesTable({
           {expenses.map((expense) => (
             <TableRow key={expense.id}>
               <TableCell>
-                {format(new Date(expense.data), "dd/MM/yyyy", { locale: ptBR })}
+                {formatDate(expense.data)}
               </TableCell>
               <TableCell>{expense.descricao}</TableCell>
               <TableCell>

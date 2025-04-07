@@ -1,7 +1,6 @@
 
 import React from "react";
-import { format, parse } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -33,29 +32,30 @@ export default function EditExpenseDialog({
     if (!expense) return {};
     
     try {
-      console.log("Parsing expense date:", expense.data);
+      console.log("Parsing expense date for form:", expense.data, typeof expense.data);
       
-      // Parse the date from ISO format (YYYY-MM-DD)
-      const dateParts = expense.data.split('-');
-      if (dateParts.length === 3) {
-        // Create date as YYYY-MM-DD to avoid timezone issues
-        const year = parseInt(dateParts[0]);
-        const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-based
-        const day = parseInt(dateParts[2]);
-        console.log(`Creating expense date from parts: year=${year}, month=${month}, day=${day}`);
-        const parsedDate = new Date(year, month, day);
-        console.log("Parsed expense date:", parsedDate);
-        return {
-          descricao: expense.descricao,
-          valor: expense.valor,
-          data: parsedDate,
-          id_responsavel: expense.id_responsavel?.toString(),
-        };
+      let parsedDate: Date;
+      
+      // Check if it's already a Date object
+      if (Object.prototype.toString.call(expense.data) === '[object Date]') {
+        parsedDate = expense.data as unknown as Date;
+      }
+      // Handle string date in YYYY-MM-DD format
+      else if (typeof expense.data === 'string' && expense.data.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Parse the date from ISO format (YYYY-MM-DD)
+        const [year, month, day] = expense.data.split('-').map(Number);
+        parsedDate = new Date(year, month - 1, day); // month is 0-based in JavaScript
+      }
+      // Handle ISO date strings
+      else if (typeof expense.data === 'string' && (expense.data.includes('T') || expense.data.includes(':'))) {
+        parsedDate = new Date(expense.data);
+      }
+      // Fallback
+      else {
+        parsedDate = new Date(expense.data);
       }
       
-      // Fallback to standard date parsing
-      const parsedDate = parse(expense.data, "yyyy-MM-dd", new Date());
-      console.log("Parsed expense date (fallback):", parsedDate);
+      console.log("Parsed expense date for form:", parsedDate);
       
       return {
         descricao: expense.descricao,
@@ -64,7 +64,7 @@ export default function EditExpenseDialog({
         id_responsavel: expense.id_responsavel?.toString(),
       };
     } catch (error) {
-      console.error("Error parsing expense date:", error);
+      console.error("Error parsing expense date for form:", error);
       // Fallback to current date if parsing fails
       return {
         descricao: expense.descricao,

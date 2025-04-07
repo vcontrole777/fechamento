@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -122,7 +123,24 @@ export function ExpenseForm({
                     onSelect={(date) => {
                       if (date) {
                         console.log("Calendar date selected for expense:", date);
-                        field.onChange(date);
+                        console.log("Selected date components:", {
+                          year: date.getFullYear(),
+                          month: date.getMonth() + 1,
+                          day: date.getDate()
+                        });
+                        
+                        // Create a new date with only the date part to avoid timezone issues
+                        const normalizedDate = new Date(
+                          date.getFullYear(), 
+                          date.getMonth(), 
+                          date.getDate(), 
+                          12, // noon to avoid any timezone issues
+                          0, 
+                          0
+                        );
+                        
+                        console.log("Normalized expense date:", normalizedDate.toISOString());
+                        field.onChange(normalizedDate);
                       }
                     }}
                     initialFocus
