@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useClosingData } from "@/hooks/useClosingData";
 import { ClosingSummary } from "@/components/closing/ClosingSummary";
@@ -7,6 +6,7 @@ import { AttendantCommissionsTable } from "@/components/closing/AttendantCommiss
 import { CopyToWhatsAppButton } from "@/components/closing/CopyToWhatsAppButton";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { format } from "date-fns";
+import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
 export default function Closing() {
   const {
@@ -18,6 +18,9 @@ export default function Closing() {
     dateRange,
     updateDateRange,
   } = useClosingData();
+
+  // Get shared date filter update function
+  const { updateSharedDateFilter } = useSharedDateFilter();
 
   // Force refetch when component mounts
   useEffect(() => {
@@ -38,7 +41,10 @@ export default function Closing() {
       to: newDateRange.to ? format(newDateRange.to, 'yyyy-MM-dd') : null,
       option
     });
+    
+    // Update both our local state and the shared state
     updateDateRange(newDateRange);
+    updateSharedDateFilter(newDateRange, option);
   };
 
   return (

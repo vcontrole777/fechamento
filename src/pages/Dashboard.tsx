@@ -1,4 +1,3 @@
-
 import { Banknote, TrendingDown, TrendingUp } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { BarChartComponent } from "@/components/dashboard/BarChartComponent";
@@ -7,6 +6,7 @@ import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { TopAttendants } from "@/components/dashboard/TopAttendants";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
+import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
 export default function Dashboard() {
   const {
@@ -21,7 +21,8 @@ export default function Dashboard() {
     updateDateRange,
   } = useDashboardData();
 
-  // Format currency in Brazilian style (R$ 1.000,00)
+  const { updateSharedDateFilter } = useSharedDateFilter();
+
   const formatCurrency = (value: number): string => {
     return value.toLocaleString('pt-BR', {
       style: 'currency',
@@ -31,6 +32,7 @@ export default function Dashboard() {
 
   const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
     updateDateRange(newDateRange);
+    updateSharedDateFilter(newDateRange, option);
   };
 
   return (

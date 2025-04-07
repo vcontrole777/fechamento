@@ -1,19 +1,22 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DateRange } from "@/types/payment.types";
 import { startOfDay, endOfDay, format } from "date-fns";
 import { useClosingQueries } from "./closing/useClosingQueries";
 import { useClosingCalculations } from "./closing/useClosingCalculations";
+import { useSharedDateFilter } from "./useSharedDateFilter";
 import { Expense } from "./expenses/useExpensesQuery";
 
 export type { TripeiroSummary, AttendantSummary, ClosingSummary } from "./closing/useClosingCalculations";
 
 export function useClosingData() {
-  const today = new Date();
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfDay(today),
-    to: endOfDay(today)
-  });
+  // Use shared date filter instead of local state
+  const { dateRange: sharedDateRange, updateSharedDateFilter } = useSharedDateFilter();
+  const [dateRange, setDateRange] = useState<DateRange>(sharedDateRange);
+
+  // Keep local state in sync with shared state
+  useEffect(() => {
+    setDateRange(sharedDateRange);
+  }, [sharedDateRange]);
 
   // Fetch data using our custom queries hook
   const { payments, expenses, isLoading } = useClosingQueries(dateRange);

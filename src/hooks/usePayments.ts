@@ -1,10 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { PaymentFilters, DateRange } from "@/types/payment.types";
 import { usePaymentsQuery } from "./payments/usePaymentsQuery";
 import { usePaymentCalculations } from "./payments/usePaymentCalculations";
 import { usePaymentDialogState } from "./payments/usePaymentDialogState";
+import { useSharedDateFilter } from "./useSharedDateFilter";
 
 export type { Attendant, Tripeiro, Payment } from "@/types/payment.types";
 export type { PaymentFilters } from "@/types/payment.types";
@@ -16,10 +16,12 @@ export function usePayments() {
     statuses: [],
   });
   
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfDay(new Date()),
-    to: endOfDay(new Date())
-  });
+  const { dateRange: sharedDateRange, updateSharedDateFilter } = useSharedDateFilter();
+  const [dateRange, setDateRange] = useState<DateRange>(sharedDateRange);
+
+  useEffect(() => {
+    setDateRange(sharedDateRange);
+  }, [sharedDateRange]);
 
   const { data: payments, isLoading, refetch } = usePaymentsQuery(filters, dateRange);
   const { calculateTotals } = usePaymentCalculations();

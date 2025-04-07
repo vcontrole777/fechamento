@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format, startOfDay, endOfDay, subDays } from "date-fns";
@@ -17,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
 export type DateFilterOption = 
   | "today" 
@@ -33,20 +33,28 @@ interface DateFilterProps {
 }
 
 export function DateFilter({ onFilterChange }: DateFilterProps) {
-  // Create today date at beginning of day
-  const today = startOfDay(new Date());
+  // Use the shared date filter
+  const { dateRange: sharedDateRange, selectedOption: sharedOption, updateSharedDateFilter } = useSharedDateFilter();
   
-  const [date, setDate] = useState<DateRange>({
-    from: today,
-    to: endOfDay(today),
-  });
-  const [selectedOption, setSelectedOption] = useState<DateFilterOption>("today");
+  // Local state for UI
+  const [date, setDate] = useState<DateRange>(sharedDateRange);
+  const [selectedOption, setSelectedOption] = useState<DateFilterOption>(sharedOption);
   const [open, setOpen] = useState(false);
 
+  // Initialize from shared state
   useEffect(() => {
-    // Notify parent component when date range changes
+    setDate(sharedDateRange);
+    setSelectedOption(sharedOption);
+  }, [sharedDateRange, sharedOption]);
+
+  // Notify both parent component and shared state when date range changes
+  useEffect(() => {
+    // Notify parent component
     onFilterChange(date, selectedOption);
-  }, [date, selectedOption, onFilterChange]);
+    
+    // Update shared state
+    updateSharedDateFilter(date, selectedOption);
+  }, [date, selectedOption, onFilterChange, updateSharedDateFilter]);
 
   const handleOptionSelect = (option: DateFilterOption) => {
     setSelectedOption(option);

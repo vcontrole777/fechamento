@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DateRange } from "@/components/common/DateFilter";
 import { startOfDay, endOfDay, format } from "date-fns";
 import { 
@@ -17,13 +16,17 @@ import {
   formatRecentPayments,
   formatRecentExpenses
 } from "@/utils/dashboardFormatters";
+import { useSharedDateFilter } from "./useSharedDateFilter";
 
 export function useDashboardData() {
-  const today = new Date();
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfDay(today),
-    to: endOfDay(today)
-  });
+  // Use shared date filter instead of local state
+  const { dateRange: sharedDateRange, updateSharedDateFilter } = useSharedDateFilter();
+  const [dateRange, setDateRange] = useState<DateRange>(sharedDateRange);
+
+  // Keep local state in sync with shared state
+  useEffect(() => {
+    setDateRange(sharedDateRange);
+  }, [sharedDateRange]);
 
   // Fetch data using the refactored query hooks
   const { data: payments, isLoading: isLoadingPayments } = usePaymentsQuery(dateRange);

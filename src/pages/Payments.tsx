@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { usePayments } from "@/hooks/usePayments";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import EmptyPaymentsState from "@/components/payments/EmptyPaymentsState";
 import { PaymentFiltersComponent } from "@/components/payments/PaymentFilters";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { format } from "date-fns";
+import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
 export default function Payments() {
   const {
@@ -37,6 +37,9 @@ export default function Payments() {
     closeDeletePaymentDialog,
   } = usePayments();
 
+  // Get shared date filter update function
+  const { updateSharedDateFilter } = useSharedDateFilter();
+
   // Force refetch when component mounts
   useEffect(() => {
     refetch();
@@ -57,7 +60,10 @@ export default function Payments() {
       to: newDateRange.to ? format(newDateRange.to, 'yyyy-MM-dd') : null,
       option
     });
+    
+    // Update both our local state and the shared state
     updateDateRange(newDateRange);
+    updateSharedDateFilter(newDateRange, option);
   };
 
   return (

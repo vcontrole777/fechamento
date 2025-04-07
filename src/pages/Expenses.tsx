@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import EditExpenseDialog from "@/components/expenses/EditExpenseDialog";
 import DeleteExpenseDialog from "@/components/expenses/DeleteExpenseDialog";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { format } from "date-fns";
+import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
 export default function Expenses() {
   const {
@@ -32,6 +32,9 @@ export default function Expenses() {
     closeDeleteExpenseDialog,
   } = useExpenses();
 
+  // Get shared date filter update function
+  const { updateSharedDateFilter } = useSharedDateFilter();
+
   // Force refetch when component mounts
   useEffect(() => {
     refetch();
@@ -51,7 +54,10 @@ export default function Expenses() {
       to: newDateRange.to ? format(newDateRange.to, 'yyyy-MM-dd') : null,
       option
     });
+    
+    // Update both our local state and the shared state
     updateDateRange(newDateRange);
+    updateSharedDateFilter(newDateRange, option);
   };
 
   return (

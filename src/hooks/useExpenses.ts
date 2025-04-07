@@ -1,34 +1,33 @@
-
-import { useState } from "react";
-import { DateRange } from "@/types/payment.types";
-import { startOfDay, endOfDay, format } from "date-fns";
-import { useExpensesQuery, type Expense } from "./expenses/useExpensesQuery";
+import { useState, useEffect } from "react";
+import { format, startOfDay, endOfDay } from "date-fns";
+import { useExpensesQuery, Expense } from "./expenses/useExpensesQuery";
 import { useExpensesDialogState } from "./expenses/useExpensesDialogState";
-
-export type { Expense } from "./expenses/useExpensesQuery";
+import { DateRange } from "@/types/payment.types";
+import { useSharedDateFilter } from "./useSharedDateFilter";
 
 export function useExpenses() {
-  // Initialize with current date
-  const today = new Date();
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: startOfDay(today),
-    to: endOfDay(today)
-  });
+  // Use shared date filter instead of local state
+  const { dateRange: sharedDateRange, updateSharedDateFilter } = useSharedDateFilter();
+  const [dateRange, setDateRange] = useState<DateRange>(sharedDateRange);
 
-  // Use the new hooks
+  // Keep local state in sync with shared state
+  useEffect(() => {
+    setDateRange(sharedDateRange);
+  }, [sharedDateRange]);
+
   const { data: expenses, isLoading, refetch } = useExpensesQuery(dateRange);
   const dialogState = useExpensesDialogState();
 
-  const totalExpenses = expenses?.reduce((acc, expense) => acc + Number(expense.valor), 0) || 0;
+  // Calculate total expenses
+  const totalExpenses = expenses?.reduce((acc, expense) => acc + expense.valor, 0) || 0;
 
   const updateDateRange = (range: DateRange) => {
-    // Make sure we're using startOfDay and endOfDay correctly
     const newRange: DateRange = {
       from: range.from ? startOfDay(range.from) : null,
       to: range.to ? endOfDay(range.to) : null
     };
     
-    console.log("Updating date range in useExpenses:", {
+    console.log("Updating expenses date range:", {
       from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
       to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null
     });
@@ -43,6 +42,6 @@ export function useExpenses() {
     dateRange,
     updateDateRange,
     refetch,
-    ...dialogState,
+    ...dialogState
   };
 }
