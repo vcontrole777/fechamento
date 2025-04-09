@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Wallet,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth"; 
@@ -29,6 +30,7 @@ export function Sidebar({ className }: SidebarProps) {
   const menuItems = [
     { name: "Painel", icon: BarChart3, path: "/" },
     { name: "Pagamentos", icon: CircleDollarSign, path: "/pagamentos" },
+    { name: "Recebimentos", icon: Wallet, path: "/recebimentos" },
     { name: "Atendentes", icon: Users, path: "/atendentes" },
     { name: "Tripeiros", icon: Truck, path: "/tripeiros" },
     { name: "Despesas", icon: Receipt, path: "/despesas" },
