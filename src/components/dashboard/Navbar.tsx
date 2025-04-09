@@ -5,8 +5,14 @@ import { NavbarUserMenu } from "@/components/NavbarUserMenu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Command, CommandInput } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
-export function Navbar() {
+interface NavbarProps {
+  onToggleSidebar?: () => void;
+}
+
+export function Navbar({ onToggleSidebar }: NavbarProps) {
   const { user } = useAuth();
   const [equipeName, setEquipeName] = useState<string>("");
 
@@ -51,7 +57,18 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4">
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
+          {onToggleSidebar && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleSidebar}
+              className="md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle sidebar</span>
+            </Button>
+          )}
           <Command className="rounded-lg border px-4 max-w-[320px]">
             <CommandInput placeholder="Buscar..." className="h-9 border-0 w-[280px] px-1" />
           </Command>
