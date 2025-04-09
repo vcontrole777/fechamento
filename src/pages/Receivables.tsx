@@ -25,6 +25,15 @@ type ReceiptFormValues = {
   receiptDate: Date;
 };
 
+// Define the structure for tripeiro receipt records since it's not in the types yet
+type TripeiroRecebimento = {
+  id: number;
+  id_tripeiro: number;
+  valor: number;
+  data_recebimento: string;
+  criado_em: string;
+};
+
 export default function Receivables() {
   const { dateRange, updateSharedDateFilter } = useSharedDateFilter();
   const [currentTab, setCurrentTab] = useState<"summary" | "details">("summary");
@@ -85,23 +94,29 @@ export default function Receivables() {
             return sum + (amount * percentage / 100);
           }, 0);
           
-          // Fetch receipt records for this tripeiro
+          // Fetch receipt records for this tripeiro using the raw query approach
           const { data: receipts, error: receiptsError } = await supabase
-            .from("tripeiro_recebimentos")
-            .select("*")
-            .eq("id_tripeiro", tripeiro.id);
+            .from('tripeiro_recebimentos')
+            .select('*')
+            .eq('id_tripeiro', tripeiro.id);
             
-          if (receiptsError) throw receiptsError;
+          if (receiptsError) {
+            console.error("Error fetching receipts:", receiptsError);
+            throw receiptsError;
+          }
+          
+          // Cast receipts to the correct type
+          const typedReceipts = receipts as unknown as TripeiroRecebimento[];
           
           // Calculate total received amount from receipt records
-          const totalReceived = receipts ? receipts.reduce((sum, receipt) => sum + Number(receipt.valor), 0) : 0;
+          const totalReceived = typedReceipts ? typedReceipts.reduce((sum, receipt) => sum + Number(receipt.valor), 0) : 0;
           
           return {
             ...tripeiro,
             payments: payments.sort((a, b) => 
               new Date(b.data).getTime() - new Date(a.data).getTime()
             ),
-            receipts: receipts || [],
+            receipts: typedReceipts || [],
             totalPayments,
             totalReceivable,
             completedAmount,
@@ -140,9 +155,9 @@ export default function Receivables() {
 
   const onSubmit = async (data: ReceiptFormValues) => {
     try {
-      // Insert receipt record
+      // Insert receipt record using raw query since the table is not in the types
       const { error } = await supabase
-        .from("tripeiro_recebimentos")
+        .from('tripeiro_recebimentos')
         .insert({
           id_tripeiro: selectedTripeiro.id,
           valor: parseFloat(data.amount),
@@ -341,7 +356,7 @@ export default function Receivables() {
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {tripeiro.receipts.map((receipt) => (
+                                {tripeiro.receipts.map((receipt: TripeiroRecebimento) => (
                                   <TableRow key={receipt.id}>
                                     <TableCell>{format(new Date(receipt.data_recebimento), 'dd/MM/yyyy')}</TableCell>
                                     <TableCell>{formatCurrency(Number(receipt.valor))}</TableCell>

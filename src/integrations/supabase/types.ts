@@ -203,6 +203,38 @@ export type Database = {
           },
         ]
       }
+      tripeiro_recebimentos: {
+        Row: {
+          criado_em: string
+          data_recebimento: string
+          id: number
+          id_tripeiro: number
+          valor: number
+        }
+        Insert: {
+          criado_em?: string
+          data_recebimento: string
+          id?: number
+          id_tripeiro: number
+          valor: number
+        }
+        Update: {
+          criado_em?: string
+          data_recebimento?: string
+          id?: number
+          id_tripeiro?: number
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tripeiro_recebimentos_id_tripeiro_fkey"
+            columns: ["id_tripeiro"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
