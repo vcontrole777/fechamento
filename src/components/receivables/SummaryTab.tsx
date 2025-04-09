@@ -34,6 +34,7 @@ export function SummaryTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
             <TableHeader>
               <TableRow>
                 <TableHead>Tripeiro</TableHead>
+                <TableHead>%</TableHead>
                 <TableHead>Total em Pagamentos</TableHead>
                 <TableHead>Total a Receber</TableHead>
                 <TableHead>Já Recebido</TableHead>
@@ -46,6 +47,7 @@ export function SummaryTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
                 filteredTripeiros.map((tripeiro) => (
                   <TableRow key={tripeiro.id}>
                     <TableCell className="font-medium">{tripeiro.nome}</TableCell>
+                    <TableCell>{tripeiro.porcentagem ? `${tripeiro.porcentagem}%` : "-"}</TableCell>
                     <TableCell>{isNonZeroValue(tripeiro.totalPayments) ? formatCurrency(tripeiro.totalPayments) : "-"}</TableCell>
                     <TableCell>{isNonZeroValue(tripeiro.totalReceivable) ? formatCurrency(tripeiro.totalReceivable) : "-"}</TableCell>
                     <TableCell>{isNonZeroValue(tripeiro.totalReceived) ? formatCurrency(tripeiro.totalReceived) : "-"}</TableCell>
@@ -67,7 +69,7 @@ export function SummaryTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={7} className="text-center py-4">
                     Nenhum pagamento encontrado para o período selecionado.
                   </TableCell>
                 </TableRow>

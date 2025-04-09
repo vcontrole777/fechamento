@@ -50,18 +50,17 @@ export function useReceivables(dateRange: DateRange) {
           // Calculate the total payments amount for this tripeiro
           const totalPayments = payments.reduce((sum, payment) => sum + Number(payment.valor), 0);
           
-          // Only count concluded payments for the receivable amount (calculation corrected)
+          // Only count concluded payments for the calculation
           const completedPayments = payments.filter(payment => payment.status === "concluido");
+          const completedAmount = completedPayments.reduce((sum, payment) => sum + Number(payment.valor), 0);
           
-          // Corrected calculation: For each concluded payment, calculate the commission amount
-          // based on porcentagem_tripeiro (percentage the tripeiro receives)
+          // CORRECTED CALCULATION: The tripeiro gets porcentagem_tripeiro% of each payment
+          // Example: If payment is R$100 and porcentagem_tripeiro is 3%, tripeiro gets R$3
           const totalReceivable = completedPayments.reduce((sum, payment) => {
             const amount = Number(payment.valor);
             const percentage = Number(payment.porcentagem_tripeiro);
             return sum + (amount * percentage / 100);
           }, 0);
-
-          const completedAmount = completedPayments.reduce((sum, payment) => sum + Number(payment.valor), 0);
           
           // Fetch receipt records for this tripeiro
           const { data: receipts, error: receiptsError } = await supabase

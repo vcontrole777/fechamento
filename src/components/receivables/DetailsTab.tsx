@@ -36,7 +36,9 @@ export function DetailsTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
               filteredTripeiros.map((tripeiro) => (
                 <div key={tripeiro.id} className="space-y-3">
                   <div className="flex justify-between items-center border-b pb-2">
-                    <h3 className="text-lg font-medium">{tripeiro.nome}</h3>
+                    <h3 className="text-lg font-medium">
+                      {tripeiro.nome} {tripeiro.porcentagem && `(${tripeiro.porcentagem}%)`}
+                    </h3>
                     <div className="flex items-center gap-4">
                       <div className="text-sm">
                         Total a receber: <span className="font-bold">
@@ -73,6 +75,7 @@ export function DetailsTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
                         </TableHeader>
                         <TableBody>
                           {tripeiro.payments.map((payment) => {
+                            // Calculate the amount to receive: payment amount * percentage / 100
                             const receivable = Number(payment.valor) * (Number(payment.porcentagem_tripeiro) / 100);
                             
                             return (
