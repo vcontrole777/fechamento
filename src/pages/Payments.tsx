@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { usePayments } from "@/hooks/usePayments";
 import { Button } from "@/components/ui/button";
@@ -39,19 +38,15 @@ export default function Payments() {
     closeDeletePaymentDialog,
   } = usePayments();
 
-  // Get shared date filter update function
   const { updateSharedDateFilter } = useSharedDateFilter();
 
-  // Verificar se há filtros ativos
   const hasActiveFilters = filters.attendantIds.length > 0 || filters.tripeiroIds.length > 0;
 
-  // Force refetch when component mounts
   useEffect(() => {
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Format currency in Brazilian style (R$ 1.000,00)
   const formatCurrency = (value: number): string => {
     return value.toLocaleString('pt-BR', {
       style: 'currency',
@@ -66,7 +61,6 @@ export default function Payments() {
       option
     });
     
-    // Update both our local state and the shared state
     updateDateRange(newDateRange);
     updateSharedDateFilter(newDateRange, option);
   };
@@ -86,7 +80,8 @@ export default function Payments() {
           <DateFilter onFilterChange={handleDateFilterChange} />
           <CopyToWhatsAppButton 
             payments={payments} 
-            isVisible={!isLoading && payments.length > 0} 
+            isVisible={!isLoading && payments.length > 0}
+            filters={filters}
           />
         </div>
         
@@ -110,7 +105,8 @@ export default function Payments() {
           {hasActiveFilters && payments.length > 0 && (
             <CopyToWhatsAppButton 
               payments={payments} 
-              isVisible={true} 
+              isVisible={true}
+              filters={filters}
             />
           )}
         </div>
