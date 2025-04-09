@@ -52,6 +52,9 @@ export function useReceivables(dateRange: DateRange) {
           
           // Only count concluded payments for the receivable amount (calculation corrected)
           const completedPayments = payments.filter(payment => payment.status === "concluido");
+          
+          // Corrected calculation: For each concluded payment, calculate the commission amount
+          // based on porcentagem_tripeiro (percentage the tripeiro receives)
           const totalReceivable = completedPayments.reduce((sum, payment) => {
             const amount = Number(payment.valor);
             const percentage = Number(payment.porcentagem_tripeiro);
