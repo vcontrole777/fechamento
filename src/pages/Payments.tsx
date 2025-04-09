@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { usePayments } from "@/hooks/usePayments";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { PaymentFiltersComponent } from "@/components/payments/PaymentFilters";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { format } from "date-fns";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
+import { CopyToWhatsAppButton } from "@/components/payments/CopyToWhatsAppButton";
 
 export default function Payments() {
   const {
@@ -39,6 +41,9 @@ export default function Payments() {
 
   // Get shared date filter update function
   const { updateSharedDateFilter } = useSharedDateFilter();
+
+  // Verificar se há filtros ativos
+  const hasActiveFilters = filters.attendantIds.length > 0 || filters.tripeiroIds.length > 0;
 
   // Force refetch when component mounts
   useEffect(() => {
@@ -77,8 +82,12 @@ export default function Payments() {
       </div>
 
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <DateFilter onFilterChange={handleDateFilterChange} />
+          <CopyToWhatsAppButton 
+            payments={payments} 
+            isVisible={!isLoading && payments.length > 0} 
+          />
         </div>
         
         <div className="w-full flex justify-center">
@@ -93,10 +102,18 @@ export default function Payments() {
       </div>
 
       <div className="space-y-4">
-        <PaymentFiltersComponent 
-          filters={filters} 
-          onUpdateFilters={updateFilters} 
-        />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <PaymentFiltersComponent 
+            filters={filters} 
+            onUpdateFilters={updateFilters} 
+          />
+          {hasActiveFilters && payments.length > 0 && (
+            <CopyToWhatsAppButton 
+              payments={payments} 
+              isVisible={true} 
+            />
+          )}
+        </div>
 
         {isLoading ? (
           <div className="w-full h-96 flex items-center justify-center">
