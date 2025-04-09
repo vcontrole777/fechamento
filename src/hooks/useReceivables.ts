@@ -47,10 +47,10 @@ export function useReceivables(dateRange: DateRange) {
           
           if (paymentsError) throw paymentsError;
           
-          // Calculate the total receivable amount for this tripeiro
+          // Calculate the total payments amount for this tripeiro
           const totalPayments = payments.reduce((sum, payment) => sum + Number(payment.valor), 0);
           
-          // Only count concluded payments for the receivable amount
+          // Only count concluded payments for the receivable amount (calculation corrected)
           const completedPayments = payments.filter(payment => payment.status === "concluido");
           const totalReceivable = completedPayments.reduce((sum, payment) => {
             const amount = Number(payment.valor);
@@ -59,11 +59,6 @@ export function useReceivables(dateRange: DateRange) {
           }, 0);
 
           const completedAmount = completedPayments.reduce((sum, payment) => sum + Number(payment.valor), 0);
-          const receivedAmount = completedPayments.reduce((sum, payment) => {
-            const amount = Number(payment.valor);
-            const percentage = Number(payment.porcentagem_tripeiro);
-            return sum + (amount * percentage / 100);
-          }, 0);
           
           // Fetch receipt records for this tripeiro
           const { data: receipts, error: receiptsError } = await supabase
@@ -89,7 +84,6 @@ export function useReceivables(dateRange: DateRange) {
             totalPayments,
             totalReceivable,
             completedAmount,
-            receivedAmount,
             totalReceived
           } as TripeiroWithPayments;
         })
