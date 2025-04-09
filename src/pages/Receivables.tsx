@@ -8,17 +8,36 @@ import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 import { DateFilter } from "@/components/common/DateFilter";
+import { Button } from "@/components/ui/button";
+import { Calendar, Check, X } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { toast } from "@/hooks/use-toast";
+import { useTripeiros } from "@/hooks/useTripeiros";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+
+type ReceiptFormValues = {
+  amount: string;
+  receiptDate: Date;
+};
 
 export default function Receivables() {
   const { dateRange, updateSharedDateFilter } = useSharedDateFilter();
   const [currentTab, setCurrentTab] = useState<"summary" | "details">("summary");
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
+  const [selectedTripeiro, setSelectedTripeiro] = useState<any>(null);
+  const { tripeiros } = useTripeiros();
 
   // Format dates for database query
   const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
   const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
 
   // Fetch tripeiros and their payment data
-  const { data: tripeiroSummaries = [], isLoading } = useQuery({
+  const { data: tripeiroSummaries = [], isLoading, refetch } = useQuery({
     queryKey: ["tripeiro-receivables", dateRange],
     queryFn: async () => {
       console.log("Fetching tripeiro receivables with date range:", { fromDate, toDate });
@@ -66,15 +85,28 @@ export default function Receivables() {
             return sum + (amount * percentage / 100);
           }, 0);
           
+          // Fetch receipt records for this tripeiro
+          const { data: receipts, error: receiptsError } = await supabase
+            .from("tripeiro_recebimentos")
+            .select("*")
+            .eq("id_tripeiro", tripeiro.id);
+            
+          if (receiptsError) throw receiptsError;
+          
+          // Calculate total received amount from receipt records
+          const totalReceived = receipts ? receipts.reduce((sum, receipt) => sum + Number(receipt.valor), 0) : 0;
+          
           return {
             ...tripeiro,
             payments: payments.sort((a, b) => 
               new Date(b.data).getTime() - new Date(a.data).getTime()
             ),
+            receipts: receipts || [],
             totalPayments,
             totalReceivable,
             completedAmount,
-            receivedAmount
+            receivedAmount,
+            totalReceived
           };
         })
       );
@@ -92,6 +124,49 @@ export default function Receivables() {
       style: 'currency',
       currency: 'BRL',
     });
+  };
+
+  const handleOpenReceiptDialog = (tripeiro) => {
+    setSelectedTripeiro(tripeiro);
+    setIsReceiptDialogOpen(true);
+  };
+
+  const form = useForm<ReceiptFormValues>({
+    defaultValues: {
+      amount: "",
+      receiptDate: new Date(),
+    },
+  });
+
+  const onSubmit = async (data: ReceiptFormValues) => {
+    try {
+      // Insert receipt record
+      const { error } = await supabase
+        .from("tripeiro_recebimentos")
+        .insert({
+          id_tripeiro: selectedTripeiro.id,
+          valor: parseFloat(data.amount),
+          data_recebimento: format(data.receiptDate, "yyyy-MM-dd"),
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Recebimento registrado",
+        description: `Recebimento de ${formatCurrency(parseFloat(data.amount))} para ${selectedTripeiro.nome} registrado com sucesso.`,
+      });
+
+      setIsReceiptDialogOpen(false);
+      form.reset();
+      refetch();
+    } catch (error) {
+      console.error("Erro ao registrar recebimento:", error);
+      toast({
+        title: "Erro ao registrar recebimento",
+        description: "Ocorreu um erro ao tentar registrar o recebimento.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -131,6 +206,7 @@ export default function Receivables() {
                       <TableHead>Total a Receber</TableHead>
                       <TableHead>Já Recebido</TableHead>
                       <TableHead>Pendente</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -140,13 +216,22 @@ export default function Receivables() {
                           <TableCell className="font-medium">{tripeiro.nome}</TableCell>
                           <TableCell>{formatCurrency(tripeiro.totalPayments)}</TableCell>
                           <TableCell>{formatCurrency(tripeiro.totalReceivable)}</TableCell>
-                          <TableCell>{formatCurrency(tripeiro.receivedAmount)}</TableCell>
-                          <TableCell>{formatCurrency(tripeiro.totalReceivable - tripeiro.receivedAmount)}</TableCell>
+                          <TableCell>{formatCurrency(tripeiro.totalReceived)}</TableCell>
+                          <TableCell>{formatCurrency(tripeiro.totalReceivable - tripeiro.totalReceived)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleOpenReceiptDialog(tripeiro)}
+                            >
+                              Registrar Recebimento
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-4">
+                        <TableCell colSpan={6} className="text-center py-4">
                           Nenhum pagamento encontrado para o período selecionado.
                         </TableCell>
                       </TableRow>
@@ -175,59 +260,95 @@ export default function Receivables() {
                       <div key={tripeiro.id} className="space-y-3">
                         <div className="flex justify-between items-center border-b pb-2">
                           <h3 className="text-lg font-medium">{tripeiro.nome}</h3>
-                          <div className="text-sm">
-                            Total a receber: <span className="font-bold">{formatCurrency(tripeiro.totalReceivable)}</span> 
-                            {" | "}
-                            Já recebido: <span className="font-bold">{formatCurrency(tripeiro.receivedAmount)}</span>
+                          <div className="flex items-center gap-4">
+                            <div className="text-sm">
+                              Total a receber: <span className="font-bold">{formatCurrency(tripeiro.totalReceivable)}</span> 
+                              {" | "}
+                              Já recebido: <span className="font-bold">{formatCurrency(tripeiro.totalReceived)}</span>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleOpenReceiptDialog(tripeiro)}
+                            >
+                              Registrar Recebimento
+                            </Button>
                           </div>
                         </div>
                         
+                        {/* Payments details */}
                         {tripeiro.payments.length > 0 ? (
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Data</TableHead>
-                                <TableHead>Valor</TableHead>
-                                <TableHead>Porcentagem</TableHead>
-                                <TableHead>Valor a Receber</TableHead>
-                                <TableHead>Status</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {tripeiro.payments.map((payment) => {
-                                const receivable = Number(payment.valor) * (Number(payment.porcentagem_tripeiro) / 100);
-                                
-                                return (
-                                  <TableRow key={payment.id}>
-                                    <TableCell>{format(new Date(payment.data), 'dd/MM/yyyy')}</TableCell>
-                                    <TableCell>{formatCurrency(Number(payment.valor))}</TableCell>
-                                    <TableCell>{payment.porcentagem_tripeiro}%</TableCell>
-                                    <TableCell>{formatCurrency(receivable)}</TableCell>
-                                    <TableCell>
-                                      <span
-                                        className={`px-2 py-1 text-xs rounded-full ${
-                                          payment.status === "concluido"
-                                            ? "bg-green-100 text-green-800"
+                          <div className="space-y-4">
+                            <h4 className="text-sm font-medium">Pagamentos</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Data</TableHead>
+                                  <TableHead>Valor</TableHead>
+                                  <TableHead>Porcentagem</TableHead>
+                                  <TableHead>Valor a Receber</TableHead>
+                                  <TableHead>Status</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {tripeiro.payments.map((payment) => {
+                                  const receivable = Number(payment.valor) * (Number(payment.porcentagem_tripeiro) / 100);
+                                  
+                                  return (
+                                    <TableRow key={payment.id}>
+                                      <TableCell>{format(new Date(payment.data), 'dd/MM/yyyy')}</TableCell>
+                                      <TableCell>{formatCurrency(Number(payment.valor))}</TableCell>
+                                      <TableCell>{payment.porcentagem_tripeiro}%</TableCell>
+                                      <TableCell>{formatCurrency(receivable)}</TableCell>
+                                      <TableCell>
+                                        <span
+                                          className={`px-2 py-1 text-xs rounded-full ${
+                                            payment.status === "concluido"
+                                              ? "bg-green-100 text-green-800"
+                                              : payment.status === "pendente"
+                                              ? "bg-yellow-100 text-yellow-800"
+                                              : "bg-red-100 text-red-800"
+                                          }`}
+                                        >
+                                          {payment.status === "concluido"
+                                            ? "Concluído"
                                             : payment.status === "pendente"
-                                            ? "bg-yellow-100 text-yellow-800"
-                                            : "bg-red-100 text-red-800"
-                                        }`}
-                                      >
-                                        {payment.status === "concluido"
-                                          ? "Concluído"
-                                          : payment.status === "pendente"
-                                          ? "Pendente"
-                                          : "Bloqueado"}
-                                      </span>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
+                                            ? "Pendente"
+                                            : "Bloqueado"}
+                                        </span>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          </div>
                         ) : (
                           <div className="text-center py-4 text-sm text-gray-500">
                             Nenhum pagamento encontrado para este tripeiro no período selecionado.
+                          </div>
+                        )}
+                        
+                        {/* Receipts details */}
+                        {tripeiro.receipts.length > 0 && (
+                          <div className="space-y-4 mt-6">
+                            <h4 className="text-sm font-medium">Recebimentos Registrados</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Data</TableHead>
+                                  <TableHead>Valor Recebido</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {tripeiro.receipts.map((receipt) => (
+                                  <TableRow key={receipt.id}>
+                                    <TableCell>{format(new Date(receipt.data_recebimento), 'dd/MM/yyyy')}</TableCell>
+                                    <TableCell>{formatCurrency(Number(receipt.valor))}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
                           </div>
                         )}
                       </div>
@@ -243,6 +364,99 @@ export default function Receivables() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Receipt Dialog */}
+      <Dialog open={isReceiptDialogOpen} onOpenChange={setIsReceiptDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Registrar Recebimento</DialogTitle>
+          </DialogHeader>
+          {selectedTripeiro && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="text-sm mb-4">
+                  Registrar recebimento para: <span className="font-medium">{selectedTripeiro.nome}</span>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor Recebido</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0.00"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="receiptDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Data do Recebimento</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy")
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormItem>
+                  )}
+                />
+                
+                <DialogFooter className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsReceiptDialogOpen(false)}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    <Check className="mr-2 h-4 w-4" />
+                    Registrar
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
