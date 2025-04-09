@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { TripeiroWithPayments, TripeiroRecebimento } from "./types";
-import { formatCurrency } from "./utils";
+import { formatCurrency, isNonZeroValue } from "./utils";
 
 interface DetailsTabProps {
   tripeiroSummaries: TripeiroWithPayments[];
@@ -13,6 +13,13 @@ interface DetailsTabProps {
 }
 
 export function DetailsTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: DetailsTabProps) {
+  // Filter tripeiros with non-zero payments or receivables
+  const filteredTripeiros = tripeiroSummaries.filter(tripeiro => 
+    isNonZeroValue(tripeiro.totalPayments) || 
+    isNonZeroValue(tripeiro.totalReceivable) || 
+    isNonZeroValue(tripeiro.totalReceived)
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -25,16 +32,20 @@ export function DetailsTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
           </div>
         ) : (
           <div className="space-y-8">
-            {tripeiroSummaries.length > 0 ? (
-              tripeiroSummaries.map((tripeiro) => (
+            {filteredTripeiros.length > 0 ? (
+              filteredTripeiros.map((tripeiro) => (
                 <div key={tripeiro.id} className="space-y-3">
                   <div className="flex justify-between items-center border-b pb-2">
                     <h3 className="text-lg font-medium">{tripeiro.nome}</h3>
                     <div className="flex items-center gap-4">
                       <div className="text-sm">
-                        Total a receber: <span className="font-bold">{formatCurrency(tripeiro.totalReceivable)}</span> 
+                        Total a receber: <span className="font-bold">
+                          {isNonZeroValue(tripeiro.totalReceivable) ? formatCurrency(tripeiro.totalReceivable) : "-"}
+                        </span> 
                         {" | "}
-                        Já recebido: <span className="font-bold">{formatCurrency(tripeiro.totalReceived)}</span>
+                        Já recebido: <span className="font-bold">
+                          {isNonZeroValue(tripeiro.totalReceived) ? formatCurrency(tripeiro.totalReceived) : "-"}
+                        </span>
                       </div>
                       <Button 
                         variant="outline" 

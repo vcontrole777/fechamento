@@ -5,3 +5,7 @@ export const formatCurrency = (value: number): string => {
     currency: 'BRL',
   });
 };
+
+export const isNonZeroValue = (value: number): boolean => {
+  return value !== 0 && value !== null && value !== undefined;
+};

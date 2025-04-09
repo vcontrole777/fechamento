@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-import { DateRange } from "@/types/payment.types";
+import { DateRange, Payment } from "@/types/payment.types";
 import { TripeiroRecebimento, TripeiroWithPayments } from "@/components/receivables/types";
 
 export function useReceivables(dateRange: DateRange) {
@@ -35,7 +35,7 @@ export function useReceivables(dateRange: DateRange) {
           let query = supabase
             .from("pagamentos")
             .select(`
-              id, data, valor, porcentagem_tripeiro, status
+              id, data, valor, porcentagem_tripeiro, status, tipo, id_atendente, id_tripeiro, porcentagem_atendente, criado_em, id_equipe
             `)
             .eq("id_tripeiro", tripeiro.id);
           
@@ -49,13 +49,15 @@ export function useReceivables(dateRange: DateRange) {
           
           // Calculate the total receivable amount for this tripeiro
           const totalPayments = payments.reduce((sum, payment) => sum + Number(payment.valor), 0);
-          const totalReceivable = payments.reduce((sum, payment) => {
+          
+          // Only count concluded payments for the receivable amount
+          const completedPayments = payments.filter(payment => payment.status === "concluido");
+          const totalReceivable = completedPayments.reduce((sum, payment) => {
             const amount = Number(payment.valor);
             const percentage = Number(payment.porcentagem_tripeiro);
             return sum + (amount * percentage / 100);
           }, 0);
 
-          const completedPayments = payments.filter(payment => payment.status === "concluido");
           const completedAmount = completedPayments.reduce((sum, payment) => sum + Number(payment.valor), 0);
           const receivedAmount = completedPayments.reduce((sum, payment) => {
             const amount = Number(payment.valor);
@@ -82,16 +84,14 @@ export function useReceivables(dateRange: DateRange) {
           
           return {
             ...tripeiro,
-            payments: payments.sort((a, b) => 
-              new Date(b.data).getTime() - new Date(a.data).getTime()
-            ),
+            payments: payments as unknown as Payment[],
             receipts: typedReceipts || [],
             totalPayments,
             totalReceivable,
             completedAmount,
             receivedAmount,
             totalReceived
-          };
+          } as TripeiroWithPayments;
         })
       );
       

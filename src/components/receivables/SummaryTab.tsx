@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { TripeiroWithPayments } from "./types";
-import { formatCurrency } from "./utils";
+import { formatCurrency, isNonZeroValue } from "./utils";
 
 interface SummaryTabProps {
   tripeiroSummaries: TripeiroWithPayments[];
@@ -12,6 +12,13 @@ interface SummaryTabProps {
 }
 
 export function SummaryTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: SummaryTabProps) {
+  // Filter tripeiros with non-zero payments or receivables
+  const filteredTripeiros = tripeiroSummaries.filter(tripeiro => 
+    isNonZeroValue(tripeiro.totalPayments) || 
+    isNonZeroValue(tripeiro.totalReceivable) || 
+    isNonZeroValue(tripeiro.totalReceived)
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -35,14 +42,18 @@ export function SummaryTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tripeiroSummaries.length > 0 ? (
-                tripeiroSummaries.map((tripeiro) => (
+              {filteredTripeiros.length > 0 ? (
+                filteredTripeiros.map((tripeiro) => (
                   <TableRow key={tripeiro.id}>
                     <TableCell className="font-medium">{tripeiro.nome}</TableCell>
-                    <TableCell>{formatCurrency(tripeiro.totalPayments)}</TableCell>
-                    <TableCell>{formatCurrency(tripeiro.totalReceivable)}</TableCell>
-                    <TableCell>{formatCurrency(tripeiro.totalReceived)}</TableCell>
-                    <TableCell>{formatCurrency(tripeiro.totalReceivable - tripeiro.totalReceived)}</TableCell>
+                    <TableCell>{isNonZeroValue(tripeiro.totalPayments) ? formatCurrency(tripeiro.totalPayments) : "-"}</TableCell>
+                    <TableCell>{isNonZeroValue(tripeiro.totalReceivable) ? formatCurrency(tripeiro.totalReceivable) : "-"}</TableCell>
+                    <TableCell>{isNonZeroValue(tripeiro.totalReceived) ? formatCurrency(tripeiro.totalReceived) : "-"}</TableCell>
+                    <TableCell>
+                      {isNonZeroValue(tripeiro.totalReceivable - tripeiro.totalReceived) 
+                        ? formatCurrency(tripeiro.totalReceivable - tripeiro.totalReceived) 
+                        : "-"}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button 
                         variant="outline" 
