@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Copy, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -16,6 +17,8 @@ interface CopyToWhatsAppButtonProps {
 }
 
 export function CopyToWhatsAppButton({ payments, isVisible, filters }: CopyToWhatsAppButtonProps) {
+  const [isCopied, setIsCopied] = useState(false);
+  
   if (!isVisible) return null;
   
   const handleCopyToClipboard = async () => {
@@ -25,10 +28,16 @@ export function CopyToWhatsAppButton({ payments, isVisible, filters }: CopyToWha
       
       await navigator.clipboard.writeText(formattedText);
       
+      setIsCopied(true);
       toast({
         title: "Copiado com sucesso!",
         description: "Texto formatado copiado para a área de transferência.",
       });
+      
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
     } catch (error) {
       console.error("Erro ao copiar para área de transferência:", error);
       toast({
@@ -53,8 +62,10 @@ export function CopyToWhatsAppButton({ payments, isVisible, filters }: CopyToWha
         className="flex items-center gap-2"
       >
         <Copy className="h-4 w-4" />
-        <span className="hidden sm:inline">Copiar para WhatsApp</span>
-        <span className="sm:hidden">Copiar</span>
+        <span className="hidden sm:inline">
+          {isCopied ? "Copiado!" : "Copiar para WhatsApp"}
+        </span>
+        <span className="sm:hidden">{isCopied ? "Copiado!" : "Copiar"}</span>
       </Button>
       <Button
         variant="default"

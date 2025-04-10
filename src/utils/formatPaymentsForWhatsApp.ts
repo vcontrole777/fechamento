@@ -9,118 +9,89 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
   }
 
   // Agrupar por atendente/tripeiro dependendo de quais filtros estão aplicados
+  const paymentsByPerson: Record<string, Payment[]> = {};
+  
+  // Verificar se temos atendentes ou tripeiros
   const hasTripeiros = payments.some(p => p.tripeiro?.nome);
   const hasAttendants = payments.some(p => p.atendente?.nome);
   
-  let message = "*RELATÓRIO DE PAGAMENTOS*\n\n";
-  
-  // Adicionar período, se disponível (primeiro e último pagamento)
-  if (payments.length > 0) {
-    const sortedByDate = [...payments].sort((a, b) => 
-      new Date(a.data).getTime() - new Date(b.data).getTime()
-    );
-    const firstDate = format(new Date(sortedByDate[0].data), "dd/MM/yyyy", { locale: ptBR });
-    const lastDate = format(new Date(sortedByDate[sortedByDate.length - 1].data), "dd/MM/yyyy", { locale: ptBR });
+  // Agrupar pagamentos por pessoa (atendente ou tripeiro)
+  payments.forEach(payment => {
+    let personName = '';
+    let personType = '';
     
-    if (firstDate === lastDate) {
-      message += `*Data:* ${firstDate}\n\n`;
-    } else {
-      message += `*Período:* ${firstDate} a ${lastDate}\n\n`;
+    if (hasAttendants && payment.atendente?.nome) {
+      personName = payment.atendente.nome;
+      personType = 'atendente';
+    } else if (hasTripeiros && payment.tripeiro?.nome) {
+      personName = payment.tripeiro.nome;
+      personType = 'tripeiro';
     }
-  }
-
-  // Calcular totais
-  const totalValue = payments.reduce((sum, p) => sum + Number(p.valor), 0);
-  
-  message += `*Total:* ${formatCurrency(totalValue)}\n`;
-  message += `*Quantidade:* ${payments.length} pagamento${payments.length !== 1 ? 's' : ''}\n\n`;
-  
-  // Se há atendentes no filtro, agrupar por atendente
-  if (hasAttendants) {
-    message += "*PAGAMENTOS POR ATENDENTE:*\n\n";
     
-    // Agrupar por atendente
-    const attendantGroups: Record<string, Payment[]> = {};
-    
-    payments.forEach(payment => {
-      if (payment.atendente?.nome) {
-        const name = payment.atendente.nome;
-        if (!attendantGroups[name]) {
-          attendantGroups[name] = [];
-        }
-        attendantGroups[name].push(payment);
+    if (personName) {
+      if (!paymentsByPerson[personName]) {
+        paymentsByPerson[personName] = [];
       }
-    });
-    
-    // Iterar por cada atendente
-    Object.entries(attendantGroups).forEach(([attendantName, attendantPayments]) => {
-      const attendantTotal = attendantPayments.reduce((sum, p) => sum + Number(p.valor), 0);
-      const commission = attendantPayments.reduce((sum, p) => {
-        const commissionAmount = Number(p.valor) * (p.porcentagem_atendente / 100);
-        return sum + commissionAmount;
-      }, 0);
-      
-      message += `*${attendantName}*\n`;
-      message += `Total: ${formatCurrency(attendantTotal)}\n`;
-      message += `Comissão (${attendantPayments[0].porcentagem_atendente}%): ${formatCurrency(commission)}\n`;
-      message += `Qtd: ${attendantPayments.length}\n\n`;
-    });
-  }
+      paymentsByPerson[personName].push(payment);
+    }
+  });
   
-  // Se há tripeiros no filtro, agrupar por tripeiro
-  if (hasTripeiros) {
-    message += "*PAGAMENTOS POR TRIPEIRO:*\n\n";
-    
-    // Agrupar por tripeiro
-    const tripeiroGroups: Record<string, Payment[]> = {};
-    
-    payments.forEach(payment => {
-      if (payment.tripeiro?.nome) {
-        const name = payment.tripeiro.nome;
-        if (!tripeiroGroups[name]) {
-          tripeiroGroups[name] = [];
-        }
-        tripeiroGroups[name].push(payment);
-      }
-    });
-    
-    // Iterar por cada tripeiro
-    Object.entries(tripeiroGroups).forEach(([tripeiroName, tripeiroPayments]) => {
-      const tripeiroTotal = tripeiroPayments.reduce((sum, p) => sum + Number(p.valor), 0);
-      const receivable = tripeiroPayments.reduce((sum, p) => {
-        const receivableAmount = Number(p.valor) * (p.porcentagem_tripeiro / 100);
-        return sum + receivableAmount;
-      }, 0);
-      
-      message += `*${tripeiroName}*\n`;
-      message += `Total: ${formatCurrency(tripeiroTotal)}\n`;
-      message += `A Receber (${tripeiroPayments[0].porcentagem_tripeiro}%): ${formatCurrency(receivable)}\n`;
-      message += `Qtd: ${tripeiroPayments.length}\n\n`;
-    });
-  }
+  let message = "";
   
-  // Se não há agrupamentos específicos, listar todos os pagamentos
-  if (!hasAttendants && !hasTripeiros) {
-    message += "*LISTA DE PAGAMENTOS:*\n\n";
+  // Processar cada pessoa e seus pagamentos
+  Object.entries(paymentsByPerson).forEach(([personName, personPayments]) => {
+    // Ordenar pagamentos por data (mais recente primeiro)
+    const sortedPayments = [...personPayments].sort((a, b) => 
+      new Date(b.data).getTime() - new Date(a.data).getTime()
+    );
     
-    payments.forEach((payment, index) => {
-      const date = format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR });
-      message += `*${index + 1}. ${formatCurrency(Number(payment.valor))}*\n`;
-      message += `Data: ${date}\n`;
+    // Calcular totais para esta pessoa
+    const totalValue = sortedPayments.reduce((sum, p) => sum + Number(p.valor), 0);
+    
+    // Determinar se estamos lidando com comissão de atendente ou valor a receber de tripeiro
+    const isAttendant = sortedPayments[0].atendente?.nome === personName;
+    const percentage = isAttendant ? 
+      sortedPayments[0].porcentagem_atendente : 
+      sortedPayments[0].porcentagem_tripeiro;
+    
+    const commissionTotal = sortedPayments.reduce((sum, p) => {
+      const commissionAmount = Number(p.valor) * (percentage / 100);
+      return sum + commissionAmount;
+    }, 0);
+    
+    // Título do resumo
+    message += `Resumo de Pagamentos - ${personName.toUpperCase()}\n\n`;
+    
+    // Listar cada pagamento
+    sortedPayments.forEach(payment => {
+      const paymentDate = format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR });
+      const paymentValue = Number(payment.valor);
+      const commission = paymentValue * (percentage / 100);
       
-      if (payment.atendente?.nome) {
-        message += `Atendente: ${payment.atendente.nome}\n`;
+      message += `📅 ${paymentDate}\n`;
+      message += `💰 Valor: ${formatCurrency(paymentValue)}\n`;
+      
+      if (isAttendant) {
+        message += `💼 Comissão: ${formatCurrency(commission)}\n`;
+      } else {
+        message += `💼 A Receber: ${formatCurrency(commission)}\n`;
       }
       
-      if (payment.tripeiro?.nome) {
-        message += `Tripeiro: ${payment.tripeiro.nome}\n`;
-      }
-      
-      message += `Status: ${formatStatus(payment.status)}\n\n`;
+      message += `\n`;
     });
-  }
+    
+    // Adicionar totais no final
+    message += `Total: ${formatCurrency(totalValue)}\n`;
+    if (isAttendant) {
+      message += `Comissão Total: ${formatCurrency(commissionTotal)}\n`;
+    } else {
+      message += `Total a Receber: ${formatCurrency(commissionTotal)}\n`;
+    }
+    
+    message += `\n\n`;
+  });
   
-  return message;
+  return message.trim();
 }
 
 function formatCurrency(value: number): string {
