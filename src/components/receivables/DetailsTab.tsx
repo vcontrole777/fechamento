@@ -75,8 +75,8 @@ export function DetailsTab({ tripeiroSummaries, isLoading, onRegisterReceipt }: 
                         </TableHeader>
                         <TableBody>
                           {tripeiro.payments.map((payment) => {
-                            // Calculate the amount to receive: payment amount * percentage / 100
-                            const receivable = Number(payment.valor) * (Number(payment.porcentagem_tripeiro) / 100);
+                            // Calculate the amount to receive: payment amount - tripeiro's percentage
+                            const receivable = Number(payment.valor) * ((100 - Number(payment.porcentagem_tripeiro)) / 100);
                             
                             return (
                               <TableRow key={payment.id}>

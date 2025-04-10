@@ -54,12 +54,12 @@ export function useReceivables(dateRange: DateRange) {
           const completedPayments = payments.filter(payment => payment.status === "concluido");
           const completedAmount = completedPayments.reduce((sum, payment) => sum + Number(payment.valor), 0);
           
-          // CORRECTED CALCULATION: The tripeiro gets porcentagem_tripeiro% of each payment
-          // Example: If payment is R$100 and porcentagem_tripeiro is 3%, tripeiro gets R$3
+          // CORRECTED CALCULATION: The amount to receive is the total payment MINUS the tripeiro's percentage
+          // Example: If payment is R$100 and porcentagem_tripeiro is 30%, company gets R$70
           const totalReceivable = completedPayments.reduce((sum, payment) => {
             const amount = Number(payment.valor);
             const percentage = Number(payment.porcentagem_tripeiro);
-            return sum + (amount * percentage / 100);
+            return sum + (amount * (100 - percentage) / 100);
           }, 0);
           
           // Fetch receipt records for this tripeiro
