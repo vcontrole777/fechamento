@@ -8,8 +8,6 @@ import {
 } from "./useDashboardQueries";
 import {
   calculateTopAttendants,
-  calculateRevenueByMonth,
-  calculateExpensesByMonth,
   calculateFinancialStats
 } from "@/utils/dashboardCalculations";
 import {
@@ -35,8 +33,6 @@ export function useDashboardData() {
 
   // Process data using the utility functions
   const topAttendants = calculateTopAttendants(attendants || [], payments || []);
-  const revenueByMonth = calculateRevenueByMonth(payments || []);
-  const expensesByMonth = calculateExpensesByMonth(expenses || []);
   const recentPayments = formatRecentPayments(payments || []);
   const recentExpenses = formatRecentExpenses(expenses || []);
   const financialStats = calculateFinancialStats(payments || [], expenses || []);
@@ -58,8 +54,6 @@ export function useDashboardData() {
   return {
     isLoading: isLoadingPayments || isLoadingExpenses || isLoadingAttendants,
     topAttendants,
-    revenueByMonth,
-    expensesByMonth,
     recentPayments,
     recentExpenses,
     financialStats,

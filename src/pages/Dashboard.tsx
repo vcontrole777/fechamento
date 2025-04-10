@@ -1,10 +1,9 @@
 
 import { Banknote, TrendingDown, TrendingUp } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { BarChartComponent } from "@/components/dashboard/BarChartComponent";
-import { LineChartComponent } from "@/components/dashboard/LineChartComponent";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { TopAttendants } from "@/components/dashboard/TopAttendants";
+import { NotesAndReminders } from "@/components/dashboard/NotesAndReminders";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
@@ -14,8 +13,6 @@ export default function Dashboard() {
   const {
     isLoading,
     topAttendants,
-    revenueByMonth,
-    expensesByMonth,
     recentPayments,
     recentExpenses,
     financialStats,
@@ -72,17 +69,9 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
-        <LineChartComponent
-          title="Faturamento por Mês"
-          data={revenueByMonth}
-          dataKey="valor"
-        />
-        <BarChartComponent
-          title="Gastos por Mês"
-          data={expensesByMonth}
-          dataKey="valor"
-        />
+      {/* Substituímos os gráficos pela funcionalidade de notas e lembretes */}
+      <div className="grid gap-4 md:gap-6 grid-cols-1">
+        <NotesAndReminders />
       </div>
 
       <div className={`grid gap-4 md:gap-6 grid-cols-1 ${isMobile ? "" : "md:grid-cols-3"}`}>
