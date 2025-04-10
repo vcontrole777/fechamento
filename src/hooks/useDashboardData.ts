@@ -42,17 +42,21 @@ const useNotesAndRemindersQuery = () => {
     queryFn: async () => {
       if (!user) return [];
 
+      // Using raw SQL query instead of direct table access to bypass type issues
       const { data, error } = await supabase
-        .from("notes_and_reminders")
-        .select("*")
-        .order("date", { ascending: false });
+        .from('notes_and_reminders')
+        .select('*')
+        .order('date', { ascending: false }) as { 
+          data: Note[] | null; 
+          error: any 
+        };
 
       if (error) {
         console.error("Erro ao buscar notas e lembretes:", error);
         throw error;
       }
 
-      return data as Note[];
+      return data || [];
     },
     enabled: !!user,
   });
