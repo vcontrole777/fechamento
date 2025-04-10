@@ -69,7 +69,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Substituímos os gráficos pela funcionalidade de notas e lembretes */}
+      {/* Componente de notas e lembretes */}
       <div className="grid gap-4 md:gap-6 grid-cols-1">
         <NotesAndReminders />
       </div>

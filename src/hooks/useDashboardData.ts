@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { DateRange } from "@/components/common/DateFilter";
 import { startOfDay, endOfDay, format } from "date-fns";
@@ -15,6 +16,47 @@ import {
   formatRecentExpenses
 } from "@/utils/dashboardFormatters";
 import { useSharedDateFilter } from "./useSharedDateFilter";
+import { useAuth } from "./useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+
+// Tipo para as notas e lembretes
+export interface Note {
+  id: string;
+  title: string;
+  content: string | null;
+  date: string;
+  is_reminder: boolean;
+  completed: boolean;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Hook para buscar notas e lembretes
+const useNotesAndRemindersQuery = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["notesAndReminders"],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("notes_and_reminders")
+        .select("*")
+        .order("date", { ascending: false });
+
+      if (error) {
+        console.error("Erro ao buscar notas e lembretes:", error);
+        throw error;
+      }
+
+      return data as Note[];
+    },
+    enabled: !!user,
+  });
+};
 
 export function useDashboardData() {
   // Use shared date filter instead of local state
@@ -30,6 +72,7 @@ export function useDashboardData() {
   const { data: payments, isLoading: isLoadingPayments } = usePaymentsQuery(dateRange);
   const { data: expenses, isLoading: isLoadingExpenses } = useExpensesQuery(dateRange);
   const { data: attendants, isLoading: isLoadingAttendants } = useAttendantsQuery();
+  const { data: notesAndReminders, isLoading: isLoadingNotes } = useNotesAndRemindersQuery();
 
   // Process data using the utility functions
   const topAttendants = calculateTopAttendants(attendants || [], payments || []);
@@ -52,12 +95,13 @@ export function useDashboardData() {
   };
 
   return {
-    isLoading: isLoadingPayments || isLoadingExpenses || isLoadingAttendants,
+    isLoading: isLoadingPayments || isLoadingExpenses || isLoadingAttendants || isLoadingNotes,
     topAttendants,
     recentPayments,
     recentExpenses,
     financialStats,
     dateRange,
     updateDateRange,
+    notesAndReminders,
   };
 }

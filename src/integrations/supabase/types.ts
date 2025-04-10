@@ -72,6 +72,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notes_and_reminders: {
+        Row: {
+          completed: boolean
+          content: string | null
+          created_at: string
+          date: string
+          id: string
+          is_reminder: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          content?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          is_reminder?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          content?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          is_reminder?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pagamentos: {
         Row: {
           criado_em: string

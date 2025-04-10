@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Bell, Calendar, CheckCircle, PlusCircle, Trash } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,44 +8,32 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-
-// Definição dos tipos
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  isReminder: boolean;
-  completed: boolean;
-}
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { Note, useDashboardData } from "@/hooks/useDashboardData";
 
 export function NotesAndReminders({ className }: { className?: string }) {
-  const [notes, setNotes] = useState<Note[]>([]);
+  const { user } = useAuth();
+  const { notesAndReminders, isLoading } = useDashboardData();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isReminder, setIsReminder] = useState(false);
   const [reminderDate, setReminderDate] = useState("");
-
-  // Carregar notas do localStorage ao iniciar
-  useEffect(() => {
-    const savedNotes = localStorage.getItem("dashboardNotes");
-    if (savedNotes) {
-      try {
-        setNotes(JSON.parse(savedNotes));
-      } catch (error) {
-        console.error("Erro ao carregar notas:", error);
-      }
-    }
-  }, []);
-
-  // Salvar notas no localStorage quando alteradas
-  useEffect(() => {
-    localStorage.setItem("dashboardNotes", JSON.stringify(notes));
-  }, [notes]);
+  const queryClient = useQueryClient();
 
   // Adicionar uma nova nota ou lembrete
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar autenticado para adicionar notas ou lembretes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!title.trim()) {
       toast({
         title: "Título obrigatório",
@@ -55,45 +43,105 @@ export function NotesAndReminders({ className }: { className?: string }) {
       return;
     }
 
-    const newNote: Note = {
-      id: Date.now().toString(),
+    if (isReminder && !reminderDate) {
+      toast({
+        title: "Data obrigatória",
+        description: "Por favor, selecione uma data para o lembrete.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newNote = {
       title,
       content,
       date: isReminder ? reminderDate : format(new Date(), "yyyy-MM-dd"),
-      isReminder,
+      is_reminder: isReminder,
       completed: false,
+      user_id: user.id,
     };
 
-    setNotes([...notes, newNote]);
-    setOpen(false);
-    resetForm();
+    try {
+      const { error } = await supabase
+        .from("notes_and_reminders")
+        .insert(newNote);
 
-    toast({
-      title: isReminder ? "Lembrete criado" : "Nota adicionada",
-      description: isReminder 
-        ? `Lembrete "${title}" criado para ${format(new Date(reminderDate), "dd/MM/yyyy")}`
-        : `Nota "${title}" adicionada com sucesso`,
-    });
+      if (error) throw error;
+
+      // Atualizar a lista de notas
+      queryClient.invalidateQueries({ queryKey: ["notesAndReminders"] });
+      
+      setOpen(false);
+      resetForm();
+
+      toast({
+        title: isReminder ? "Lembrete criado" : "Nota adicionada",
+        description: isReminder 
+          ? `Lembrete "${title}" criado para ${format(new Date(reminderDate), "dd/MM/yyyy")}`
+          : `Nota "${title}" adicionada com sucesso`,
+      });
+    } catch (error) {
+      console.error("Erro ao adicionar nota:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar a nota ou lembrete.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Marcar lembrete como concluído ou reabrir
-  const toggleComplete = (id: string) => {
-    setNotes(
-      notes.map((note) =>
-        note.id === id ? { ...note, completed: !note.completed } : note
-      )
-    );
+  const toggleComplete = async (id: string, completed: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("notes_and_reminders")
+        .update({ completed: !completed, updated_at: new Date().toISOString() })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Atualizar a lista de notas
+      queryClient.invalidateQueries({ queryKey: ["notesAndReminders"] });
+
+      toast({
+        title: completed ? "Lembrete reaberto" : "Lembrete concluído",
+        description: `Status do lembrete atualizado com sucesso.`,
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar lembrete:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do lembrete.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Excluir uma nota ou lembrete
-  const deleteNote = (id: string) => {
-    const noteToDelete = notes.find(note => note.id === id);
-    setNotes(notes.filter((note) => note.id !== id));
-    
-    toast({
-      title: noteToDelete?.isReminder ? "Lembrete excluído" : "Nota excluída",
-      description: `"${noteToDelete?.title}" foi removido com sucesso.`
-    });
+  const deleteNote = async (id: string, title: string, isReminder: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("notes_and_reminders")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Atualizar a lista de notas
+      queryClient.invalidateQueries({ queryKey: ["notesAndReminders"] });
+      
+      toast({
+        title: isReminder ? "Lembrete excluído" : "Nota excluída",
+        description: `"${title}" foi removido com sucesso.`
+      });
+    } catch (error) {
+      console.error("Erro ao excluir nota:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a nota ou lembrete.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Resetar o formulário
@@ -122,6 +170,28 @@ export function NotesAndReminders({ className }: { className?: string }) {
     return "futuro";
   };
 
+  // Verifica se o usuário está autenticado
+  if (!user) {
+    return (
+      <Card className={className}>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle>Notas e Lembretes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <div className="rounded-full bg-primary/10 p-3">
+              <Bell className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="mt-4 text-lg font-medium">Login necessário</h3>
+            <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+              Você precisa estar autenticado para ver e adicionar notas e lembretes.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -131,7 +201,11 @@ export function NotesAndReminders({ className }: { className?: string }) {
         </Button>
       </CardHeader>
       <CardContent>
-        {notes.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <p>Carregando...</p>
+          </div>
+        ) : notesAndReminders && notesAndReminders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-center">
             <div className="rounded-full bg-primary/10 p-3">
               <Bell className="h-6 w-6 text-primary" />
@@ -146,11 +220,11 @@ export function NotesAndReminders({ className }: { className?: string }) {
           </div>
         ) : (
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-            {notes.map((note) => (
+            {notesAndReminders && notesAndReminders.map((note: Note) => (
               <div
                 key={note.id}
                 className={`p-3 rounded-lg border ${
-                  note.isReminder
+                  note.is_reminder
                     ? note.completed
                       ? "bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800"
                       : getReminderStatus(note.date) === "atrasado"
@@ -165,12 +239,12 @@ export function NotesAndReminders({ className }: { className?: string }) {
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-3">
-                    {note.isReminder ? (
+                    {note.is_reminder ? (
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-5 w-5 rounded-full mt-0.5"
-                        onClick={() => toggleComplete(note.id)}
+                        onClick={() => toggleComplete(note.id, note.completed)}
                       >
                         <CheckCircle
                           className={`h-5 w-5 ${
@@ -200,7 +274,7 @@ export function NotesAndReminders({ className }: { className?: string }) {
                           {note.content}
                         </p>
                       )}
-                      {note.isReminder && (
+                      {note.is_reminder && (
                         <div className="flex items-center mt-2 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3 mr-1" />
                           {format(new Date(note.date), "dd/MM/yyyy")}
@@ -218,7 +292,7 @@ export function NotesAndReminders({ className }: { className?: string }) {
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 rounded-full"
-                    onClick={() => deleteNote(note.id)}
+                    onClick={() => deleteNote(note.id, note.title, note.is_reminder)}
                   >
                     <Trash className="h-4 w-4 text-muted-foreground" />
                   </Button>
