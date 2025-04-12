@@ -19,7 +19,12 @@ export function CalculationPreview({
   const calculations = useMemo(() => {
     if (!totalValue) return null;
 
-    const tripeiroCommission = totalValue * (tripeiroPercentage / 100);
+    // Determine which percentage to use based on the toggle
+    const effectiveTripeiroPercentage = useCustomTripeiroPercentage 
+      ? tripeiroPercentage 
+      : selectedTripeiroPercentage;
+
+    const tripeiroCommission = totalValue * (effectiveTripeiroPercentage / 100);
     const tripeiroReceivable = totalValue - tripeiroCommission;
     const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
     const netValue = totalValue - tripeiroCommission - attendantCommission;
@@ -30,15 +35,20 @@ export function CalculationPreview({
       attendantCommission,
       netValue,
     };
-  }, [totalValue, tripeiroPercentage, attendantPercentage]);
+  }, [totalValue, tripeiroPercentage, attendantPercentage, useCustomTripeiroPercentage, selectedTripeiroPercentage]);
 
   if (!totalValue || !calculations) return null;
+
+  // Determine which percentage to display in the UI
+  const displayTripeiroPercentage = useCustomTripeiroPercentage 
+    ? tripeiroPercentage 
+    : selectedTripeiroPercentage;
 
   return (
     <div className="mt-4 p-4 bg-muted rounded-md space-y-2">
       <h3 className="font-semibold text-sm">Prévia do Cálculo:</h3>
       <div className="grid grid-cols-2 text-sm">
-        <div>Comissão Tripeiro ({useCustomTripeiroPercentage ? tripeiroPercentage : selectedTripeiroPercentage}%):</div>
+        <div>Comissão Tripeiro ({displayTripeiroPercentage}%):</div>
         <div>R$ {calculations.tripeiroCommission.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
       </div>
       <div className="grid grid-cols-2 text-sm">
