@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Pencil, Trash2 } from "lucide-react";
@@ -83,6 +84,11 @@ export default function PaymentsTable({
     }
   };
 
+  const formatPercentage = (value: number | undefined | null): string => {
+    if (value === undefined || value === null) return "-";
+    return `${value}%`;
+  };
+
   return (
     <div className="rounded-md border overflow-hidden">
       <Table>
@@ -91,7 +97,9 @@ export default function PaymentsTable({
             <TableHead>Data</TableHead>
             <TableHead>Valor Total</TableHead>
             <TableHead>Atendente</TableHead>
+            <TableHead>% Atendente</TableHead>
             <TableHead>Tripeiro</TableHead>
+            <TableHead>% Tripeiro</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
@@ -100,7 +108,7 @@ export default function PaymentsTable({
         <TableBody>
           {payments.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={9} className="h-24 text-center">
                 Nenhum pagamento encontrado.
               </TableCell>
             </TableRow>
@@ -115,7 +123,13 @@ export default function PaymentsTable({
                   {payment.atendente?.nome || "N/A"}
                 </TableCell>
                 <TableCell>
+                  {formatPercentage(payment.atendente?.porcentagem || payment.porcentagem_atendente)}
+                </TableCell>
+                <TableCell>
                   {payment.tripeiro?.nome || "N/A"}
+                </TableCell>
+                <TableCell>
+                  {formatPercentage(payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro)}
                 </TableCell>
                 <TableCell className="capitalize">
                   {payment.tipo === "pix" ? "PIX" : payment.tipo}
