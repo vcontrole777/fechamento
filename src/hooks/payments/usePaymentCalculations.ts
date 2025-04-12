@@ -17,9 +17,14 @@ export function usePaymentCalculations() {
 
     return completedPayments.reduce((acc, payment) => {
       const totalPayment = Number(payment.valor);
-      const tripeiroCommission = totalPayment * (payment.porcentagem_tripeiro / 100);
+      
+      // Use the most current percentages from the related entities
+      const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+      const attendantPercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
+      
+      const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
       const tripeiroReceivable = totalPayment - tripeiroCommission;
-      const attendantCommission = tripeiroReceivable * (payment.porcentagem_atendente / 100);
+      const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
       const netTotal = totalPayment - tripeiroCommission - attendantCommission;
 
       return {

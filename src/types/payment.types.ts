@@ -24,10 +24,12 @@ export type Payment = {
   criado_em: string;
   id_equipe: number;
   atendente?: {
+    id: number;
     nome: string;
     porcentagem: number;
   };
   tripeiro?: {
+    id: number;
     nome: string;
     porcentagem: number;
   };

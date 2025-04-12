@@ -49,8 +49,9 @@ export function useClosingCalculations() {
     const commissions = completedPayments.reduce(
       (acc, payment) => {
         const totalPayment = Number(payment.valor);
-        const tripeiroPercentage = payment.porcentagem_tripeiro || 0;
-        const atendentePercentage = payment.porcentagem_atendente || 0;
+        // Use the most current percentages from the related entities
+        const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+        const atendentePercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
         
         const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
         const atendenteCommission = (totalPayment - tripeiroCommission) * (atendentePercentage / 100);
@@ -91,7 +92,8 @@ export function useClosingCalculations() {
       const tripeiroId = payment.id_tripeiro;
       const tripeiroName = payment.tripeiro.nome;
       const paymentAmount = Number(payment.valor);
-      const tripeiroPercentage = payment.porcentagem_tripeiro || 0;
+      // Use the most current percentage from tripeiro
+      const tripeiroPercentage = payment.tripeiro.porcentagem || payment.porcentagem_tripeiro;
       const tripeiroPercentageDecimal = tripeiroPercentage / 100;
       const tripeiroCommission = paymentAmount * tripeiroPercentageDecimal;
       const tripeiroReceivable = paymentAmount - tripeiroCommission;
@@ -100,7 +102,8 @@ export function useClosingCalculations() {
         const existingSummary = tripeirosMap.get(tripeiroId)!;
         existingSummary.totalReceivable += tripeiroReceivable;
         existingSummary.paymentsCount += 1;
-        // We don't need to update the percentage as it should be the same for all payments of this tripeiro
+        // Update the percentage to the latest one
+        existingSummary.porcentagemDecimal = tripeiroPercentageDecimal;
       } else {
         tripeirosMap.set(tripeiroId, {
           id: tripeiroId,
@@ -131,8 +134,9 @@ export function useClosingCalculations() {
       const attendantId = payment.id_atendente;
       const attendantName = payment.atendente.nome;
       const paymentAmount = Number(payment.valor);
-      const tripeiroPercentage = payment.porcentagem_tripeiro || 0;
-      const attendantPercentage = payment.porcentagem_atendente || 0;
+      // Use the most current percentages from the related entities
+      const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+      const attendantPercentage = payment.atendente.porcentagem || payment.porcentagem_atendente;
       const attendantPercentageDecimal = attendantPercentage / 100;
       
       // Calculate attendant commission (after tripeiro's commission is removed)
@@ -144,7 +148,8 @@ export function useClosingCalculations() {
         const existingSummary = attendantsMap.get(attendantId)!;
         existingSummary.totalCommission += attendantCommission;
         existingSummary.paymentsCount += 1;
-        // We don't need to update the percentage as it should be the same for all payments of this attendant
+        // Update the percentage to the latest one
+        existingSummary.porcentagemDecimal = attendantPercentageDecimal;
       } else {
         attendantsMap.set(attendantId, {
           id: attendantId,

@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -22,8 +23,8 @@ export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) 
         .from("pagamentos")
         .select(`
           *,
-          atendente:pessoas!pagamentos_id_atendente_fkey(nome, porcentagem),
-          tripeiro:pessoas!pagamentos_id_tripeiro_fkey(nome, porcentagem)
+          atendente:pessoas!pagamentos_id_atendente_fkey(id, nome, porcentagem),
+          tripeiro:pessoas!pagamentos_id_tripeiro_fkey(id, nome, porcentagem)
         `);
 
       // Apply filters
@@ -72,10 +73,12 @@ export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) 
 
       console.log("Payments retrieved from database:", data);
       
-      // Process dates to ensure they're correctly formatted
+      // Process the data to use updated percentages from the pessoas table
       const processedData = data.map(payment => ({
         ...payment,
-        // Keep the original data field as-is since it's coming from the database correctly
+        // Ensure we're using the current percentages from the pessoas table
+        porcentagem_atendente: payment.atendente?.porcentagem || payment.porcentagem_atendente,
+        porcentagem_tripeiro: payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro
       }));
 
       return processedData as Payment[];
