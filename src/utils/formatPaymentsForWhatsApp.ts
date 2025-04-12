@@ -50,14 +50,9 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
     
     // Determinar se estamos lidando com comissão de atendente ou valor a receber de tripeiro
     const isAttendant = sortedPayments[0].atendente?.nome === personName;
-    const percentage = isAttendant ? 
-      sortedPayments[0].porcentagem_atendente : 
-      sortedPayments[0].porcentagem_tripeiro;
     
-    const commissionTotal = sortedPayments.reduce((sum, p) => {
-      const commissionAmount = Number(p.valor) * (percentage / 100);
-      return sum + commissionAmount;
-    }, 0);
+    // Usar as porcentagens mais atualizadas
+    let totalCommission = 0;
     
     // Título do resumo
     message += `Resumo de Pagamentos - ${personName.toUpperCase()}\n\n`;
@@ -66,7 +61,25 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
     sortedPayments.forEach(payment => {
       const paymentDate = format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR });
       const paymentValue = Number(payment.valor);
-      const commission = paymentValue * (percentage / 100);
+      
+      // Usar as porcentagens corretas
+      let commission = 0;
+      if (isAttendant) {
+        // Para atendentes, calculamos a comissão baseada no valor a receber do tripeiro
+        const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+        const attendantPercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
+        
+        const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
+        const tripeiroReceivable = paymentValue - tripeiroCommission;
+        
+        commission = tripeiroReceivable * (attendantPercentage / 100);
+      } else {
+        // Para tripeiros, o valor a receber é o pagamento menos a comissão do tripeiro
+        const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+        commission = paymentValue * (tripeiroPercentage / 100);
+      }
+      
+      totalCommission += commission;
       
       message += `📅 ${paymentDate}\n`;
       message += `💰 Valor: ${formatCurrency(paymentValue)}\n`;
@@ -83,9 +96,9 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
     // Adicionar totais no final
     message += `Total: ${formatCurrency(totalValue)}\n`;
     if (isAttendant) {
-      message += `Comissão Total: ${formatCurrency(commissionTotal)}\n`;
+      message += `Comissão Total: ${formatCurrency(totalCommission)}\n`;
     } else {
-      message += `Total a Receber: ${formatCurrency(commissionTotal)}\n`;
+      message += `Total a Receber: ${formatCurrency(totalCommission)}\n`;
     }
     
     message += `\n\n`;
