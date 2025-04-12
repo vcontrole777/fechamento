@@ -117,9 +117,9 @@ function formatCurrency(value: number): string {
 function formatStatus(status: string): string {
   switch (status) {
     case "concluido":
-      return "Concluído";
+      return "Aprovado";
     case "pendente":
-      return "Pendente";
+      return "Em análise";
     case "bloqueado":
       return "Bloqueado";
     default:
