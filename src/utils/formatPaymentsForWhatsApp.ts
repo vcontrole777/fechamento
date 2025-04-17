@@ -15,17 +15,23 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
   const hasTripeiros = payments.some(p => p.tripeiro?.nome);
   const hasAttendants = payments.some(p => p.atendente?.nome);
   
-  // Agrupar pagamentos por pessoa (atendente ou tripeiro)
+  // Determinar o modo de agrupamento com base nos pagamentos (priorizar tripeiros)
+  let groupingMode = 'tripeiro';
+  
+  if (hasTripeiros) {
+    groupingMode = 'tripeiro';
+  } else if (hasAttendants) {
+    groupingMode = 'atendente';
+  }
+  
+  // Agrupar pagamentos de acordo com o modo selecionado
   payments.forEach(payment => {
     let personName = '';
-    let personType = '';
     
-    if (hasAttendants && payment.atendente?.nome) {
-      personName = payment.atendente.nome;
-      personType = 'atendente';
-    } else if (hasTripeiros && payment.tripeiro?.nome) {
+    if (groupingMode === 'tripeiro' && payment.tripeiro?.nome) {
       personName = payment.tripeiro.nome;
-      personType = 'tripeiro';
+    } else if (groupingMode === 'atendente' && payment.atendente?.nome) {
+      personName = payment.atendente.nome;
     }
     
     if (personName) {
@@ -49,10 +55,10 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
     const totalValue = sortedPayments.reduce((sum, p) => sum + Number(p.valor), 0);
     
     // Determinar se estamos lidando com comissão de atendente ou valor a receber de tripeiro
-    const isAttendant = sortedPayments[0].atendente?.nome === personName;
+    const isAttendant = groupingMode === 'atendente';
     
-    // Usar as porcentagens mais atualizadas
-    let totalCommission = 0;
+    // Valor total a receber/pagar
+    let totalReceivable = 0;
     
     // Título do resumo
     message += `Resumo de Pagamentos - ${personName.toUpperCase()}\n\n`;
@@ -62,8 +68,8 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
       const paymentDate = format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR });
       const paymentValue = Number(payment.valor);
       
-      // Usar as porcentagens corretas
-      let commission = 0;
+      // Calcular o valor correto com base no tipo de pessoa
+      let receivableAmount = 0;
       if (isAttendant) {
         // Para atendentes, calculamos a comissão baseada no valor a receber do tripeiro
         const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
@@ -72,33 +78,33 @@ export function formatPaymentsForWhatsApp(payments: Payment[]): string {
         const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
         const tripeiroReceivable = paymentValue - tripeiroCommission;
         
-        commission = tripeiroReceivable * (attendantPercentage / 100);
+        receivableAmount = tripeiroReceivable * (attendantPercentage / 100);
       } else {
-        // Para tripeiros, o valor a receber é o pagamento menos a comissão do tripeiro
+        // Para tripeiros, o valor a ser pago é a comissão do tripeiro
         const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-        commission = paymentValue * (tripeiroPercentage / 100);
+        receivableAmount = paymentValue * (tripeiroPercentage / 100);
       }
       
-      totalCommission += commission;
+      totalReceivable += receivableAmount;
       
       message += `📅 ${paymentDate}\n`;
       message += `💰 Valor: ${formatCurrency(paymentValue)}\n`;
       
       if (isAttendant) {
-        message += `💼 Comissão: ${formatCurrency(commission)}\n`;
+        message += `💼 Comissão: ${formatCurrency(receivableAmount)}\n`;
       } else {
-        message += `💼 A Receber: ${formatCurrency(commission)}\n`;
+        message += `💼 Valor a pagar: ${formatCurrency(receivableAmount)}\n`;
       }
       
       message += `\n`;
     });
     
     // Adicionar totais no final
-    message += `Total: ${formatCurrency(totalValue)}\n`;
+    message += `Total de pagamentos: ${formatCurrency(totalValue)}\n`;
     if (isAttendant) {
-      message += `Comissão Total: ${formatCurrency(totalCommission)}\n`;
+      message += `Comissão Total: ${formatCurrency(totalReceivable)}\n`;
     } else {
-      message += `Total a Receber: ${formatCurrency(totalCommission)}\n`;
+      message += `Total a ser pago: ${formatCurrency(totalReceivable)}\n`;
     }
     
     message += `\n\n`;
@@ -126,3 +132,4 @@ function formatStatus(status: string): string {
       return status;
   }
 }
+
