@@ -45,12 +45,7 @@ export function formatClosingForWhatsApp(
   if (tripeiroSummaries.length > 0) {
     // Calculate total payments value - this is the full amount before tripeiro commission
     const totalPaymentsValue = tripeiroSummaries.reduce((total, tripeiro) => {
-      const tripeiroPercentage = tripeiro.porcentagemDecimal;
-      // This calculates the original total payment before the tripeiro's commission was taken
-      // We use: receivable = total - (total * percentage)
-      // Solve for total: total = receivable / (1 - percentage)
-      const originalPaymentValue = tripeiro.totalReceivable / (1 - tripeiroPercentage);
-      return total + originalPaymentValue;
+      return total + tripeiro.totalValue;
     }, 0);
     
     // Calculate total receivable for all tripeiros
@@ -59,25 +54,16 @@ export function formatClosingForWhatsApp(
     
     whatsappText += `*VALORES A RECEBER (TRIPEIROS)*\n`;
     tripeiroSummaries.forEach((tripeiro) => {
-      // Calculate the total payment value for this tripeiro
-      const tripeiroPercentage = tripeiro.porcentagemDecimal;
-      const originalPaymentValue = tripeiro.totalReceivable / (1 - tripeiroPercentage);
-      
-      whatsappText += `${tripeiro.nome}: ${formatCurrency(originalPaymentValue)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
+      whatsappText += `${tripeiro.nome}: ${formatCurrency(tripeiro.totalValue)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
     });
     whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsValue)}* (${totalPayments} pagamentos)\n\n`;
   }
   
   // Add attendant data
   if (attendantSummaries.length > 0) {
-    // Calculate total payment value for attendants - this is after tripeiro's commission
+    // Calculate total payment value for attendants (after tripeiro's commission)
     const totalPaymentsAfterTripeiro = attendantSummaries.reduce((total, attendant) => {
-      const attendantPercentage = attendant.porcentagemDecimal;
-      // This calculates what the payment was before the attendant's commission
-      // We use: commission = paymentAfterTripeiro * percentage
-      // So: paymentAfterTripeiro = commission / percentage
-      const paymentAfterTripeiro = attendant.totalCommission / attendantPercentage;
-      return total + paymentAfterTripeiro;
+      return total + attendant.totalValue;
     }, 0);
     
     // Calculate total commission for all attendants
@@ -86,11 +72,7 @@ export function formatClosingForWhatsApp(
     
     whatsappText += `*COMISSÕES (ATENDENTES)*\n`;
     attendantSummaries.forEach((attendant) => {
-      // Calculate the total payment value for this attendant
-      const attendantPercentage = attendant.porcentagemDecimal;
-      const paymentAfterTripeiro = attendant.totalCommission / attendantPercentage;
-      
-      whatsappText += `${attendant.nome}: ${formatCurrency(paymentAfterTripeiro)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
+      whatsappText += `${attendant.nome}: ${formatCurrency(attendant.totalValue)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
     });
     whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsAfterTripeiro)}* (${totalPayments} pagamentos)\n\n`;
   }

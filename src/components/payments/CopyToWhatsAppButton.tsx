@@ -1,10 +1,16 @@
 
 import { useState } from "react";
-import { Copy, Truck, Users } from "lucide-react";
+import { Copy, ExternalLink, Truck, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Payment } from "@/types/payment.types";
 import { formatPaymentsForWhatsApp } from "@/utils/formatPaymentsForWhatsApp";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 interface CopyToWhatsAppButtonProps {
   payments: Payment[];
@@ -65,35 +71,55 @@ export function CopyToWhatsAppButton({ payments, isVisible, filters }: CopyToWha
     <div className="flex items-center gap-2 flex-wrap">
       {hasTripeiros && (
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleCopyToClipboard('tripeiro')}
-            className="flex items-center gap-2"
-          >
-            <Truck className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {isCopiedTripeiro ? "Copiado!" : "Copiar Tripeiros"}
-            </span>
-            <span className="sm:hidden">{isCopiedTripeiro ? "Copiado!" : "Tripeiros"}</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Truck className="h-4 w-4" />
+                <span className="hidden sm:inline">Tripeiros</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleCopyToClipboard('tripeiro')}>
+                <Copy className="h-4 w-4 mr-2" />
+                <span>{isCopiedTripeiro ? "Copiado!" : "Copiar para área de transferência"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openWhatsApp('tripeiro')}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                <span>Abrir no WhatsApp</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
       
       {hasAttendants && (
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleCopyToClipboard('atendente')}
-            className="flex items-center gap-2"
-          >
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {isCopiedAtendente ? "Copiado!" : "Copiar Atendentes"}
-            </span>
-            <span className="sm:hidden">{isCopiedAtendente ? "Copiado!" : "Atendentes"}</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Atendentes</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleCopyToClipboard('atendente')}>
+                <Copy className="h-4 w-4 mr-2" />
+                <span>{isCopiedAtendente ? "Copiado!" : "Copiar para área de transferência"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openWhatsApp('atendente')}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                <span>Abrir no WhatsApp</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
     </div>

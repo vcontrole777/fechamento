@@ -80,9 +80,12 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
         
         receivableAmount = tripeiroReceivable * (attendantPercentage / 100);
       } else {
-        // Para tripeiros, o valor a ser pago é a comissão do tripeiro
+        // CORREÇÃO: Para tripeiros, o valor a receber é o valor total menos a comissão
         const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-        receivableAmount = paymentValue * (tripeiroPercentage / 100);
+        // Valor da comissão do tripeiro
+        const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
+        // Valor a receber é o valor total menos a comissão
+        receivableAmount = paymentValue - tripeiroCommission;
       }
       
       totalReceivable += receivableAmount;
@@ -93,7 +96,8 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
       if (isAttendant) {
         message += `💼 Comissão: ${formatCurrency(receivableAmount)}\n`;
       } else {
-        message += `💼 Valor a pagar: ${formatCurrency(receivableAmount)}\n`;
+        // CORREÇÃO: Atualizar o texto para "Valor a receber" em vez de "Valor a pagar"
+        message += `💼 Valor a receber: ${formatCurrency(receivableAmount)}\n`;
       }
       
       message += `\n`;
@@ -104,7 +108,8 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
     if (isAttendant) {
       message += `Comissão Total: ${formatCurrency(totalReceivable)}\n`;
     } else {
-      message += `Total a ser pago: ${formatCurrency(totalReceivable)}\n`;
+      // CORREÇÃO: Atualizar o texto para "Total a receber" em vez de "Total a ser pago"
+      message += `Total a receber: ${formatCurrency(totalReceivable)}\n`;
     }
     
     message += `\n\n`;
