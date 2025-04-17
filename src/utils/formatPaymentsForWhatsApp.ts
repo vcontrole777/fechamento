@@ -3,25 +3,25 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Payment } from "@/types/payment.types";
 
-export function formatPaymentsForWhatsApp(payments: Payment[]): string {
+export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeiro' | 'atendente' = 'tripeiro'): string {
   if (!payments || payments.length === 0) {
     return "Nenhum pagamento encontrado.";
   }
 
-  // Agrupar por atendente/tripeiro dependendo de quais filtros estão aplicados
+  // Agrupar por atendente/tripeiro dependendo do parâmetro groupBy
   const paymentsByPerson: Record<string, Payment[]> = {};
   
   // Verificar se temos atendentes ou tripeiros
   const hasTripeiros = payments.some(p => p.tripeiro?.nome);
   const hasAttendants = payments.some(p => p.atendente?.nome);
   
-  // Determinar o modo de agrupamento com base nos pagamentos (priorizar tripeiros)
-  let groupingMode = 'tripeiro';
+  // Validar o modo de agrupamento com base nos pagamentos disponíveis
+  let groupingMode = groupBy;
   
-  if (hasTripeiros) {
-    groupingMode = 'tripeiro';
-  } else if (hasAttendants) {
+  if (groupingMode === 'tripeiro' && !hasTripeiros) {
     groupingMode = 'atendente';
+  } else if (groupingMode === 'atendente' && !hasAttendants) {
+    groupingMode = 'tripeiro';
   }
   
   // Agrupar pagamentos de acordo com o modo selecionado
@@ -132,4 +132,3 @@ function formatStatus(status: string): string {
       return status;
   }
 }
-

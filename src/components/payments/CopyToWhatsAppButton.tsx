@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Copy, Send } from "lucide-react";
+import { Copy, Truck, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Payment } from "@/types/payment.types";
@@ -17,27 +17,31 @@ interface CopyToWhatsAppButtonProps {
 }
 
 export function CopyToWhatsAppButton({ payments, isVisible, filters }: CopyToWhatsAppButtonProps) {
-  const [isCopied, setIsCopied] = useState(false);
+  const [isCopiedTripeiro, setIsCopiedTripeiro] = useState(false);
+  const [isCopiedAtendente, setIsCopiedAtendente] = useState(false);
   
   if (!isVisible) return null;
   
-  const handleCopyToClipboard = async () => {
+  const handleCopyToClipboard = async (groupBy: 'tripeiro' | 'atendente') => {
     try {
-      // Use the utility function to format the message with all selected payments
-      const formattedText = formatPaymentsForWhatsApp(payments);
+      // Use the utility function to format the message with the specified grouping
+      const formattedText = formatPaymentsForWhatsApp(payments, groupBy);
       
       await navigator.clipboard.writeText(formattedText);
       
-      setIsCopied(true);
+      // Update the appropriate copied state
+      if (groupBy === 'tripeiro') {
+        setIsCopiedTripeiro(true);
+        setTimeout(() => setIsCopiedTripeiro(false), 2000);
+      } else {
+        setIsCopiedAtendente(true);
+        setTimeout(() => setIsCopiedAtendente(false), 2000);
+      }
+      
       toast({
         title: "Copiado com sucesso!",
         description: "Texto formatado copiado para a área de transferência.",
       });
-      
-      // Reset the copied state after 2 seconds
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
     } catch (error) {
       console.error("Erro ao copiar para área de transferência:", error);
       toast({
@@ -48,35 +52,50 @@ export function CopyToWhatsAppButton({ payments, isVisible, filters }: CopyToWha
     }
   };
 
-  const openWhatsApp = () => {
-    const formattedText = encodeURIComponent(formatPaymentsForWhatsApp(payments));
+  const openWhatsApp = (groupBy: 'tripeiro' | 'atendente') => {
+    const formattedText = encodeURIComponent(formatPaymentsForWhatsApp(payments, groupBy));
     window.open(`https://wa.me/?text=${formattedText}`, '_blank');
   };
   
+  // Verifica se existem tripeiros e atendentes nos pagamentos
+  const hasTripeiros = payments.some(p => p.tripeiro?.nome);
+  const hasAttendants = payments.some(p => p.atendente?.nome);
+  
   return (
-    <div className="flex items-center space-x-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleCopyToClipboard}
-        className="flex items-center gap-2"
-      >
-        <Copy className="h-4 w-4" />
-        <span className="hidden sm:inline">
-          {isCopied ? "Copiado!" : "Copiar para WhatsApp"}
-        </span>
-        <span className="sm:hidden">{isCopied ? "Copiado!" : "Copiar"}</span>
-      </Button>
-      <Button
-        variant="default"
-        size="sm"
-        onClick={openWhatsApp}
-        className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-      >
-        <Send className="h-4 w-4" />
-        <span className="hidden sm:inline">Enviar pelo WhatsApp</span>
-        <span className="sm:hidden">Enviar</span>
-      </Button>
+    <div className="flex items-center gap-2 flex-wrap">
+      {hasTripeiros && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleCopyToClipboard('tripeiro')}
+            className="flex items-center gap-2"
+          >
+            <Truck className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {isCopiedTripeiro ? "Copiado!" : "Copiar Tripeiros"}
+            </span>
+            <span className="sm:hidden">{isCopiedTripeiro ? "Copiado!" : "Tripeiros"}</span>
+          </Button>
+        </div>
+      )}
+      
+      {hasAttendants && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleCopyToClipboard('atendente')}
+            className="flex items-center gap-2"
+          >
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {isCopiedAtendente ? "Copiado!" : "Copiar Atendentes"}
+            </span>
+            <span className="sm:hidden">{isCopiedAtendente ? "Copiado!" : "Atendentes"}</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
