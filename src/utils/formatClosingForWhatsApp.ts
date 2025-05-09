@@ -45,7 +45,7 @@ export function formatClosingForWhatsApp(
   if (tripeiroSummaries.length > 0) {
     // Calculate total payments value - this is the full amount before tripeiro commission
     const totalPaymentsValue = tripeiroSummaries.reduce((total, tripeiro) => {
-      return total + tripeiro.totalValue;
+      return total + tripeiro.totalReceivable;
     }, 0);
     
     // Calculate total receivable for all tripeiros
@@ -54,7 +54,7 @@ export function formatClosingForWhatsApp(
     
     whatsappText += `*VALORES A RECEBER (TRIPEIROS)*\n`;
     tripeiroSummaries.forEach((tripeiro) => {
-      whatsappText += `${tripeiro.nome}: ${formatCurrency(tripeiro.totalValue)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
+      whatsappText += `${tripeiro.nome}: ${formatCurrency(tripeiro.totalReceivable)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
     });
     whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsValue)}* (${totalPayments} pagamentos)\n\n`;
   }
@@ -63,7 +63,7 @@ export function formatClosingForWhatsApp(
   if (attendantSummaries.length > 0) {
     // Calculate total payment value for attendants (after tripeiro's commission)
     const totalPaymentsAfterTripeiro = attendantSummaries.reduce((total, attendant) => {
-      return total + attendant.totalValue;
+      return total + attendant.totalCommission;
     }, 0);
     
     // Calculate total commission for all attendants
@@ -72,7 +72,7 @@ export function formatClosingForWhatsApp(
     
     whatsappText += `*COMISSÕES (ATENDENTES)*\n`;
     attendantSummaries.forEach((attendant) => {
-      whatsappText += `${attendant.nome}: ${formatCurrency(attendant.totalValue)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
+      whatsappText += `${attendant.nome}: ${formatCurrency(attendant.totalCommission)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
     });
     whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsAfterTripeiro)}* (${totalPayments} pagamentos)\n\n`;
   }
