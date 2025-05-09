@@ -1,5 +1,5 @@
 
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Payment } from "@/types/payment.types";
 
@@ -55,7 +55,28 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
     const paymentsByDate: Record<string, Payment[]> = {};
     
     sortedPayments.forEach(payment => {
-      const dateKey = format(new Date(payment.data), "dd/MM/yyyy");
+      // Garantir que a data é tratada corretamente, usando parseISO para lidar com string ISO
+      let paymentDate;
+      try {
+        // Tenta parseISO primeiro se for string
+        if (typeof payment.data === 'string') {
+          paymentDate = parseISO(payment.data);
+        } else {
+          // Se não for string, assume que é um objeto Date
+          paymentDate = new Date(payment.data);
+        }
+        
+        // Verifica se é uma data válida
+        if (isNaN(paymentDate.getTime())) {
+          console.error("Data inválida:", payment.data);
+          paymentDate = new Date(); // Fallback para data atual
+        }
+      } catch (error) {
+        console.error("Erro ao processar data:", error, payment.data);
+        paymentDate = new Date(); // Fallback para data atual
+      }
+      
+      const dateKey = format(paymentDate, "dd/MM/yyyy");
       if (!paymentsByDate[dateKey]) {
         paymentsByDate[dateKey] = [];
       }
