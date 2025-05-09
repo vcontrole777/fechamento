@@ -51,6 +51,17 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
       new Date(b.data).getTime() - new Date(a.data).getTime()
     );
     
+    // Agrupar pagamentos por data
+    const paymentsByDate: Record<string, Payment[]> = {};
+    
+    sortedPayments.forEach(payment => {
+      const dateKey = format(new Date(payment.data), "dd/MM/yyyy");
+      if (!paymentsByDate[dateKey]) {
+        paymentsByDate[dateKey] = [];
+      }
+      paymentsByDate[dateKey].push(payment);
+    });
+    
     // Calcular totais para esta pessoa
     const totalValue = sortedPayments.reduce((sum, p) => sum + Number(p.valor), 0);
     
@@ -61,48 +72,70 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
     let totalReceivable = 0;
     
     // Título do resumo
-    message += `Resumo de Pagamentos - ${personName.toUpperCase()}\n\n`;
+    message += `📊 *RESUMO DE PAGAMENTOS* 📊\n*${personName.toUpperCase()}*\n\n`;
     
-    // Listar cada pagamento
-    sortedPayments.forEach(payment => {
-      const paymentDate = format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR });
-      const paymentValue = Number(payment.valor);
+    // Listar pagamentos agrupados por data
+    Object.entries(paymentsByDate).forEach(([dateStr, paymentsOnDate]) => {
+      let dateTotal = 0;
+      let dateReceivable = 0;
       
-      // Calcular o valor correto com base no tipo de pessoa
-      let receivableAmount = 0;
-      if (isAttendant) {
-        // Para atendentes, calculamos a comissão baseada no valor a receber do tripeiro
-        const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-        const attendantPercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
+      message += `📅 *${dateStr}*\n`;
+      
+      paymentsOnDate.forEach(payment => {
+        const paymentValue = Number(payment.valor);
+        dateTotal += paymentValue;
         
-        const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
-        const tripeiroReceivable = paymentValue - tripeiroCommission;
+        // Calcular o valor correto com base no tipo de pessoa
+        let receivableAmount = 0;
         
-        receivableAmount = tripeiroReceivable * (attendantPercentage / 100);
-      } else {
-        // Para tripeiros, o valor a receber é o valor total menos a comissão
-        const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-        // Valor da comissão do tripeiro
-        const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
-        // Valor a receber é o valor total menos a comissão (correção aqui)
-        receivableAmount = paymentValue - tripeiroCommission;
-      }
+        if (isAttendant) {
+          // Para atendentes, calculamos a comissão baseada no valor a receber do tripeiro
+          const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+          const attendantPercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
+          
+          message += `• R$ ${paymentValue.toFixed(2)}`; 
+          
+          if (payment.tripeiro?.nome) {
+            message += ` - ${payment.tripeiro.nome} (${tripeiroPercentage}%)`;
+          }
+          
+          const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
+          const tripeiroReceivable = paymentValue - tripeiroCommission;
+          
+          receivableAmount = tripeiroReceivable * (attendantPercentage / 100);
+          message += ` → Comissão ${attendantPercentage}%: ${formatCurrency(receivableAmount)}\n`;
+        } else {
+          // Para tripeiros, o valor a receber é o valor total menos a comissão
+          const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+          
+          message += `• R$ ${paymentValue.toFixed(2)}`;
+          
+          if (payment.atendente?.nome) {
+            message += ` - ${payment.atendente.nome} (${payment.atendente.porcentagem}%)`;
+          }
+          
+          // Valor da comissão do tripeiro
+          const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
+          // Valor a receber é o valor total menos a comissão
+          receivableAmount = paymentValue - tripeiroCommission;
+          message += ` → ${tripeiroPercentage}%: ${formatCurrency(receivableAmount)}\n`;
+        }
+        
+        totalReceivable += receivableAmount;
+        dateReceivable += receivableAmount;
+      });
       
-      totalReceivable += receivableAmount;
-      
-      message += `📅 ${paymentDate}\n`;
-      message += `💰 Valor: ${formatCurrency(paymentValue)}\n`;
-      
+      message += `*Subtotal do dia: ${formatCurrency(dateTotal)}*\n`;
       if (isAttendant) {
-        message += `💼 Comissão: ${formatCurrency(receivableAmount)}\n`;
+        message += `*Comissão do dia: ${formatCurrency(dateReceivable)}*\n`;
       } else {
-        message += `💼 Valor a receber: ${formatCurrency(receivableAmount)}\n`;
+        message += `*A receber do dia: ${formatCurrency(dateReceivable)}*\n`;
       }
-      
       message += `\n`;
     });
     
     // Adicionar totais no final
+    message += `*TOTAIS*\n`;
     message += `Total de pagamentos: ${formatCurrency(totalValue)}\n`;
     if (isAttendant) {
       message += `Comissão Total: ${formatCurrency(totalReceivable)}\n`;
