@@ -84,8 +84,8 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
         const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
         // Valor da comissão do tripeiro
         const tripeiroCommission = paymentValue * (tripeiroPercentage / 100);
-        // Valor a receber é o valor total menos a comissão
-        receivableAmount = tripeiroCommission;
+        // Valor a receber é o valor total menos a comissão (correção aqui)
+        receivableAmount = paymentValue - tripeiroCommission;
       }
       
       totalReceivable += receivableAmount;
