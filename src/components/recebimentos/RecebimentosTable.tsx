@@ -1,10 +1,10 @@
-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Recebimento } from "@/hooks/useRecebimentos";
 import { EditRecebimentoDialog } from "./EditRecebimentoDialog";
 import { DeleteRecebimentoDialog } from "./DeleteRecebimentoDialog";
+import { ViewRecebimentoDetailsDialog } from "./ViewRecebimentoDetailsDialog";
 
 interface RecebimentosTableProps {
   recebimentos: Recebimento[];
@@ -110,7 +110,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
             <TableHead>Tipos</TableHead>
             <TableHead>Comprovantes</TableHead>
             <TableHead>Observações</TableHead>
-            <TableHead className="w-20">Ações</TableHead>
+            <TableHead className="w-32">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -158,15 +158,25 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    {group.recebimentos.length === 1 ? (
+                    {group.recebimentos.length > 1 ? (
                       <>
+                        <ViewRecebimentoDetailsDialog 
+                          recebimentos={group.recebimentos}
+                          formatCurrency={formatCurrency}
+                        />
+                        <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
+                          Agrupado
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <ViewRecebimentoDetailsDialog 
+                          recebimentos={group.recebimentos}
+                          formatCurrency={formatCurrency}
+                        />
                         <EditRecebimentoDialog recebimento={group.recebimentos[0]} />
                         <DeleteRecebimentoDialog recebimento={group.recebimentos[0]} />
                       </>
-                    ) : (
-                      <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
-                        Agrupado
-                      </span>
                     )}
                   </div>
                 </TableCell>
