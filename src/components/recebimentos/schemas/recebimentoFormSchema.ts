@@ -9,9 +9,7 @@ export const recebimentoFormSchema = z.object({
   conta_depositada: z.string().optional(),
   numero_comprovante: z.string().optional(),
   banco: z.string().optional(),
-  tipo_deposito: z.enum(["deposito", "pix", "especie"]).optional(),
-  valor_em_massa: z.boolean().optional(),
-  quantidade_recebimentos: z.number().min(1, "Quantidade deve ser maior que zero").optional(),
+  tipo_deposito: z.string().optional(),
 });
 
 export type RecebimentoFormData = z.infer<typeof recebimentoFormSchema>;
