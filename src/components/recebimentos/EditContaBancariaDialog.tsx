@@ -46,7 +46,6 @@ export function EditContaBancariaDialog({ conta }: EditContaBancariaDialogProps)
           onSubmit={handleSubmit} 
           isSubmitting={isSubmitting}
           defaultValues={{
-            nome: conta.nome,
             banco: conta.banco,
             agencia: conta.agencia,
             conta: conta.conta,

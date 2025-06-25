@@ -7,7 +7,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 
 const contaBancariaSchema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório"),
   banco: z.string().min(1, "Banco é obrigatório"),
   agencia: z.string().min(1, "Agência é obrigatória"),
   conta: z.string().min(1, "Conta é obrigatória"),
@@ -26,7 +25,6 @@ export function ContaBancariaForm({ onSubmit, isSubmitting = false, defaultValue
   const form = useForm<ContaBancariaFormValues>({
     resolver: zodResolver(contaBancariaSchema),
     defaultValues: {
-      nome: defaultValues?.nome || "",
       banco: defaultValues?.banco || "",
       agencia: defaultValues?.agencia || "",
       conta: defaultValues?.conta || "",
@@ -37,20 +35,6 @@ export function ContaBancariaForm({ onSubmit, isSubmitting = false, defaultValue
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="nome"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome da Conta</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: Conta Principal" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="banco"

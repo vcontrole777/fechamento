@@ -43,16 +43,19 @@ export function useAddContaBancaria() {
 
   return useMutation({
     mutationFn: async (data: {
-      nome: string;
       banco: string;
       agencia: string;
       conta: string;
       titular: string;
     }) => {
+      // Generate a default name based on bank and account info
+      const nome = `${data.banco} - ${data.agencia}/${data.conta}`;
+      
       const { data: result, error } = await supabase
         .from("contas_bancarias")
         .insert([{
           ...data,
+          nome,
           id_equipe: 1 // TODO: Get from user context
         }])
         .select()
@@ -84,16 +87,18 @@ export function useUpdateContaBancaria() {
   return useMutation({
     mutationFn: async (data: {
       id: number;
-      nome: string;
       banco: string;
       agencia: string;
       conta: string;
       titular: string;
     }) => {
       const { id, ...updateData } = data;
+      // Generate a default name based on bank and account info
+      const nome = `${data.banco} - ${data.agencia}/${data.conta}`;
+      
       const { data: result, error } = await supabase
         .from("contas_bancarias")
-        .update(updateData)
+        .update({ ...updateData, nome })
         .eq("id", id)
         .select()
         .single();
