@@ -20,6 +20,7 @@ export function NovoRecebimentoDialog({ open, onOpenChange }: NovoRecebimentoDia
       const recebimentoData = {
         data: values.data,
         valor: values.valor,
+        valores_massa: values.valores_massa,
         id_tripeiro: parseInt(values.id_tripeiro),
         banco: values.conta_info?.banco,
         conta_depositada: values.conta_info?.conta,

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Minus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -17,10 +17,13 @@ import { useTripeiros } from "@/hooks/useTripeiros";
 import { useContasBancarias } from "@/hooks/useContasBancarias";
 import { useState } from "react";
 import { NovaContaBancariaDialog } from "./NovaContaBancariaDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const recebimentoSchema = z.object({
   data: z.date({ required_error: "Data é obrigatória" }),
   valor: z.number().min(0.01, "Valor deve ser maior que zero"),
+  valores_massa: z.array(z.number().min(0.01, "Valor deve ser maior que zero")).optional(),
+  adicionar_em_massa: z.boolean().default(false),
   id_tripeiro: z.string().min(1, "Tripeiro é obrigatório"),
   id_conta_bancaria: z.string().optional(),
   tipo_deposito: z.string().optional(),
@@ -37,6 +40,7 @@ interface RecebimentoFormProps {
 
 export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoFormProps) {
   const [showNovaContaDialog, setShowNovaContaDialog] = useState(false);
+  const [valoresMassa, setValoresMassa] = useState<number[]>([]);
   const { tripeiros } = useTripeiros();
   const { data: contasBancarias = [] } = useContasBancarias();
 
@@ -45,19 +49,49 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
     defaultValues: {
       data: new Date(),
       valor: 0,
+      adicionar_em_massa: false,
       tipo_deposito: "deposito",
     },
   });
+
+  const adicionarEmMassa = form.watch("adicionar_em_massa");
+
+  const adicionarValor = () => {
+    setValoresMassa([...valoresMassa, 0]);
+  };
+
+  const removerValor = (index: number) => {
+    const novosValores = valoresMassa.filter((_, i) => i !== index);
+    setValoresMassa(novosValores);
+  };
+
+  const atualizarValor = (index: number, valor: number) => {
+    const novosValores = [...valoresMassa];
+    novosValores[index] = valor;
+    setValoresMassa(novosValores);
+  };
 
   const handleSubmit = (values: RecebimentoFormValues) => {
     const contaSelecionada = contasBancarias.find(
       conta => conta.id.toString() === values.id_conta_bancaria
     );
 
-    onSubmit({
+    // Se estiver em modo massa, incluir os valores adicionais
+    const valoresParaSubmeter = adicionarEmMassa ? {
       ...values,
+      valores_massa: valoresMassa.filter(v => v > 0),
+    } : values;
+
+    onSubmit({
+      ...valoresParaSubmeter,
       conta_info: contaSelecionada,
     });
+  };
+
+  const calcularTotalMassa = () => {
+    const valorPrincipal = form.getValues("valor") || 0;
+    const somaValoresMassa = valoresMassa.reduce((sum, valor) => sum + (valor || 0), 0);
+    return valorPrincipal + somaValoresMassa;
   };
 
   return (
@@ -106,10 +140,35 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
 
           <FormField
             control={form.control}
+            name="adicionar_em_massa"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Adicionar valores em massa
+                  </FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Permite adicionar múltiplos valores de uma vez
+                  </p>
+                </div>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="valor"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Valor</FormLabel>
+                <FormLabel>
+                  {adicionarEmMassa ? "Primeiro Valor" : "Valor"}
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -123,6 +182,58 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
               </FormItem>
             )}
           />
+
+          {adicionarEmMassa && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <FormLabel>Valores Adicionais</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={adicionarValor}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Valor
+                </Button>
+              </div>
+              
+              {valoresMassa.map((valor, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={valor || ""}
+                    onChange={(e) => atualizarValor(index, parseFloat(e.target.value) || 0)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removerValor(index)}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+
+              {valoresMassa.length > 0 && (
+                <div className="bg-muted p-3 rounded-lg">
+                  <p className="text-sm font-medium">
+                    Total Geral: {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    }).format(calcularTotalMassa())}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {valoresMassa.filter(v => v > 0).length + 1} recebimentos serão criados
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           <FormField
             control={form.control}
@@ -242,7 +353,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
 
           <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Salvando..." : "Salvar Recebimento"}
+              {isSubmitting ? "Salvando..." : `Salvar ${adicionarEmMassa && valoresMassa.filter(v => v > 0).length > 0 ? `${valoresMassa.filter(v => v > 0).length + 1} Recebimentos` : "Recebimento"}`}
             </Button>
           </div>
         </form>

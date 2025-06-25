@@ -83,6 +83,7 @@ export function useAddRecebimento() {
     mutationFn: async (data: {
       data: Date;
       valor: number;
+      valores_massa?: number[];
       id_tripeiro: number;
       id_responsavel?: number;
       banco?: string;
@@ -91,24 +92,52 @@ export function useAddRecebimento() {
       numero_comprovante?: string;
       observacoes?: string;
     }) => {
-      const { data: result, error } = await supabase
-        .from("recebimentos")
-        .insert([{
-          ...data,
-          data: format(data.data, 'yyyy-MM-dd'),
-          id_equipe: 1 // TODO: Get from user context
-        }])
-        .select()
-        .single();
+      const baseRecebimento = {
+        data: format(data.data, 'yyyy-MM-dd'),
+        id_tripeiro: data.id_tripeiro,
+        id_responsavel: data.id_responsavel,
+        banco: data.banco,
+        conta_depositada: data.conta_depositada,
+        tipo_deposito: data.tipo_deposito,
+        numero_comprovante: data.numero_comprovante,
+        observacoes: data.observacoes,
+        id_equipe: 1 // TODO: Get from user context
+      };
 
-      if (error) throw error;
-      return result;
+      // Se há valores em massa, criar múltiplos recebimentos
+      if (data.valores_massa && data.valores_massa.length > 0) {
+        const recebimentos = [
+          { ...baseRecebimento, valor: data.valor },
+          ...data.valores_massa.map(valor => ({ ...baseRecebimento, valor }))
+        ];
+
+        const { data: results, error } = await supabase
+          .from("recebimentos")
+          .insert(recebimentos)
+          .select();
+
+        if (error) throw error;
+        return results;
+      } else {
+        // Recebimento único
+        const { data: result, error } = await supabase
+          .from("recebimentos")
+          .insert([{ ...baseRecebimento, valor: data.valor }])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return result;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["recebimentos"] });
+      const isMultiple = Array.isArray(result);
       toast({
-        title: "Recebimento adicionado",
-        description: "O recebimento foi registrado com sucesso.",
+        title: isMultiple ? "Recebimentos adicionados" : "Recebimento adicionado",
+        description: isMultiple 
+          ? `${result.length} recebimentos foram registrados com sucesso.`
+          : "O recebimento foi registrado com sucesso.",
       });
     },
     onError: (error: any) => {
