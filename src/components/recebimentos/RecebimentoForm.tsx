@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -191,51 +190,33 @@ export function RecebimentoForm({
 
         {tipoDeposito !== "especie" && (
           <div className="space-y-4">
-            <div>
-              <Label>Conta Bancária</Label>
-              <Select onValueChange={handleContaChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma conta cadastrada" />
-                </SelectTrigger>
-                <SelectContent>
-                  {contas.map((conta) => (
-                    <SelectItem key={conta.id} value={conta.id.toString()}>
-                      {conta.banco} - {conta.agencia} - {conta.conta} ({conta.nome})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="banco"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Banco</FormLabel>
+            <FormField
+              control={form.control}
+              name="conta_depositada"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Conta Bancária</FormLabel>
+                  <Select onValueChange={(value) => {
+                    handleContaChange(value);
+                    field.onChange(`conta_${value}`);
+                  }}>
                     <FormControl>
-                      <Input placeholder="Ex: Banco do Brasil, Itaú..." {...field} />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma conta cadastrada" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="conta_depositada"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Conta Depositada</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: 12345-6" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    <SelectContent>
+                      {contas.map((conta) => (
+                        <SelectItem key={conta.id} value={conta.id.toString()}>
+                          {conta.banco} - {conta.agencia} - {conta.conta} ({conta.nome})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
