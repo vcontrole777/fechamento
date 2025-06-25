@@ -14,7 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useTripeiros } from "@/hooks/useTripeiros";
 import { useContasBancarias } from "@/hooks/useContasBancarias";
-import { useAttendants } from "@/hooks/useAttendants";
+import { useResponsaveis } from "@/components/expenses/hooks/useResponsaveis";
 import { useState, useEffect } from "react";
 import { NovaContaBancariaDialog } from "./NovaContaBancariaDialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,7 +45,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
   const [valoresMassa, setValoresMassa] = useState<number[]>([]);
   const { tripeiros } = useTripeiros();
   const { data: contasBancarias = [] } = useContasBancarias();
-  const { attendants } = useAttendants();
+  const { data: responsaveis = [] } = useResponsaveis();
 
   const form = useForm<RecebimentoFormValues>({
     resolver: zodResolver(recebimentoSchema),
@@ -357,9 +357,9 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {attendants.map((attendant) => (
-                        <SelectItem key={attendant.id} value={attendant.id.toString()}>
-                          {attendant.nome}
+                      {responsaveis.map((responsavel) => (
+                        <SelectItem key={responsavel.id} value={responsavel.id.toString()}>
+                          {responsavel.nome}
                         </SelectItem>
                       ))}
                     </SelectContent>
