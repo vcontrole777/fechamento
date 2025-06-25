@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -249,6 +248,7 @@ export function useUpdateRecebimento() {
       data: Date;
       valor: number;
       id_tripeiro: number;
+      id_responsavel?: number;
       banco?: string;
       conta_depositada?: string;
       tipo_deposito?: string;
@@ -261,6 +261,7 @@ export function useUpdateRecebimento() {
           data: format(data.data, 'yyyy-MM-dd'),
           valor: data.valor,
           id_tripeiro: data.id_tripeiro,
+          id_responsavel: data.id_responsavel,
           banco: data.banco,
           conta_depositada: data.conta_depositada,
           tipo_deposito: data.tipo_deposito,

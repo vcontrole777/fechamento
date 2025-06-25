@@ -22,6 +22,7 @@ export function NovoRecebimentoDialog({ open, onOpenChange }: NovoRecebimentoDia
         valor: values.valor,
         valores_massa: values.valores_massa,
         id_tripeiro: parseInt(values.id_tripeiro),
+        id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : undefined,
         banco: values.conta_info?.banco,
         conta_depositada: values.conta_info?.conta,
         tipo_deposito: values.tipo_deposito,

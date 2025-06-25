@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useTripeiros } from "@/hooks/useTripeiros";
 import { useContasBancarias } from "@/hooks/useContasBancarias";
+import { useAttendants } from "@/hooks/useAttendants";
 import { useState, useEffect } from "react";
 import { NovaContaBancariaDialog } from "./NovaContaBancariaDialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,6 +26,7 @@ const recebimentoSchema = z.object({
   adicionar_em_massa: z.boolean().default(false),
   id_tripeiro: z.string().min(1, "Tripeiro é obrigatório"),
   id_conta_bancaria: z.string().optional(),
+  id_responsavel: z.string().optional(),
   tipo_deposito: z.string().optional(),
   numero_comprovante: z.string().optional(),
   observacoes: z.string().optional(),
@@ -44,6 +45,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
   const [valoresMassa, setValoresMassa] = useState<number[]>([]);
   const { tripeiros } = useTripeiros();
   const { data: contasBancarias = [] } = useContasBancarias();
+  const { attendants } = useAttendants();
 
   const form = useForm<RecebimentoFormValues>({
     resolver: zodResolver(recebimentoSchema),
@@ -70,6 +72,8 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
 
   const adicionarEmMassa = form.watch("adicionar_em_massa");
   const isEditMode = !!defaultValues;
+  const tipoDeposito = form.watch("tipo_deposito");
+  const isEspecieSelected = tipoDeposito === "especie";
 
   const adicionarValor = () => {
     setValoresMassa([...valoresMassa, 0]);
@@ -87,9 +91,9 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
   };
 
   const handleSubmit = (values: RecebimentoFormValues) => {
-    const contaSelecionada = contasBancarias.find(
+    const contaSelecionada = !isEspecieSelected ? contasBancarias.find(
       conta => conta.id.toString() === values.id_conta_bancaria
-    );
+    ) : null;
 
     // Se estiver em modo massa, incluir os valores adicionais
     const valoresParaSubmeter = adicionarEmMassa ? {
@@ -279,41 +283,6 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
 
           <FormField
             control={form.control}
-            name="id_conta_bancaria"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Conta Bancária</FormLabel>
-                <div className="flex gap-2">
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Selecione uma conta" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {contasBancarias.map((conta) => (
-                        <SelectItem key={conta.id} value={conta.id.toString()}>
-                          {conta.titular || "Titular não informado"} - {conta.banco}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowNovaContaDialog(true)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="tipo_deposito"
             render={({ field }) => (
               <FormItem>
@@ -329,12 +298,77 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
                     <SelectItem value="transferencia">Transferência</SelectItem>
                     <SelectItem value="pix">PIX</SelectItem>
                     <SelectItem value="ted">TED</SelectItem>
+                    <SelectItem value="especie">Espécie</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {!isEspecieSelected && (
+            <FormField
+              control={form.control}
+              name="id_conta_bancaria"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Conta Bancária</FormLabel>
+                  <div className="flex gap-2">
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Selecione uma conta" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {contasBancarias.map((conta) => (
+                          <SelectItem key={conta.id} value={conta.id.toString()}>
+                            {conta.titular || "Titular não informado"} - {conta.banco}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowNovaContaDialog(true)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {isEspecieSelected && (
+            <FormField
+              control={form.control}
+              name="id_responsavel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Responsável pelo Recebimento</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um responsável" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {attendants.map((attendant) => (
+                        <SelectItem key={attendant.id} value={attendant.id.toString()}>
+                          {attendant.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
