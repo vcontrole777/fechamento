@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -53,24 +54,35 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
   };
 
   const getTitularByConta = (contaDepositada: string | null) => {
+    console.log("🔍 Debug getTitularByConta:", { contaDepositada, contasBancarias });
+    
     if (!contaDepositada) return "-";
     
     // Primeiro tenta encontrar pela correspondência exata do nome
     let conta = contasBancarias.find(c => c.nome === contaDepositada);
+    console.log("🔍 Busca por nome exato:", conta);
     
     // Se não encontrar, tenta buscar pelo formato "banco - agencia/conta"
     if (!conta) {
       conta = contasBancarias.find(c => 
         `${c.banco} - ${c.agencia}/${c.conta}` === contaDepositada
       );
+      console.log("🔍 Busca por formato banco-agencia/conta:", conta);
+    }
+    
+    // Se ainda não encontrou, tenta buscar apenas pelo nome do banco
+    if (!conta) {
+      conta = contasBancarias.find(c => c.banco === contaDepositada);
+      console.log("🔍 Busca por banco:", conta);
     }
     
     // Se encontrou a conta e tem titular, retorna o titular
     if (conta && conta.titular) {
+      console.log("✅ Titular encontrado:", conta.titular);
       return conta.titular;
     }
     
-    // Se não encontrou ou não tem titular, retorna "-"
+    console.log("❌ Titular não encontrado para:", contaDepositada);
     return "-";
   };
 
