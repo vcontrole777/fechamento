@@ -239,6 +239,54 @@ export type Database = {
           },
         ]
       }
+      recebimentos: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          data: string
+          id: number
+          id_equipe: number
+          id_tripeiro: number
+          observacoes: string | null
+          valor: number
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          data: string
+          id?: number
+          id_equipe: number
+          id_tripeiro: number
+          observacoes?: string | null
+          valor: number
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          data?: string
+          id?: number
+          id_equipe?: number
+          id_tripeiro?: number
+          observacoes?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recebimentos_id_equipe_fkey"
+            columns: ["id_equipe"]
+            isOneToOne: false
+            referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recebimentos_id_tripeiro_fkey"
+            columns: ["id_tripeiro"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
