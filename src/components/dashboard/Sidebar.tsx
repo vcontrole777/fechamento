@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Banknote,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth"; 
@@ -32,6 +32,7 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Atendentes", icon: Users, path: "/atendentes" },
     { name: "Tripeiros", icon: Truck, path: "/tripeiros" },
     { name: "Despesas", icon: Receipt, path: "/despesas" },
+    { name: "Recebimentos", icon: Banknote, path: "/recebimentos" },
     { name: "Fechamento", icon: FileBarChart, path: "/fechamento" },
     { name: "Minha Conta", icon: User, path: "/minha-conta" },
   ];
@@ -113,4 +114,3 @@ export function Sidebar({ className }: SidebarProps) {
     </aside>
   );
 }
-

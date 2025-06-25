@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      contas_bancarias: {
+        Row: {
+          agencia: string
+          atualizado_em: string
+          banco: string
+          conta: string
+          criado_em: string
+          id: number
+          id_equipe: number
+          nome: string
+          titular: string | null
+        }
+        Insert: {
+          agencia: string
+          atualizado_em?: string
+          banco: string
+          conta: string
+          criado_em?: string
+          id?: number
+          id_equipe: number
+          nome: string
+          titular?: string | null
+        }
+        Update: {
+          agencia?: string
+          atualizado_em?: string
+          banco?: string
+          conta?: string
+          criado_em?: string
+          id?: number
+          id_equipe?: number
+          nome?: string
+          titular?: string | null
+        }
+        Relationships: []
+      }
       despesas: {
         Row: {
           criado_em: string
@@ -235,6 +271,76 @@ export type Database = {
             columns: ["id_equipe"]
             isOneToOne: false
             referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recebimentos: {
+        Row: {
+          atualizado_em: string
+          banco: string | null
+          conta_depositada: string | null
+          criado_em: string
+          data: string
+          id: number
+          id_equipe: number
+          id_responsavel: number | null
+          id_tripeiro: number
+          numero_comprovante: string | null
+          observacoes: string | null
+          tipo_deposito: string | null
+          valor: number
+        }
+        Insert: {
+          atualizado_em?: string
+          banco?: string | null
+          conta_depositada?: string | null
+          criado_em?: string
+          data: string
+          id?: number
+          id_equipe: number
+          id_responsavel?: number | null
+          id_tripeiro: number
+          numero_comprovante?: string | null
+          observacoes?: string | null
+          tipo_deposito?: string | null
+          valor: number
+        }
+        Update: {
+          atualizado_em?: string
+          banco?: string | null
+          conta_depositada?: string | null
+          criado_em?: string
+          data?: string
+          id?: number
+          id_equipe?: number
+          id_responsavel?: number | null
+          id_tripeiro?: number
+          numero_comprovante?: string | null
+          observacoes?: string | null
+          tipo_deposito?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recebimentos_id_equipe_fkey"
+            columns: ["id_equipe"]
+            isOneToOne: false
+            referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recebimentos_id_responsavel_fkey"
+            columns: ["id_responsavel"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recebimentos_id_tripeiro_fkey"
+            columns: ["id_tripeiro"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
             referencedColumns: ["id"]
           },
         ]
