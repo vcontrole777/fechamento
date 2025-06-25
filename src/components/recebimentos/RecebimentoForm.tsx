@@ -37,7 +37,7 @@ interface RecebimentoFormProps {
 
 export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoFormProps) {
   const [showNovaContaDialog, setShowNovaContaDialog] = useState(false);
-  const { data: tripeiros = [] } = useTripeiros();
+  const { tripeiros } = useTripeiros();
   const { data: contasBancarias = [] } = useContasBancarias();
 
   const form = useForm<RecebimentoFormValues>({

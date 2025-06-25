@@ -11,7 +11,7 @@ export function RecebimentosFilters({
   selectedTripeiroId, 
   onTripeiroChange 
 }: RecebimentosFiltersProps) {
-  const { data: tripeiros = [] } = useTripeiros();
+  const { tripeiros } = useTripeiros();
 
   return (
     <div className="flex flex-col sm:flex-row gap-4">

@@ -4,17 +4,17 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateFilter } from "@/components/common/DateFilter";
-import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 import { useRecebimentos } from "@/hooks/useRecebimentos";
 import { RecebimentosTable } from "@/components/recebimentos/RecebimentosTable";
 import { RecebimentosFilters } from "@/components/recebimentos/RecebimentosFilters";
 import { NovoRecebimentoDialog } from "@/components/recebimentos/NovoRecebimentoDialog";
+import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
 export default function Recebimentos() {
   const [showNovoRecebimentoDialog, setShowNovoRecebimentoDialog] = useState(false);
   const [selectedTripeiroId, setSelectedTripeiroId] = useState<string>("all");
   
-  const { dateRange, updateSharedDateFilter } = useSharedDateFilter();
+  const { dateRange } = useSharedDateFilter();
   
   const tripeiroIdForQuery = selectedTripeiroId === "all" ? undefined : parseInt(selectedTripeiroId);
   const { data: recebimentos = [], isLoading } = useRecebimentos(dateRange, tripeiroIdForQuery);
@@ -45,8 +45,7 @@ export default function Recebimentos() {
 
       <div className="flex flex-col lg:flex-row gap-4">
         <DateFilter 
-          dateRange={dateRange}
-          onDateRangeChange={updateSharedDateFilter}
+          onFilterChange={() => {}}
         />
         <RecebimentosFilters
           selectedTripeiroId={selectedTripeiroId}
