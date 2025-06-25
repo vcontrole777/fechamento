@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DateFilter } from "@/components/common/DateFilter";
 import { useRecebimentos } from "@/hooks/useRecebimentos";
 import { RecebimentosTable } from "@/components/recebimentos/RecebimentosTable";
@@ -44,51 +45,62 @@ export default function Recebimentos() {
         </Button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4">
-        <DateFilter 
-          onFilterChange={() => {}}
-        />
-        <RecebimentosFilters
-          selectedTripeiroId={selectedTripeiroId}
-          onTripeiroChange={setSelectedTripeiroId}
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Recebido</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(totalRecebido)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {recebimentos.length} recebimento{recebimentos.length !== 1 ? 's' : ''}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <ContasBancariasSection />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Histórico de Recebimentos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-muted-foreground">Carregando recebimentos...</div>
-            </div>
-          ) : (
-            <RecebimentosTable 
-              recebimentos={recebimentos}
-              formatCurrency={formatCurrency}
+      <Tabs defaultValue="historico" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="historico">Histórico de Recebimentos</TabsTrigger>
+          <TabsTrigger value="contas">Contas Bancárias</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="historico" className="space-y-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <DateFilter 
+              onFilterChange={() => {}}
             />
-          )}
-        </CardContent>
-      </Card>
+            <RecebimentosFilters
+              selectedTripeiroId={selectedTripeiroId}
+              onTripeiroChange={setSelectedTripeiroId}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Recebido</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {formatCurrency(totalRecebido)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {recebimentos.length} recebimento{recebimentos.length !== 1 ? 's' : ''}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Histórico de Recebimentos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="text-muted-foreground">Carregando recebimentos...</div>
+                </div>
+              ) : (
+                <RecebimentosTable 
+                  recebimentos={recebimentos}
+                  formatCurrency={formatCurrency}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="contas">
+          <ContasBancariasSection />
+        </TabsContent>
+      </Tabs>
 
       <NovoRecebimentoDialog
         open={showNovoRecebimentoDialog}
