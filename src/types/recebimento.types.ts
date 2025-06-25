@@ -10,12 +10,17 @@ export interface Recebimento {
   numero_comprovante?: string;
   banco?: string;
   tipo_deposito?: string;
+  id_responsavel?: number;
   criado_em: string;
   atualizado_em: string;
   tripeiro?: {
     id: number;
     nome: string;
     porcentagem: number;
+  };
+  responsavel?: {
+    id: number;
+    nome: string;
   };
 }
 
@@ -28,6 +33,7 @@ export interface NewRecebimento {
   numero_comprovante?: string;
   banco?: string;
   tipo_deposito?: string;
+  id_responsavel?: number;
 }
 
 export interface UpdateRecebimento {
@@ -39,4 +45,5 @@ export interface UpdateRecebimento {
   numero_comprovante?: string;
   banco?: string;
   tipo_deposito?: string;
+  id_responsavel?: number;
 }

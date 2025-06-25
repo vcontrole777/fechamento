@@ -10,6 +10,7 @@ export const recebimentoFormSchema = z.object({
   numero_comprovante: z.string().optional(),
   banco: z.string().optional(),
   tipo_deposito: z.string().optional(),
+  id_responsavel: z.number().optional(),
 });
 
 export type RecebimentoFormData = z.infer<typeof recebimentoFormSchema>;

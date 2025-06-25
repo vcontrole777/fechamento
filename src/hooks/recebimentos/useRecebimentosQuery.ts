@@ -18,6 +18,10 @@ export function useRecebimentosQuery(dateRange?: DateRange) {
             id,
             nome,
             porcentagem
+          ),
+          responsavel:pessoas!recebimentos_id_responsavel_fkey (
+            id,
+            nome
           )
         `)
         .order("data", { ascending: false });

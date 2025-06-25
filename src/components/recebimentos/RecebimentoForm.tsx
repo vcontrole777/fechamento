@@ -23,6 +23,7 @@ import {
 import { recebimentoFormSchema } from "./schemas/recebimentoFormSchema";
 import { Recebimento } from "@/types/recebimento.types";
 import { useTripeiros } from "@/hooks/useTripeiros";
+import { useResponsaveis } from "@/hooks/useResponsaveis";
 import { useContasBancariasQuery } from "@/hooks/contas-bancarias/useContasBancariasQuery";
 import { format } from "date-fns";
 
@@ -40,6 +41,7 @@ export function RecebimentoForm({
   isLoading
 }: RecebimentoFormProps) {
   const { tripeiros } = useTripeiros();
+  const { responsaveis } = useResponsaveis();
   const { data: contas = [] } = useContasBancariasQuery();
 
   const form = useForm({
@@ -53,8 +55,11 @@ export function RecebimentoForm({
       numero_comprovante: initialData?.numero_comprovante || "",
       banco: initialData?.banco || "",
       tipo_deposito: initialData?.tipo_deposito || "deposito",
+      id_responsavel: initialData?.id_responsavel || undefined,
     },
   });
+
+  const tipoDeposito = form.watch("tipo_deposito");
 
   const handleContaChange = (contaId: string) => {
     const conta = contas.find(c => c.id.toString() === contaId);
@@ -131,94 +136,122 @@ export function RecebimentoForm({
           />
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <Label>Conta Bancária</Label>
-            <Select onValueChange={handleContaChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma conta cadastrada" />
-              </SelectTrigger>
-              <SelectContent>
-                {contas.map((conta) => (
-                  <SelectItem key={conta.id} value={conta.id.toString()}>
-                    {conta.banco} - {conta.agencia} - {conta.conta} ({conta.nome})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="banco"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Banco</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: Banco do Brasil, Itaú..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="conta_depositada"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Conta Depositada</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: 12345-6" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="numero_comprovante"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Número do Comprovante</FormLabel>
+        <FormField
+          control={form.control}
+          name="tipo_deposito"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Depósito</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <Input placeholder="Ex: 123456789" {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  <SelectItem value="deposito">Depósito</SelectItem>
+                  <SelectItem value="pix">PIX</SelectItem>
+                  <SelectItem value="especie">Espécie</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
+        {tipoDeposito === "especie" && (
           <FormField
             control={form.control}
-            name="tipo_deposito"
+            name="id_responsavel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Depósito</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <FormLabel>Responsável pela Coleta</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(parseInt(value))}
+                  value={field.value?.toString()}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo" />
+                      <SelectValue placeholder="Selecione o responsável" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="deposito">Depósito</SelectItem>
-                    <SelectItem value="transferencia">Transferência</SelectItem>
-                    <SelectItem value="pix">PIX</SelectItem>
-                    <SelectItem value="ted">TED</SelectItem>
-                    <SelectItem value="doc">DOC</SelectItem>
+                    {responsaveis.map((responsavel) => (
+                      <SelectItem key={responsavel.id} value={responsavel.id.toString()}>
+                        {responsavel.nome}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
+        )}
+
+        {tipoDeposito !== "especie" && (
+          <div className="space-y-4">
+            <div>
+              <Label>Conta Bancária</Label>
+              <Select onValueChange={handleContaChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma conta cadastrada" />
+                </SelectTrigger>
+                <SelectContent>
+                  {contas.map((conta) => (
+                    <SelectItem key={conta.id} value={conta.id.toString()}>
+                      {conta.banco} - {conta.agencia} - {conta.conta} ({conta.nome})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="banco"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Banco</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Banco do Brasil, Itaú..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="conta_depositada"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Conta Depositada</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: 12345-6" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="numero_comprovante"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número do Comprovante</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: 123456789" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
 
         <FormField
           control={form.control}

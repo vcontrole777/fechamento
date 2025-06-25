@@ -281,6 +281,7 @@ export type Database = {
           data: string
           id: number
           id_equipe: number
+          id_responsavel: number | null
           id_tripeiro: number
           numero_comprovante: string | null
           observacoes: string | null
@@ -295,6 +296,7 @@ export type Database = {
           data: string
           id?: number
           id_equipe: number
+          id_responsavel?: number | null
           id_tripeiro: number
           numero_comprovante?: string | null
           observacoes?: string | null
@@ -309,6 +311,7 @@ export type Database = {
           data?: string
           id?: number
           id_equipe?: number
+          id_responsavel?: number | null
           id_tripeiro?: number
           numero_comprovante?: string | null
           observacoes?: string | null
