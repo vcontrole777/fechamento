@@ -45,15 +45,34 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
         return [];
       }
 
+      console.log("🔑 User authenticated:", user.id);
+
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("id_equipe")
         .eq("id", user.id)
         .single();
 
+      console.log("👤 Profile query result:", profile, "error:", profileError);
+
       if (profileError || !profile?.id_equipe) {
         console.error("❌ Unable to get user team information:", profileError);
-        return [];
+        // Let's try to get recebimentos without team filter to debug
+        console.log("🔧 Trying to fetch recebimentos without team filter for debugging...");
+        
+        const debugQuery = supabase
+          .from("recebimentos")
+          .select(`
+            *,
+            tripeiro:pessoas!recebimentos_id_tripeiro_fkey(id, nome),
+            responsavel:pessoas!recebimentos_id_responsavel_fkey(nome)
+          `)
+          .order("data", { ascending: false });
+
+        const { data: debugData, error: debugError } = await debugQuery;
+        console.log("🔧 Debug query - all recebimentos:", debugData, "error:", debugError);
+        
+        return debugData || [];
       }
 
       console.log("👥 User's team ID:", profile.id_equipe);
@@ -72,6 +91,8 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
         console.log("🔍 Filtering by tripeiro ID:", tripeiroId);
       }
 
+      // Simplify date filtering for debugging
+      console.log("🔧 Applying date filters...");
       if (fromDate && toDate && fromDate === toDate) {
         query = query.eq('data', fromDate);
         console.log("📅 Filtering by exact date:", fromDate);
@@ -88,9 +109,11 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
 
       query = query.order("data", { ascending: false });
 
+      console.log("🔧 Final query about to execute...");
       const { data, error } = await query;
 
       console.log("📊 Query result - data count:", data?.length, "error:", error);
+      console.log("📊 Full query result data:", data);
 
       if (error) {
         console.error("❌ Error fetching recebimentos:", error);
