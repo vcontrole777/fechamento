@@ -84,7 +84,6 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
                 <TableRow>
                   <TableHead>Valor</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Comprovante</TableHead>
                   <TableHead>Observações</TableHead>
                   <TableHead>Criado em</TableHead>
                   <TableHead className="w-24">Ações</TableHead>
@@ -98,9 +97,6 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
                     </TableCell>
                     <TableCell>
                       {formatTipoDeposito(recebimento.tipo_deposito)}
-                    </TableCell>
-                    <TableCell>
-                      {recebimento.numero_comprovante || "-"}
                     </TableCell>
                     <TableCell className="max-w-[200px]">
                       {recebimento.observacoes ? (

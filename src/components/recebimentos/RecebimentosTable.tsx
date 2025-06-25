@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,7 +22,6 @@ interface GroupedRecebimento {
   totalValor: number;
   recebimentos: Recebimento[];
   tipos: string[];
-  comprovantes: string[];
   observacoes: string[];
 }
 
@@ -68,11 +68,6 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
           existing.tipos.push(tipoFormatado);
         }
         
-        // Adicionar comprovantes únicos
-        if (recebimento.numero_comprovante && !existing.comprovantes.includes(recebimento.numero_comprovante)) {
-          existing.comprovantes.push(recebimento.numero_comprovante);
-        }
-        
         // Adicionar observações únicas
         if (recebimento.observacoes && !existing.observacoes.includes(recebimento.observacoes)) {
           existing.observacoes.push(recebimento.observacoes);
@@ -87,7 +82,6 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
           totalValor: Number(recebimento.valor),
           recebimentos: [recebimento],
           tipos: recebimento.tipo_deposito ? [formatTipoDeposito(recebimento.tipo_deposito)] : [],
-          comprovantes: recebimento.numero_comprovante ? [recebimento.numero_comprovante] : [],
           observacoes: recebimento.observacoes ? [recebimento.observacoes] : []
         });
       }
@@ -107,9 +101,8 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
             <TableHead>Tripeiro</TableHead>
             <TableHead>Valor Total</TableHead>
             <TableHead>Banco</TableHead>
-            <TableHead>Conta</TableHead>
+            <TableHead>Titular</TableHead>
             <TableHead>Tipos</TableHead>
-            <TableHead>Comprovantes</TableHead>
             <TableHead>Observações</TableHead>
             <TableHead className="w-40">Ações</TableHead>
           </TableRow>
@@ -117,7 +110,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
         <TableBody>
           {groupedRecebimentos.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 Nenhum recebimento encontrado.
               </TableCell>
             </TableRow>
@@ -138,15 +131,6 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                 <TableCell>{group.conta}</TableCell>
                 <TableCell>
                   {group.tipos.length > 0 ? group.tipos.join(", ") : "-"}
-                </TableCell>
-                <TableCell className="max-w-[150px]">
-                  {group.comprovantes.length > 0 ? (
-                    <div className="truncate" title={group.comprovantes.join(", ")}>
-                      {group.comprovantes.join(", ")}
-                    </div>
-                  ) : (
-                    "-"
-                  )}
                 </TableCell>
                 <TableCell className="max-w-[200px]">
                   {group.observacoes.length > 0 ? (
