@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,6 +7,7 @@ import { EditRecebimentoDialog } from "./EditRecebimentoDialog";
 import { DeleteRecebimentoDialog } from "./DeleteRecebimentoDialog";
 import { ViewRecebimentoDetailsDialog } from "./ViewRecebimentoDetailsDialog";
 import { GroupedRecebimentoActions } from "./GroupedRecebimentoActions";
+import { useContasBancarias } from "@/hooks/useContasBancarias";
 
 interface RecebimentosTableProps {
   recebimentos: Recebimento[];
@@ -25,6 +27,8 @@ interface GroupedRecebimento {
 }
 
 export function RecebimentosTable({ recebimentos, formatCurrency }: RecebimentosTableProps) {
+  const { data: contasBancarias = [] } = useContasBancarias();
+
   const formatDate = (dateString: string) => {
     try {
       const [year, month, day] = dateString.split('-').map(Number);
@@ -47,6 +51,17 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     };
     
     return tipos[tipo] || tipo;
+  };
+
+  const getTitularByConta = (contaDepositada: string | null) => {
+    if (!contaDepositada) return "-";
+    
+    const conta = contasBancarias.find(c => 
+      c.nome === contaDepositada || 
+      `${c.banco} - ${c.agencia}/${c.conta}` === contaDepositada
+    );
+    
+    return conta?.titular || contaDepositada;
   };
 
   // Função para agrupar recebimentos
@@ -128,9 +143,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                 </TableCell>
                 <TableCell>{group.banco}</TableCell>
                 <TableCell>
-                  {/* Buscar o titular da primeira conta bancária correspondente */}
-                  {group.recebimentos[0]?.conta_depositada ? 
-                    group.recebimentos[0]?.conta_depositada : "-"}
+                  {getTitularByConta(group.recebimentos[0]?.conta_depositada)}
                 </TableCell>
                 <TableCell>
                   {group.tipos.length > 0 ? group.tipos.join(", ") : "-"}
