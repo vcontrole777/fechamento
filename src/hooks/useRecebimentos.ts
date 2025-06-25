@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -32,8 +31,32 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
   return useQuery({
     queryKey: ["recebimentos", dateRange, tripeiroId],
     queryFn: async () => {
+      console.log("🔍 Fetching recebimentos with dateRange:", dateRange, "tripeiroId:", tripeiroId);
+      
       const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
       const toDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
+
+      console.log("📅 Date filters - from:", fromDate, "to:", toDate);
+
+      // Get user's team ID first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error("❌ User not authenticated");
+        return [];
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id_equipe")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile?.id_equipe) {
+        console.error("❌ Unable to get user team information:", profileError);
+        return [];
+      }
+
+      console.log("👥 User's team ID:", profile.id_equipe);
 
       let query = supabase
         .from("recebimentos")
@@ -41,20 +64,25 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
           *,
           tripeiro:pessoas!recebimentos_id_tripeiro_fkey(id, nome),
           responsavel:pessoas!recebimentos_id_responsavel_fkey(nome)
-        `);
+        `)
+        .eq("id_equipe", profile.id_equipe); // Filter by user's team
 
       if (tripeiroId) {
         query = query.eq("id_tripeiro", tripeiroId);
+        console.log("🔍 Filtering by tripeiro ID:", tripeiroId);
       }
 
       if (fromDate && toDate && fromDate === toDate) {
         query = query.eq('data', fromDate);
+        console.log("📅 Filtering by exact date:", fromDate);
       } else {
         if (fromDate) {
           query = query.gte('data', fromDate);
+          console.log("📅 Filtering from date:", fromDate);
         }
         if (toDate) {
           query = query.lte('data', toDate);
+          console.log("📅 Filtering to date:", toDate);
         }
       }
 
@@ -62,7 +90,10 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
 
       const { data, error } = await query;
 
+      console.log("📊 Query result - data count:", data?.length, "error:", error);
+
       if (error) {
+        console.error("❌ Error fetching recebimentos:", error);
         toast({
           title: "Erro ao carregar recebimentos",
           description: error.message,
@@ -71,6 +102,7 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
         return [];
       }
 
+      console.log("✅ Successfully fetched recebimentos:", data);
       return data as Recebimento[];
     },
   });
@@ -120,6 +152,8 @@ export function useAddRecebimento() {
         id_equipe: profile.id_equipe
       };
 
+      console.log("💾 Creating recebimento(s) with base data:", baseRecebimento);
+
       // Se há valores em massa, criar múltiplos recebimentos
       if (data.valores_massa && data.valores_massa.length > 0) {
         const recebimentos = [
@@ -127,28 +161,43 @@ export function useAddRecebimento() {
           ...data.valores_massa.map(valor => ({ ...baseRecebimento, valor }))
         ];
 
+        console.log("📦 Creating multiple recebimentos:", recebimentos.length, "records");
+
         const { data: results, error } = await supabase
           .from("recebimentos")
           .insert(recebimentos)
           .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error("❌ Error creating multiple recebimentos:", error);
+          throw error;
+        }
+        
+        console.log("✅ Successfully created multiple recebimentos:", results);
         return results;
       } else {
         // Recebimento único
+        console.log("📦 Creating single recebimento");
+        
         const { data: result, error } = await supabase
           .from("recebimentos")
           .insert([{ ...baseRecebimento, valor: data.valor }])
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("❌ Error creating single recebimento:", error);
+          throw error;
+        }
+        
+        console.log("✅ Successfully created single recebimento:", result);
         return result;
       }
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["recebimentos"] });
       const isMultiple = Array.isArray(result);
+      console.log("🔄 Invalidated queries and showing success toast");
       toast({
         title: isMultiple ? "Recebimentos adicionados" : "Recebimento adicionado",
         description: isMultiple 
@@ -157,6 +206,7 @@ export function useAddRecebimento() {
       });
     },
     onError: (error: any) => {
+      console.error("❌ Error in mutation:", error);
       toast({
         title: "Erro ao adicionar recebimento",
         description: error.message,
