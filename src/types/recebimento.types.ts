@@ -9,7 +9,7 @@ export interface Recebimento {
   conta_depositada?: string;
   numero_comprovante?: string;
   banco?: string;
-  tipo_deposito?: string;
+  tipo_deposito?: "deposito" | "pix" | "especie";
   criado_em: string;
   atualizado_em: string;
   tripeiro?: {
@@ -27,7 +27,7 @@ export interface NewRecebimento {
   conta_depositada?: string;
   numero_comprovante?: string;
   banco?: string;
-  tipo_deposito?: string;
+  tipo_deposito?: "deposito" | "pix" | "especie";
 }
 
 export interface UpdateRecebimento {
@@ -38,5 +38,5 @@ export interface UpdateRecebimento {
   conta_depositada?: string;
   numero_comprovante?: string;
   banco?: string;
-  tipo_deposito?: string;
+  tipo_deposito?: "deposito" | "pix" | "especie";
 }

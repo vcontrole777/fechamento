@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -25,6 +26,7 @@ import { Recebimento } from "@/types/recebimento.types";
 import { useTripeiros } from "@/hooks/useTripeiros";
 import { useContasBancariasQuery } from "@/hooks/contas-bancarias/useContasBancariasQuery";
 import { format } from "date-fns";
+import { useState } from "react";
 
 interface RecebimentoFormProps {
   initialData?: Recebimento;
@@ -41,6 +43,7 @@ export function RecebimentoForm({
 }: RecebimentoFormProps) {
   const { tripeiros } = useTripeiros();
   const { data: contas = [] } = useContasBancariasQuery();
+  const [valorEmMassa, setValorEmMassa] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(recebimentoFormSchema),
@@ -53,6 +56,8 @@ export function RecebimentoForm({
       numero_comprovante: initialData?.numero_comprovante || "",
       banco: initialData?.banco || "",
       tipo_deposito: initialData?.tipo_deposito || "deposito",
+      valor_em_massa: false,
+      quantidade_recebimentos: 1,
     },
   });
 
@@ -64,9 +69,27 @@ export function RecebimentoForm({
     }
   };
 
+  const handleSubmit = (data: any) => {
+    if (data.valor_em_massa && data.quantidade_recebimentos > 1) {
+      // Criar múltiplos recebimentos
+      const recebimentos = Array.from({ length: data.quantidade_recebimentos }, () => ({
+        ...data,
+        valor_em_massa: undefined,
+        quantidade_recebimentos: undefined,
+      }));
+      onSubmit({ multiplos: true, recebimentos });
+    } else {
+      onSubmit({
+        ...data,
+        valor_em_massa: undefined,
+        quantidade_recebimentos: undefined,
+      });
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="id_tripeiro"
@@ -130,6 +153,44 @@ export function RecebimentoForm({
             )}
           />
         </div>
+
+        {/* Opção para valor em massa */}
+        <div className="flex items-center space-x-2 p-4 bg-gray-50 rounded-lg">
+          <Checkbox
+            id="valor-em-massa"
+            checked={valorEmMassa}
+            onCheckedChange={(checked) => {
+              setValorEmMassa(checked as boolean);
+              form.setValue("valor_em_massa", checked as boolean);
+            }}
+          />
+          <Label htmlFor="valor-em-massa" className="text-sm font-medium">
+            Inserir múltiplos recebimentos (mesmo tripeiro, data e valor)
+          </Label>
+        </div>
+
+        {valorEmMassa && (
+          <FormField
+            control={form.control}
+            name="quantidade_recebimentos"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Quantidade de Recebimentos</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="50"
+                    placeholder="Ex: 5"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="space-y-4">
           <div>
@@ -208,10 +269,8 @@ export function RecebimentoForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="deposito">Depósito</SelectItem>
-                    <SelectItem value="transferencia">Transferência</SelectItem>
                     <SelectItem value="pix">PIX</SelectItem>
-                    <SelectItem value="ted">TED</SelectItem>
-                    <SelectItem value="doc">DOC</SelectItem>
+                    <SelectItem value="especie">Espécie</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -242,7 +301,7 @@ export function RecebimentoForm({
             Cancelar
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Salvando..." : "Salvar"}
+            {isLoading ? "Salvando..." : valorEmMassa ? "Salvar Múltiplos" : "Salvar"}
           </Button>
         </div>
       </form>
