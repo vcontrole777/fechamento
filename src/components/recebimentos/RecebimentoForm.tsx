@@ -23,6 +23,7 @@ import {
 import { recebimentoFormSchema } from "./schemas/recebimentoFormSchema";
 import { Recebimento } from "@/types/recebimento.types";
 import { useTripeiros } from "@/hooks/useTripeiros";
+import { useContasBancariasQuery } from "@/hooks/contas-bancarias/useContasBancariasQuery";
 import { format } from "date-fns";
 
 interface RecebimentoFormProps {
@@ -39,6 +40,7 @@ export function RecebimentoForm({
   isLoading
 }: RecebimentoFormProps) {
   const { tripeiros } = useTripeiros();
+  const { data: contas = [] } = useContasBancariasQuery();
 
   const form = useForm({
     resolver: zodResolver(recebimentoFormSchema),
@@ -53,6 +55,14 @@ export function RecebimentoForm({
       tipo_deposito: initialData?.tipo_deposito || "deposito",
     },
   });
+
+  const handleContaChange = (contaId: string) => {
+    const conta = contas.find(c => c.id.toString() === contaId);
+    if (conta) {
+      form.setValue("banco", conta.banco);
+      form.setValue("conta_depositada", `${conta.agencia} - ${conta.conta} (${conta.nome})`);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -121,34 +131,52 @@ export function RecebimentoForm({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="banco"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Banco</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: Banco do Brasil, Itaú..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="space-y-4">
+          <div>
+            <Label>Conta Bancária</Label>
+            <Select onValueChange={handleContaChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma conta cadastrada" />
+              </SelectTrigger>
+              <SelectContent>
+                {contas.map((conta) => (
+                  <SelectItem key={conta.id} value={conta.id.toString()}>
+                    {conta.banco} - {conta.agencia} - {conta.conta} ({conta.nome})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <FormField
-            control={form.control}
-            name="conta_depositada"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Conta Depositada</FormLabel>
-                <FormControl>
-                  <Input placeholder="Ex: 12345-6" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="banco"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Banco</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Banco do Brasil, Itaú..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="conta_depositada"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Conta Depositada</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: 12345-6" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
