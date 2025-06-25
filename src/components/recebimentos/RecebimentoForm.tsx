@@ -47,6 +47,10 @@ export function RecebimentoForm({
       valor: initialData?.valor || 0,
       data: initialData?.data || format(new Date(), "yyyy-MM-dd"),
       observacoes: initialData?.observacoes || "",
+      conta_depositada: initialData?.conta_depositada || "",
+      numero_comprovante: initialData?.numero_comprovante || "",
+      banco: initialData?.banco || "",
+      tipo_deposito: initialData?.tipo_deposito || "deposito",
     },
   });
 
@@ -81,39 +85,112 @@ export function RecebimentoForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="valor"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor Recebido</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="0,00"
-                  {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="valor"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valor Recebido</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0,00"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="data"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data do Recebimento</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="data"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data do Recebimento</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="banco"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Banco</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: Banco do Brasil, Itaú..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="conta_depositada"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Conta Depositada</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: 12345-6" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="numero_comprovante"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número do Comprovante</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ex: 123456789" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="tipo_deposito"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Depósito</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="deposito">Depósito</SelectItem>
+                    <SelectItem value="transferencia">Transferência</SelectItem>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="ted">TED</SelectItem>
+                    <SelectItem value="doc">DOC</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}

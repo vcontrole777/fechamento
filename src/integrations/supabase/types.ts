@@ -242,32 +242,44 @@ export type Database = {
       recebimentos: {
         Row: {
           atualizado_em: string
+          banco: string | null
+          conta_depositada: string | null
           criado_em: string
           data: string
           id: number
           id_equipe: number
           id_tripeiro: number
+          numero_comprovante: string | null
           observacoes: string | null
+          tipo_deposito: string | null
           valor: number
         }
         Insert: {
           atualizado_em?: string
+          banco?: string | null
+          conta_depositada?: string | null
           criado_em?: string
           data: string
           id?: number
           id_equipe: number
           id_tripeiro: number
+          numero_comprovante?: string | null
           observacoes?: string | null
+          tipo_deposito?: string | null
           valor: number
         }
         Update: {
           atualizado_em?: string
+          banco?: string | null
+          conta_depositada?: string | null
           criado_em?: string
           data?: string
           id?: number
           id_equipe?: number
           id_tripeiro?: number
+          numero_comprovante?: string | null
           observacoes?: string | null
+          tipo_deposito?: string | null
           valor?: number
         }
         Relationships: [

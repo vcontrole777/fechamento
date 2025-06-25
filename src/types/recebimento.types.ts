@@ -6,6 +6,10 @@ export interface Recebimento {
   valor: number;
   data: string;
   observacoes?: string;
+  conta_depositada?: string;
+  numero_comprovante?: string;
+  banco?: string;
+  tipo_deposito?: string;
   criado_em: string;
   atualizado_em: string;
   tripeiro?: {
@@ -20,6 +24,10 @@ export interface NewRecebimento {
   valor: number;
   data: string;
   observacoes?: string;
+  conta_depositada?: string;
+  numero_comprovante?: string;
+  banco?: string;
+  tipo_deposito?: string;
 }
 
 export interface UpdateRecebimento {
@@ -27,4 +35,8 @@ export interface UpdateRecebimento {
   valor?: number;
   data?: string;
   observacoes?: string;
+  conta_depositada?: string;
+  numero_comprovante?: string;
+  banco?: string;
+  tipo_deposito?: string;
 }

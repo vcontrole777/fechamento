@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Table, Building2 } from "lucide-react";
 import { RecebimentosTable } from "@/components/recebimentos/RecebimentosTable";
+import { RecebimentosByAccount } from "@/components/recebimentos/RecebimentosByAccount";
 import { NewRecebimentoDialog } from "@/components/recebimentos/NewRecebimentoDialog";
 import { EditRecebimentoDialog } from "@/components/recebimentos/EditRecebimentoDialog";
 import { DeleteRecebimentoDialog } from "@/components/recebimentos/DeleteRecebimentoDialog";
@@ -82,11 +84,34 @@ export default function Recebimentos() {
           {recebimentos.length === 0 ? (
             <EmptyRecebimentosState onNewRecebimento={openNewDialog} />
           ) : (
-            <RecebimentosTable
-              recebimentos={recebimentos}
-              onEdit={openEditDialog}
-              onDelete={openDeleteDialog}
-            />
+            <Tabs defaultValue="table" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="table" className="flex items-center gap-2">
+                  <Table className="h-4 w-4" />
+                  Lista Completa
+                </TabsTrigger>
+                <TabsTrigger value="accounts" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Por Conta Bancária
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="table" className="mt-6">
+                <RecebimentosTable
+                  recebimentos={recebimentos}
+                  onEdit={openEditDialog}
+                  onDelete={openDeleteDialog}
+                />
+              </TabsContent>
+              
+              <TabsContent value="accounts" className="mt-6">
+                <RecebimentosByAccount
+                  recebimentos={recebimentos}
+                  onEdit={openEditDialog}
+                  onDelete={openDeleteDialog}
+                />
+              </TabsContent>
+            </Tabs>
           )}
         </CardContent>
       </Card>
