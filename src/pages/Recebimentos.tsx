@@ -8,6 +8,7 @@ import { useRecebimentos } from "@/hooks/useRecebimentos";
 import { RecebimentosTable } from "@/components/recebimentos/RecebimentosTable";
 import { RecebimentosFilters } from "@/components/recebimentos/RecebimentosFilters";
 import { NovoRecebimentoDialog } from "@/components/recebimentos/NovoRecebimentoDialog";
+import { ContasBancariasSection } from "@/components/recebimentos/ContasBancariasSection";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 
 export default function Recebimentos() {
@@ -68,6 +69,8 @@ export default function Recebimentos() {
           </CardContent>
         </Card>
       </div>
+
+      <ContasBancariasSection />
 
       <Card>
         <CardHeader>

@@ -77,3 +77,72 @@ export function useAddContaBancaria() {
     },
   });
 }
+
+export function useUpdateContaBancaria() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      id: number;
+      nome: string;
+      banco: string;
+      agencia: string;
+      conta: string;
+      titular: string;
+    }) => {
+      const { id, ...updateData } = data;
+      const { data: result, error } = await supabase
+        .from("contas_bancarias")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contas-bancarias"] });
+      toast({
+        title: "Conta bancária atualizada",
+        description: "A conta foi atualizada com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar conta",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useDeleteContaBancaria() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from("contas_bancarias")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contas-bancarias"] });
+      toast({
+        title: "Conta bancária excluída",
+        description: "A conta foi excluída com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir conta",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}

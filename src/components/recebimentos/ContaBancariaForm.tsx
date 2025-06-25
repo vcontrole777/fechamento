@@ -19,17 +19,18 @@ type ContaBancariaFormValues = z.infer<typeof contaBancariaSchema>;
 interface ContaBancariaFormProps {
   onSubmit: (values: ContaBancariaFormValues) => void;
   isSubmitting?: boolean;
+  defaultValues?: Partial<ContaBancariaFormValues>;
 }
 
-export function ContaBancariaForm({ onSubmit, isSubmitting = false }: ContaBancariaFormProps) {
+export function ContaBancariaForm({ onSubmit, isSubmitting = false, defaultValues }: ContaBancariaFormProps) {
   const form = useForm<ContaBancariaFormValues>({
     resolver: zodResolver(contaBancariaSchema),
     defaultValues: {
-      nome: "",
-      banco: "",
-      agencia: "",
-      conta: "",
-      titular: "",
+      nome: defaultValues?.nome || "",
+      banco: defaultValues?.banco || "",
+      agencia: defaultValues?.agencia || "",
+      conta: defaultValues?.conta || "",
+      titular: defaultValues?.titular || "",
     },
   });
 
