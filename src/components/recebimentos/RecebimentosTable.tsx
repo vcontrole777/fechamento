@@ -11,6 +11,19 @@ interface RecebimentosTableProps {
   formatCurrency: (value: number) => string;
 }
 
+interface GroupedRecebimento {
+  key: string;
+  tripeiro: { id: number; nome: string } | undefined;
+  data: string;
+  conta: string;
+  banco: string;
+  totalValor: number;
+  recebimentos: Recebimento[];
+  tipos: string[];
+  comprovantes: string[];
+  observacoes: string[];
+}
+
 export function RecebimentosTable({ recebimentos, formatCurrency }: RecebimentosTableProps) {
   const formatDate = (dateString: string) => {
     try {
@@ -36,6 +49,54 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     return tipos[tipo] || tipo;
   };
 
+  // Função para agrupar recebimentos
+  const groupRecebimentos = (recebimentos: Recebimento[]): GroupedRecebimento[] => {
+    const groups = new Map<string, GroupedRecebimento>();
+
+    recebimentos.forEach(recebimento => {
+      const key = `${recebimento.id_tripeiro}-${recebimento.data}-${recebimento.conta_depositada || 'sem-conta'}`;
+      
+      if (groups.has(key)) {
+        const existing = groups.get(key)!;
+        existing.totalValor += Number(recebimento.valor);
+        existing.recebimentos.push(recebimento);
+        
+        // Adicionar tipos únicos
+        const tipoFormatado = formatTipoDeposito(recebimento.tipo_deposito);
+        if (tipoFormatado !== "-" && !existing.tipos.includes(tipoFormatado)) {
+          existing.tipos.push(tipoFormatado);
+        }
+        
+        // Adicionar comprovantes únicos
+        if (recebimento.numero_comprovante && !existing.comprovantes.includes(recebimento.numero_comprovante)) {
+          existing.comprovantes.push(recebimento.numero_comprovante);
+        }
+        
+        // Adicionar observações únicas
+        if (recebimento.observacoes && !existing.observacoes.includes(recebimento.observacoes)) {
+          existing.observacoes.push(recebimento.observacoes);
+        }
+      } else {
+        groups.set(key, {
+          key,
+          tripeiro: recebimento.tripeiro,
+          data: recebimento.data,
+          conta: recebimento.conta_depositada || "-",
+          banco: recebimento.banco || "-",
+          totalValor: Number(recebimento.valor),
+          recebimentos: [recebimento],
+          tipos: recebimento.tipo_deposito ? [formatTipoDeposito(recebimento.tipo_deposito)] : [],
+          comprovantes: recebimento.numero_comprovante ? [recebimento.numero_comprovante] : [],
+          observacoes: recebimento.observacoes ? [recebimento.observacoes] : []
+        });
+      }
+    });
+
+    return Array.from(groups.values()).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  };
+
+  const groupedRecebimentos = groupRecebimentos(recebimentos);
+
   return (
     <div className="rounded-md border overflow-hidden">
       <Table>
@@ -43,39 +104,70 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
           <TableRow>
             <TableHead>Data</TableHead>
             <TableHead>Tripeiro</TableHead>
-            <TableHead>Valor</TableHead>
+            <TableHead>Valor Total</TableHead>
             <TableHead>Banco</TableHead>
             <TableHead>Conta</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Comprovante</TableHead>
+            <TableHead>Tipos</TableHead>
+            <TableHead>Comprovantes</TableHead>
             <TableHead>Observações</TableHead>
             <TableHead className="w-20">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {recebimentos.length === 0 ? (
+          {groupedRecebimentos.length === 0 ? (
             <TableRow>
               <TableCell colSpan={9} className="h-24 text-center">
                 Nenhum recebimento encontrado.
               </TableCell>
             </TableRow>
           ) : (
-            recebimentos.map((recebimento) => (
-              <TableRow key={recebimento.id}>
-                <TableCell>{formatDate(recebimento.data)}</TableCell>
-                <TableCell>{recebimento.tripeiro?.nome || "N/A"}</TableCell>
-                <TableCell>{formatCurrency(Number(recebimento.valor))}</TableCell>
-                <TableCell>{recebimento.banco || "-"}</TableCell>
-                <TableCell>{recebimento.conta_depositada || "-"}</TableCell>
-                <TableCell>{formatTipoDeposito(recebimento.tipo_deposito)}</TableCell>
-                <TableCell>{recebimento.numero_comprovante || "-"}</TableCell>
-                <TableCell className="max-w-[200px] truncate">
-                  {recebimento.observacoes || "-"}
+            groupedRecebimentos.map((group) => (
+              <TableRow key={group.key}>
+                <TableCell>{formatDate(group.data)}</TableCell>
+                <TableCell>{group.tripeiro?.nome || "N/A"}</TableCell>
+                <TableCell className="font-semibold">
+                  {formatCurrency(group.totalValor)}
+                  {group.recebimentos.length > 1 && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      ({group.recebimentos.length} registros)
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>{group.banco}</TableCell>
+                <TableCell>{group.conta}</TableCell>
+                <TableCell>
+                  {group.tipos.length > 0 ? group.tipos.join(", ") : "-"}
+                </TableCell>
+                <TableCell className="max-w-[150px]">
+                  {group.comprovantes.length > 0 ? (
+                    <div className="truncate" title={group.comprovantes.join(", ")}>
+                      {group.comprovantes.join(", ")}
+                    </div>
+                  ) : (
+                    "-"
+                  )}
+                </TableCell>
+                <TableCell className="max-w-[200px]">
+                  {group.observacoes.length > 0 ? (
+                    <div className="truncate" title={group.observacoes.join(" | ")}>
+                      {group.observacoes.join(" | ")}
+                    </div>
+                  ) : (
+                    "-"
+                  )}
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <EditRecebimentoDialog recebimento={recebimento} />
-                    <DeleteRecebimentoDialog recebimento={recebimento} />
+                    {group.recebimentos.length === 1 ? (
+                      <>
+                        <EditRecebimentoDialog recebimento={group.recebimentos[0]} />
+                        <DeleteRecebimentoDialog recebimento={group.recebimentos[0]} />
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
+                        Agrupado
+                      </span>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
