@@ -293,7 +293,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
                     <SelectContent>
                       {contasBancarias.map((conta) => (
                         <SelectItem key={conta.id} value={conta.id.toString()}>
-                          {conta.nome} - {conta.banco}
+                          {conta.titular || "Titular não informado"} - {conta.banco}
                         </SelectItem>
                       ))}
                     </SelectContent>
