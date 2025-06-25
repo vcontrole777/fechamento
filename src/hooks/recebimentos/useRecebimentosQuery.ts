@@ -42,7 +42,16 @@ export function useRecebimentosQuery(dateRange?: DateRange) {
       }
 
       console.log("Fetched recebimentos:", data);
-      return data || [];
+      
+      // Transform the data to handle null responsavel
+      const transformedData = data?.map(recebimento => ({
+        ...recebimento,
+        responsavel: recebimento.responsavel && typeof recebimento.responsavel === 'object' && !Array.isArray(recebimento.responsavel) 
+          ? recebimento.responsavel 
+          : undefined
+      })) || [];
+
+      return transformedData;
     }
   });
 }
