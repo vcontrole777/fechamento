@@ -92,6 +92,22 @@ export function useAddRecebimento() {
       numero_comprovante?: string;
       observacoes?: string;
     }) => {
+      // Get the user's team ID from their profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id_equipe")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile?.id_equipe) {
+        throw new Error("Unable to get user team information");
+      }
+
       const baseRecebimento = {
         data: format(data.data, 'yyyy-MM-dd'),
         id_tripeiro: data.id_tripeiro,
@@ -101,7 +117,7 @@ export function useAddRecebimento() {
         tipo_deposito: data.tipo_deposito,
         numero_comprovante: data.numero_comprovante,
         observacoes: data.observacoes,
-        id_equipe: 1 // TODO: Get from user context
+        id_equipe: profile.id_equipe
       };
 
       // Se há valores em massa, criar múltiplos recebimentos
