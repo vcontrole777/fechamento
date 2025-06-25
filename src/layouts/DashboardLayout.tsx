@@ -21,12 +21,12 @@ export function DashboardLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className={cn(
-        "transition-all duration-300 fixed md:relative z-30",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-      )}>
-        <Sidebar />
-      </div>
+      <Sidebar 
+        className={cn(
+          "transition-all duration-300 fixed md:relative z-30",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )} 
+      />
       
       {/* Overlay for mobile when sidebar is open */}
       {isMobile && sidebarOpen && (

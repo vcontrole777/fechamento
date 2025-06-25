@@ -15,7 +15,6 @@ import Attendants from "./pages/Attendants";
 import Tripeiros from "./pages/Tripeiros";
 import Expenses from "./pages/Expenses";
 import Payments from "./pages/Payments";
-import Recebimentos from "./pages/Recebimentos";
 import Closing from "./pages/Closing";
 import AccountPage from "./pages/AccountPage";
 
@@ -45,7 +44,6 @@ const App = () => {
                 <Route path="/atendentes" element={<Attendants />} />
                 <Route path="/tripeiros" element={<Tripeiros />} />
                 <Route path="/despesas" element={<Expenses />} />
-                <Route path="/recebimentos" element={<Recebimentos />} />
                 <Route path="/fechamento" element={<Closing />} />
                 <Route path="/minha-conta" element={<AccountPage />} />
               </Route>
@@ -59,3 +57,4 @@ const App = () => {
 };
 
 export default App;
+
