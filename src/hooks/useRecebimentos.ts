@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -232,6 +233,91 @@ export function useAddRecebimento() {
       console.error("❌ Error in mutation:", error);
       toast({
         title: "Erro ao adicionar recebimento",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useUpdateRecebimento() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      id: number;
+      data: Date;
+      valor: number;
+      id_tripeiro: number;
+      banco?: string;
+      conta_depositada?: string;
+      tipo_deposito?: string;
+      numero_comprovante?: string;
+      observacoes?: string;
+    }) => {
+      const { data: result, error } = await supabase
+        .from("recebimentos")
+        .update({
+          data: format(data.data, 'yyyy-MM-dd'),
+          valor: data.valor,
+          id_tripeiro: data.id_tripeiro,
+          banco: data.banco,
+          conta_depositada: data.conta_depositada,
+          tipo_deposito: data.tipo_deposito,
+          numero_comprovante: data.numero_comprovante,
+          observacoes: data.observacoes,
+        })
+        .eq("id", data.id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recebimentos"] });
+      toast({
+        title: "Recebimento atualizado",
+        description: "O recebimento foi atualizado com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar recebimento",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useDeleteRecebimento() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from("recebimentos")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recebimentos"] });
+      toast({
+        title: "Recebimento excluído",
+        description: "O recebimento foi excluído com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir recebimento",
         description: error.message,
         variant: "destructive",
       });

@@ -15,7 +15,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useTripeiros } from "@/hooks/useTripeiros";
 import { useContasBancarias } from "@/hooks/useContasBancarias";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NovaContaBancariaDialog } from "./NovaContaBancariaDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -36,9 +36,10 @@ type RecebimentoFormValues = z.infer<typeof recebimentoSchema>;
 interface RecebimentoFormProps {
   onSubmit: (values: RecebimentoFormValues & { conta_info?: any }) => void;
   isSubmitting?: boolean;
+  defaultValues?: Partial<RecebimentoFormValues>;
 }
 
-export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoFormProps) {
+export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues }: RecebimentoFormProps) {
   const [showNovaContaDialog, setShowNovaContaDialog] = useState(false);
   const [valoresMassa, setValoresMassa] = useState<number[]>([]);
   const { tripeiros } = useTripeiros();
@@ -51,10 +52,24 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
       valor: 0,
       adicionar_em_massa: false,
       tipo_deposito: "deposito",
+      ...defaultValues,
     },
   });
 
+  // Update form values when defaultValues change
+  useEffect(() => {
+    if (defaultValues) {
+      Object.keys(defaultValues).forEach((key) => {
+        const value = defaultValues[key as keyof typeof defaultValues];
+        if (value !== undefined) {
+          form.setValue(key as keyof RecebimentoFormValues, value);
+        }
+      });
+    }
+  }, [defaultValues, form]);
+
   const adicionarEmMassa = form.watch("adicionar_em_massa");
+  const isEditMode = !!defaultValues;
 
   const adicionarValor = () => {
     setValoresMassa([...valoresMassa, 0]);
@@ -138,28 +153,30 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="adicionar_em_massa"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Adicionar valores em massa
-                  </FormLabel>
-                  <p className="text-sm text-muted-foreground">
-                    Permite adicionar múltiplos valores de uma vez
-                  </p>
-                </div>
-              </FormItem>
-            )}
-          />
+          {!isEditMode && (
+            <FormField
+              control={form.control}
+              name="adicionar_em_massa"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Adicionar valores em massa
+                    </FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      Permite adicionar múltiplos valores de uma vez
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
@@ -167,7 +184,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {adicionarEmMassa ? "Primeiro Valor" : "Valor"}
+                  {adicionarEmMassa && !isEditMode ? "Primeiro Valor" : "Valor"}
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -183,7 +200,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
             )}
           />
 
-          {adicionarEmMassa && (
+          {adicionarEmMassa && !isEditMode && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <FormLabel>Valores Adicionais</FormLabel>
@@ -241,7 +258,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tripeiro</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione um tripeiro" />
@@ -267,7 +284,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
               <FormItem>
                 <FormLabel>Conta Bancária</FormLabel>
                 <div className="flex gap-2">
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Selecione uma conta" />
@@ -301,7 +318,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tipo de Depósito</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue />
@@ -353,7 +370,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false }: RecebimentoF
 
           <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Salvando..." : `Salvar ${adicionarEmMassa && valoresMassa.filter(v => v > 0).length > 0 ? `${valoresMassa.filter(v => v > 0).length + 1} Recebimentos` : "Recebimento"}`}
+              {isSubmitting ? "Salvando..." : isEditMode ? "Atualizar Recebimento" : `Salvar ${adicionarEmMassa && valoresMassa.filter(v => v > 0).length > 0 ? `${valoresMassa.filter(v => v > 0).length + 1} Recebimentos` : "Recebimento"}`}
             </Button>
           </div>
         </form>

@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Recebimento } from "@/hooks/useRecebimentos";
+import { EditRecebimentoDialog } from "./EditRecebimentoDialog";
+import { DeleteRecebimentoDialog } from "./DeleteRecebimentoDialog";
 
 interface RecebimentosTableProps {
   recebimentos: Recebimento[];
@@ -47,12 +49,13 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
             <TableHead>Tipo</TableHead>
             <TableHead>Comprovante</TableHead>
             <TableHead>Observações</TableHead>
+            <TableHead className="w-20">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {recebimentos.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
+              <TableCell colSpan={9} className="h-24 text-center">
                 Nenhum recebimento encontrado.
               </TableCell>
             </TableRow>
@@ -68,6 +71,12 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                 <TableCell>{recebimento.numero_comprovante || "-"}</TableCell>
                 <TableCell className="max-w-[200px] truncate">
                   {recebimento.observacoes || "-"}
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <EditRecebimentoDialog recebimento={recebimento} />
+                    <DeleteRecebimentoDialog recebimento={recebimento} />
+                  </div>
                 </TableCell>
               </TableRow>
             ))
