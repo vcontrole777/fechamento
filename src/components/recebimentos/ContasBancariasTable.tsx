@@ -14,29 +14,27 @@ export function ContasBancariasTable({ contas }: ContasBancariasTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nome</TableHead>
+            <TableHead>Titular</TableHead>
             <TableHead>Banco</TableHead>
             <TableHead>Agência</TableHead>
             <TableHead>Conta</TableHead>
-            <TableHead>Titular</TableHead>
             <TableHead className="w-24">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {contas.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={5} className="h-24 text-center">
                 Nenhuma conta bancária encontrada.
               </TableCell>
             </TableRow>
           ) : (
             contas.map((conta) => (
               <TableRow key={conta.id}>
-                <TableCell className="font-medium">{conta.nome}</TableCell>
+                <TableCell className="font-medium">{conta.titular || "-"}</TableCell>
                 <TableCell>{conta.banco}</TableCell>
                 <TableCell>{conta.agencia}</TableCell>
                 <TableCell>{conta.conta}</TableCell>
-                <TableCell>{conta.titular || "-"}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <EditContaBancariaDialog conta={conta} />
