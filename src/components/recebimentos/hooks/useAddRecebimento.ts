@@ -23,12 +23,23 @@ export function useAddRecebimento() {
 
       if (!profile?.id_equipe) throw new Error("Equipe não encontrada");
 
-      if (data.multiplos && data.recebimentos) {
+      if (data.multiplos && data.recebimentos && Array.isArray(data.recebimentos)) {
         // Inserir múltiplos recebimentos
+        console.log("Processing multiple recebimentos:", data.recebimentos);
+        
         const recebimentosParaInserir = data.recebimentos.map((recebimento: NewRecebimento) => ({
-          ...recebimento,
+          id_tripeiro: recebimento.id_tripeiro,
+          valor: recebimento.valor,
+          data: recebimento.data,
+          observacoes: recebimento.observacoes || null,
+          conta_depositada: recebimento.conta_depositada || null,
+          numero_comprovante: recebimento.numero_comprovante || null,
+          banco: recebimento.banco || null,
+          tipo_deposito: recebimento.tipo_deposito || "deposito",
           id_equipe: profile.id_equipe,
         }));
+
+        console.log("Inserting multiple recebimentos:", recebimentosParaInserir);
 
         const { data: result, error } = await supabase
           .from("recebimentos")
@@ -40,15 +51,29 @@ export function useAddRecebimento() {
           throw error;
         }
 
+        console.log("Successfully inserted multiple recebimentos:", result);
         return result;
       } else {
         // Inserir um único recebimento
+        console.log("Processing single recebimento:", data);
+        
+        const recebimentoParaInserir = {
+          id_tripeiro: data.id_tripeiro,
+          valor: data.valor,
+          data: data.data,
+          observacoes: data.observacoes || null,
+          conta_depositada: data.conta_depositada || null,
+          numero_comprovante: data.numero_comprovante || null,
+          banco: data.banco || null,
+          tipo_deposito: data.tipo_deposito || "deposito",
+          id_equipe: profile.id_equipe,
+        };
+
+        console.log("Inserting single recebimento:", recebimentoParaInserir);
+
         const { data: result, error } = await supabase
           .from("recebimentos")
-          .insert({
-            ...data,
-            id_equipe: profile.id_equipe,
-          })
+          .insert(recebimentoParaInserir)
           .select()
           .single();
 
@@ -57,6 +82,7 @@ export function useAddRecebimento() {
           throw error;
         }
 
+        console.log("Successfully inserted single recebimento:", result);
         return result;
       }
     },

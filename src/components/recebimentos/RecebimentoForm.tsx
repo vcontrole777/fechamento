@@ -70,20 +70,38 @@ export function RecebimentoForm({
   };
 
   const handleSubmit = (data: any) => {
-    if (data.valor_em_massa && data.quantidade_recebimentos > 1) {
+    console.log("Form data received:", data);
+    
+    if (valorEmMassa && data.quantidade_recebimentos > 1) {
       // Criar múltiplos recebimentos
       const recebimentos = Array.from({ length: data.quantidade_recebimentos }, () => ({
-        ...data,
-        valor_em_massa: undefined,
-        quantidade_recebimentos: undefined,
+        id_tripeiro: data.id_tripeiro,
+        valor: data.valor,
+        data: data.data,
+        observacoes: data.observacoes,
+        conta_depositada: data.conta_depositada,
+        numero_comprovante: data.numero_comprovante,
+        banco: data.banco,
+        tipo_deposito: data.tipo_deposito,
       }));
+      
+      console.log("Sending multiple recebimentos:", recebimentos);
       onSubmit({ multiplos: true, recebimentos });
     } else {
-      onSubmit({
-        ...data,
-        valor_em_massa: undefined,
-        quantidade_recebimentos: undefined,
-      });
+      // Recebimento único
+      const recebimentoUnico = {
+        id_tripeiro: data.id_tripeiro,
+        valor: data.valor,
+        data: data.data,
+        observacoes: data.observacoes,
+        conta_depositada: data.conta_depositada,
+        numero_comprovante: data.numero_comprovante,
+        banco: data.banco,
+        tipo_deposito: data.tipo_deposito,
+      };
+      
+      console.log("Sending single recebimento:", recebimentoUnico);
+      onSubmit(recebimentoUnico);
     }
   };
 
