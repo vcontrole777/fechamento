@@ -38,7 +38,7 @@ export function RecebimentoForm({
   onCancel,
   isLoading
 }: RecebimentoFormProps) {
-  const { data: tripeiros = [] } = useTripeiros();
+  const { tripeiros } = useTripeiros();
 
   const form = useForm({
     resolver: zodResolver(recebimentoFormSchema),

@@ -15,7 +15,7 @@ import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 import { RecebimentosStats } from "@/components/recebimentos/RecebimentosStats";
 
 export default function Recebimentos() {
-  const { dateRange, setDateRange } = useSharedDateFilter();
+  const { dateRange, updateSharedDateFilter } = useSharedDateFilter();
   const { data: recebimentos = [], isLoading, error } = useRecebimentosQuery(dateRange);
   const {
     newDialogOpen,
@@ -28,6 +28,10 @@ export default function Recebimentos() {
     openDeleteDialog,
     closeDialogs
   } = useRecebimentosDialogState();
+
+  const handleDateFilterChange = (newDateRange: any, option: any) => {
+    updateSharedDateFilter(newDateRange, option);
+  };
 
   if (isLoading) {
     return (
@@ -66,7 +70,7 @@ export default function Recebimentos() {
         </Button>
       </div>
 
-      <DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
+      <DateFilter onFilterChange={handleDateFilterChange} />
 
       <RecebimentosStats recebimentos={recebimentos} />
 
