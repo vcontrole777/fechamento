@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Recebimento } from "@/hooks/useRecebimentos";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { EditRecebimentoDialog } from "./EditRecebimentoDialog";
+import { DeleteRecebimentoDialog } from "./DeleteRecebimentoDialog";
 
 interface ViewRecebimentoDetailsDialogProps {
   recebimentos: Recebimento[];
@@ -53,7 +55,7 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             Detalhes dos Recebimentos - {recebimentos[0]?.tripeiro?.nome}
@@ -85,6 +87,7 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
                   <TableHead>Comprovante</TableHead>
                   <TableHead>Observações</TableHead>
                   <TableHead>Criado em</TableHead>
+                  <TableHead className="w-24">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -110,6 +113,12 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {format(new Date(recebimento.criado_em), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <EditRecebimentoDialog recebimento={recebimento} />
+                        <DeleteRecebimentoDialog recebimento={recebimento} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

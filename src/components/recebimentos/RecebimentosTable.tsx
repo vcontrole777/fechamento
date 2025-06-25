@@ -5,6 +5,7 @@ import { Recebimento } from "@/hooks/useRecebimentos";
 import { EditRecebimentoDialog } from "./EditRecebimentoDialog";
 import { DeleteRecebimentoDialog } from "./DeleteRecebimentoDialog";
 import { ViewRecebimentoDetailsDialog } from "./ViewRecebimentoDetailsDialog";
+import { GroupedRecebimentoActions } from "./GroupedRecebimentoActions";
 
 interface RecebimentosTableProps {
   recebimentos: Recebimento[];
@@ -110,7 +111,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
             <TableHead>Tipos</TableHead>
             <TableHead>Comprovantes</TableHead>
             <TableHead>Observações</TableHead>
-            <TableHead className="w-32">Ações</TableHead>
+            <TableHead className="w-40">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -158,9 +159,13 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <ViewRecebimentoDetailsDialog 
+                      recebimentos={group.recebimentos}
+                      formatCurrency={formatCurrency}
+                    />
                     {group.recebimentos.length > 1 ? (
                       <>
-                        <ViewRecebimentoDetailsDialog 
+                        <GroupedRecebimentoActions 
                           recebimentos={group.recebimentos}
                           formatCurrency={formatCurrency}
                         />
@@ -170,10 +175,6 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                       </>
                     ) : (
                       <>
-                        <ViewRecebimentoDetailsDialog 
-                          recebimentos={group.recebimentos}
-                          formatCurrency={formatCurrency}
-                        />
                         <EditRecebimentoDialog recebimento={group.recebimentos[0]} />
                         <DeleteRecebimentoDialog recebimento={group.recebimentos[0]} />
                       </>
