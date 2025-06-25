@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -56,12 +55,23 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
   const getTitularByConta = (contaDepositada: string | null) => {
     if (!contaDepositada) return "-";
     
-    const conta = contasBancarias.find(c => 
-      c.nome === contaDepositada || 
-      `${c.banco} - ${c.agencia}/${c.conta}` === contaDepositada
-    );
+    // Primeiro tenta encontrar pela correspondência exata do nome
+    let conta = contasBancarias.find(c => c.nome === contaDepositada);
     
-    return conta?.titular || contaDepositada;
+    // Se não encontrar, tenta buscar pelo formato "banco - agencia/conta"
+    if (!conta) {
+      conta = contasBancarias.find(c => 
+        `${c.banco} - ${c.agencia}/${c.conta}` === contaDepositada
+      );
+    }
+    
+    // Se encontrou a conta e tem titular, retorna o titular
+    if (conta && conta.titular) {
+      return conta.titular;
+    }
+    
+    // Se não encontrou ou não tem titular, retorna "-"
+    return "-";
   };
 
   // Função para agrupar recebimentos
