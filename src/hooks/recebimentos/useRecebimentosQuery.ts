@@ -38,7 +38,12 @@ export function useRecebimentosQuery(dateRange?: DateRange) {
       }
 
       console.log("Fetched recebimentos:", data);
-      return data || [];
+      
+      // Converter os dados para o tipo Recebimento correto
+      return (data || []).map(item => ({
+        ...item,
+        tipo_deposito: item.tipo_deposito as "deposito" | "pix" | "especie"
+      }));
     }
   });
 }
