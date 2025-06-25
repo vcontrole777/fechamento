@@ -28,7 +28,6 @@ const recebimentoSchema = z.object({
   id_conta_bancaria: z.string().optional(),
   id_responsavel: z.string().optional(),
   tipo_deposito: z.string().optional(),
-  numero_comprovante: z.string().optional(),
   observacoes: z.string().optional(),
 });
 
@@ -295,9 +294,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="deposito">Depósito</SelectItem>
-                    <SelectItem value="transferencia">Transferência</SelectItem>
                     <SelectItem value="pix">PIX</SelectItem>
-                    <SelectItem value="ted">TED</SelectItem>
                     <SelectItem value="especie">Espécie</SelectItem>
                   </SelectContent>
                 </Select>
@@ -369,20 +366,6 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
               )}
             />
           )}
-
-          <FormField
-            control={form.control}
-            name="numero_comprovante"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Número do Comprovante</FormLabel>
-                <FormControl>
-                  <Input placeholder="Número do comprovante (opcional)" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}
