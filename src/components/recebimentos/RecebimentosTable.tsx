@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -128,7 +127,11 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                   )}
                 </TableCell>
                 <TableCell>{group.banco}</TableCell>
-                <TableCell>{group.conta}</TableCell>
+                <TableCell>
+                  {/* Buscar o titular da primeira conta bancária correspondente */}
+                  {group.recebimentos[0]?.conta_depositada ? 
+                    group.recebimentos[0]?.conta_depositada : "-"}
+                </TableCell>
                 <TableCell>
                   {group.tipos.length > 0 ? group.tipos.join(", ") : "-"}
                 </TableCell>
