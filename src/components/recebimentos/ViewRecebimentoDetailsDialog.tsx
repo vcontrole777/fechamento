@@ -50,11 +50,14 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
     }
     
     if (recebimento.conta_bancaria) {
-      return `${recebimento.conta_bancaria.banco} - ${recebimento.conta_bancaria.agencia}/${recebimento.conta_bancaria.conta}`;
+      const { banco, titular, agencia, conta } = recebimento.conta_bancaria;
+      return { banco, titular, agencia, conta };
     }
     
-    return "Conta não informada";
+    return null;
   };
+
+  const contaInfo = getContaInfo(recebimentos[0]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -72,9 +75,17 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
           <DialogTitle>
             Detalhes dos Recebimentos - {recebimentos[0]?.tripeiro?.nome}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {formatDate(recebimentos[0]?.data)} • {recebimentos[0]?.banco} • {getContaInfo(recebimentos[0])}
-          </p>
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p>{formatDate(recebimentos[0]?.data)}</p>
+            {contaInfo && (
+              <div className="space-y-1">
+                <p><strong>Banco:</strong> {contaInfo.banco}</p>
+                <p><strong>Titular:</strong> {contaInfo.titular || "Não informado"}</p>
+                <p><strong>Agência:</strong> {contaInfo.agencia}</p>
+                <p><strong>Conta:</strong> {contaInfo.conta}</p>
+              </div>
+            )}
+          </div>
         </DialogHeader>
         
         <div className="space-y-4">
