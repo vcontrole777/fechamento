@@ -131,7 +131,6 @@ export default function EditExpenseDialog({
         <ExpenseForm 
           defaultValues={getDefaultValues()} 
           onSubmit={handleSubmit}
-          submitButtonText="Salvar Alterações"
         />
       </DialogContent>
     </Dialog>
