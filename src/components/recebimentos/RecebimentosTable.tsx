@@ -54,7 +54,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
   };
 
   const getTitularByRecebimento = (recebimento: Recebimento) => {
-    console.log("🔍 Debug getTitularByRecebimento DETALHADO:");
+    console.log("🔍 Debug getTitularByRecebimento:");
     console.log("📋 Recebimento:", {
       id: recebimento.id,
       tipo_deposito: recebimento.tipo_deposito,
@@ -77,63 +77,67 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     }
     
     console.log("🔍 Buscando conta para:", recebimento.conta_depositada);
-    console.log("📊 Total de contas bancárias:", contasBancarias.length);
     
-    // Estratégia 1: Correspondência exata do nome
-    let conta = contasBancarias.find(c => {
-      const match = c.nome === recebimento.conta_depositada;
-      console.log(`🔍 Comparando "${c.nome}" === "${recebimento.conta_depositada}": ${match}`);
-      return match;
-    });
+    // Criar todas as possíveis variações de busca
+    const searchTerms = [
+      recebimento.conta_depositada,
+      recebimento.conta_depositada?.toLowerCase(),
+      recebimento.conta_depositada?.toUpperCase(),
+      recebimento.conta_depositada?.trim()
+    ].filter(Boolean);
     
-    if (conta) {
-      console.log("✅ Encontrou por nome exato:", conta);
-      return conta.titular || "Titular não informado";
-    }
-    
-    // Estratégia 2: Formato "banco - agencia/conta"
-    conta = contasBancarias.find(c => {
-      const formatoCompleto = `${c.banco} - ${c.agencia}/${c.conta}`;
-      const match = formatoCompleto === recebimento.conta_depositada;
-      console.log(`🔍 Comparando formato completo "${formatoCompleto}" === "${recebimento.conta_depositada}": ${match}`);
-      return match;
-    });
-    
-    if (conta) {
-      console.log("✅ Encontrou por formato completo:", conta);
-      return conta.titular || "Titular não informado";
-    }
-    
-    // Estratégia 3: Busca apenas pelo nome do banco
-    conta = contasBancarias.find(c => {
-      const match = c.banco === recebimento.conta_depositada;
-      console.log(`🔍 Comparando banco "${c.banco}" === "${recebimento.conta_depositada}": ${match}`);
-      return match;
-    });
-    
-    if (conta) {
-      console.log("✅ Encontrou por banco:", conta);
-      return conta.titular || "Titular não informado";
-    }
-    
-    // Estratégia 4: Busca flexível (contém)
-    conta = contasBancarias.find(c => {
-      const nomeContains = c.nome.toLowerCase().includes(recebimento.conta_depositada.toLowerCase());
-      const bancoContains = c.banco.toLowerCase().includes(recebimento.conta_depositada.toLowerCase());
-      const match = nomeContains || bancoContains;
-      console.log(`🔍 Busca flexível para "${recebimento.conta_depositada}":`, {
-        nome: c.nome,
-        banco: c.banco,
-        nomeContains,
-        bancoContains,
-        match
-      });
-      return match;
-    });
-    
-    if (conta) {
-      console.log("✅ Encontrou por busca flexível:", conta);
-      return conta.titular || "Titular não informado";
+    // Buscar conta bancária usando várias estratégias
+    for (const conta of contasBancarias) {
+      // Estratégia 1: Correspondência exata do nome
+      if (searchTerms.some(term => term === conta.nome)) {
+        console.log("✅ Encontrou por nome exato:", conta);
+        return conta.titular || "Titular não informado";
+      }
+      
+      // Estratégia 2: Formato "banco - agencia/conta"
+      const formatoCompleto = `${conta.banco} - ${conta.agencia}/${conta.conta}`;
+      if (searchTerms.some(term => term === formatoCompleto)) {
+        console.log("✅ Encontrou por formato completo:", conta);
+        return conta.titular || "Titular não informado";
+      }
+      
+      // Estratégia 3: Apenas pelo banco
+      if (searchTerms.some(term => term === conta.banco)) {
+        console.log("✅ Encontrou por banco:", conta);
+        return conta.titular || "Titular não informado";
+      }
+      
+      // Estratégia 4: Busca flexível (contém) - case insensitive
+      const searchLower = recebimento.conta_depositada.toLowerCase();
+      const nomeContains = conta.nome.toLowerCase().includes(searchLower);
+      const bancoContains = conta.banco.toLowerCase().includes(searchLower);
+      const formatoCompletoContains = formatoCompleto.toLowerCase().includes(searchLower);
+      const agenciaContaContains = `${conta.agencia}/${conta.conta}`.includes(searchLower);
+      
+      if (nomeContains || bancoContains || formatoCompletoContains || agenciaContaContains) {
+        console.log("✅ Encontrou por busca flexível:", conta);
+        return conta.titular || "Titular não informado";
+      }
+      
+      // Estratégia 5: Busca por partes (split por espaços e hífen)
+      const searchParts = recebimento.conta_depositada.toLowerCase().split(/[\s\-\/]+/);
+      const contaParts = [
+        ...conta.nome.toLowerCase().split(/[\s\-\/]+/),
+        ...conta.banco.toLowerCase().split(/[\s\-\/]+/),
+        conta.agencia,
+        conta.conta
+      ];
+      
+      const hasMatchingPart = searchParts.some(searchPart => 
+        searchPart.length > 2 && contaParts.some(contaPart => 
+          contaPart.toLowerCase().includes(searchPart) || searchPart.includes(contaPart.toLowerCase())
+        )
+      );
+      
+      if (hasMatchingPart) {
+        console.log("✅ Encontrou por partes:", conta);
+        return conta.titular || "Titular não informado";
+      }
     }
     
     console.log("❌ NENHUMA conta encontrada para:", recebimento.conta_depositada);
@@ -141,10 +145,13 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
       id: c.id,
       nome: c.nome,
       banco: c.banco,
+      agencia: c.agencia,
+      conta: c.conta,
       titular: c.titular
     })));
     
-    return "Conta não encontrada";
+    // Se não encontrou nada, retornar uma mensagem mais específica
+    return `Titular não encontrado (${recebimento.conta_depositada})`;
   };
 
   // Função para agrupar recebimentos
