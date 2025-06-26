@@ -48,31 +48,42 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
       transferencia: "Transferência",
       pix: "PIX",
       ted: "TED",
+      especie: "Espécie",
     };
     
     return tipos[tipo] || tipo;
   };
 
-  const getTitularByConta = (contaDepositada: string | null) => {
-    console.log("🔍 Debug getTitularByConta:", { contaDepositada, contasBancarias });
+  const getTitularByRecebimento = (recebimento: Recebimento) => {
+    console.log("🔍 Debug getTitularByRecebimento:", { recebimento, contasBancarias });
     
-    if (!contaDepositada) return "-";
+    // Para recebimentos em espécie, mostrar o responsável
+    if (recebimento.tipo_deposito === "especie") {
+      console.log("💰 Recebimento em espécie, responsável:", recebimento.responsavel?.nome);
+      return recebimento.responsavel?.nome || "-";
+    }
+    
+    // Para outros tipos, buscar pela conta bancária
+    if (!recebimento.conta_depositada) {
+      console.log("❌ Sem conta depositada");
+      return "-";
+    }
     
     // Primeiro tenta encontrar pela correspondência exata do nome
-    let conta = contasBancarias.find(c => c.nome === contaDepositada);
+    let conta = contasBancarias.find(c => c.nome === recebimento.conta_depositada);
     console.log("🔍 Busca por nome exato:", conta);
     
     // Se não encontrar, tenta buscar pelo formato "banco - agencia/conta"
     if (!conta) {
       conta = contasBancarias.find(c => 
-        `${c.banco} - ${c.agencia}/${c.conta}` === contaDepositada
+        `${c.banco} - ${c.agencia}/${c.conta}` === recebimento.conta_depositada
       );
       console.log("🔍 Busca por formato banco-agencia/conta:", conta);
     }
     
     // Se ainda não encontrou, tenta buscar apenas pelo nome do banco
     if (!conta) {
-      conta = contasBancarias.find(c => c.banco === contaDepositada);
+      conta = contasBancarias.find(c => c.banco === recebimento.conta_depositada);
       console.log("🔍 Busca por banco:", conta);
     }
     
@@ -82,7 +93,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
       return conta.titular;
     }
     
-    console.log("❌ Titular não encontrado para:", contaDepositada);
+    console.log("❌ Titular não encontrado para:", recebimento.conta_depositada);
     return "-";
   };
 
@@ -165,7 +176,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                 </TableCell>
                 <TableCell>{group.banco}</TableCell>
                 <TableCell>
-                  {getTitularByConta(group.recebimentos[0]?.conta_depositada)}
+                  {getTitularByRecebimento(group.recebimentos[0])}
                 </TableCell>
                 <TableCell>
                   {group.tipos.length > 0 ? group.tipos.join(", ") : "-"}
