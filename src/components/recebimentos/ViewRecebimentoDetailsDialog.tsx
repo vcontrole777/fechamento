@@ -59,6 +59,14 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
 
   const contaInfo = getContaInfo(recebimentos[0]);
 
+  // Função para formatar valores monetários no padrão brasileiro
+  const formatBrazilianCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -96,7 +104,7 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Total Geral:</span>
               <span className="text-lg font-bold text-green-600">
-                {formatCurrency(totalGeral)}
+                R$ {formatBrazilianCurrency(totalGeral)}
               </span>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
@@ -119,7 +127,7 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
                 {recebimentos.map((recebimento) => (
                   <TableRow key={recebimento.id}>
                     <TableCell className="font-semibold">
-                      {formatCurrency(Number(recebimento.valor))}
+                      R$ {formatBrazilianCurrency(Number(recebimento.valor))}
                     </TableCell>
                     <TableCell>
                       {formatTipoDeposito(recebimento.tipo_deposito)}
