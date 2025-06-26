@@ -33,7 +33,7 @@ export type Recebimento = {
     agencia: string;
     conta: string;
     nome: string;
-  };
+  } | null;
 };
 
 export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
@@ -75,7 +75,7 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
             *,
             tripeiro:pessoas!recebimentos_id_tripeiro_fkey(id, nome),
             responsavel:pessoas!recebimentos_id_responsavel_fkey(nome),
-            conta_bancaria:contas_bancarias!recebimentos_id_conta_bancaria_fkey(id, titular, banco, agencia, conta, nome)
+            conta_bancaria:contas_bancarias(id, titular, banco, agencia, conta, nome)
           `)
           .order("data", { ascending: false });
 
@@ -93,7 +93,7 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
           *,
           tripeiro:pessoas!recebimentos_id_tripeiro_fkey(id, nome),
           responsavel:pessoas!recebimentos_id_responsavel_fkey(nome),
-          conta_bancaria:contas_bancarias!recebimentos_id_conta_bancaria_fkey(id, titular, banco, agencia, conta, nome)
+          conta_bancaria:contas_bancarias(id, titular, banco, agencia, conta, nome)
         `)
         .eq("id_equipe", profile.id_equipe); // Filter by user's team
 
