@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -54,28 +55,26 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
   };
 
   const getTitularByRecebimento = (recebimento: Recebimento) => {
-    console.log("🔍 Debug getTitularByRecebimento:");
-    console.log("📋 Recebimento:", {
-      id: recebimento.id,
-      tipo_deposito: recebimento.tipo_deposito,
-      conta_depositada: recebimento.conta_depositada,
-      banco: recebimento.banco,
-      responsavel: recebimento.responsavel
-    });
+    console.log("🔍 INICIANDO getTitularByRecebimento para recebimento ID:", recebimento.id);
+    console.log("📋 Conta depositada:", recebimento.conta_depositada);
     
-    // Log detalhado das contas bancárias para verificar se titular existe
-    console.log("🏦 ANÁLISE DETALHADA das contas bancárias:");
+    // Log detalhado de TODAS as contas bancárias disponíveis
+    console.log("🏦 CONTAS BANCÁRIAS DISPONÍVEIS:");
+    console.log("Total de contas:", contasBancarias.length);
+    
     contasBancarias.forEach((conta, index) => {
-      console.log(`Conta ${index + 1}:`, {
-        id: conta.id,
-        nome: conta.nome,
-        banco: conta.banco,
-        agencia: conta.agencia,
-        conta: conta.conta,
-        titular: conta.titular, // ⭐ VERIFICANDO SE TITULAR EXISTE
-        titular_type: typeof conta.titular,
-        titular_length: conta.titular?.length || 0
-      });
+      console.log(`--- CONTA ${index + 1} ---`);
+      console.log("ID:", conta.id);
+      console.log("Nome:", conta.nome);
+      console.log("Banco:", conta.banco);
+      console.log("Agência:", conta.agencia);
+      console.log("Conta:", conta.conta);
+      console.log("Titular:", conta.titular);
+      console.log("Titular é null?", conta.titular === null);
+      console.log("Titular é undefined?", conta.titular === undefined);
+      console.log("Titular é string vazia?", conta.titular === "");
+      console.log("Tipo do titular:", typeof conta.titular);
+      console.log("--------------------");
     });
     
     // Para recebimentos em espécie, mostrar o responsável
@@ -92,16 +91,16 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     
     console.log("🔍 Buscando conta para:", recebimento.conta_depositada);
     
-    // Buscar conta bancária
+    // Testar cada estratégia de busca
     for (const conta of contasBancarias) {
-      console.log(`🔎 Testando conta: ${conta.nome} | Titular: "${conta.titular}"`);
+      console.log(`🔎 Testando conta ID ${conta.id}: ${conta.nome}`);
       
       // Estratégia 1: Correspondência exata do nome
       if (recebimento.conta_depositada === conta.nome) {
-        console.log("✅ Encontrou por nome exato:", conta);
-        console.log("🎯 Titular encontrado:", conta.titular);
-        if (!conta.titular) {
-          console.log("⚠️ ATENÇÃO: Conta encontrada mas titular está vazio/null!");
+        console.log("✅ MATCH por nome exato!");
+        console.log("🎯 Titular da conta encontrada:", conta.titular);
+        if (!conta.titular || conta.titular.trim() === "") {
+          console.log("⚠️ TITULAR VAZIO/NULL na conta encontrada!");
           return "Titular não cadastrado";
         }
         return conta.titular;
@@ -110,10 +109,10 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
       // Estratégia 2: Formato "banco - agencia/conta"
       const formatoCompleto = `${conta.banco} - ${conta.agencia}/${conta.conta}`;
       if (recebimento.conta_depositada === formatoCompleto) {
-        console.log("✅ Encontrou por formato completo:", conta);
-        console.log("🎯 Titular encontrado:", conta.titular);
-        if (!conta.titular) {
-          console.log("⚠️ ATENÇÃO: Conta encontrada mas titular está vazio/null!");
+        console.log("✅ MATCH por formato completo!");
+        console.log("🎯 Titular da conta encontrada:", conta.titular);
+        if (!conta.titular || conta.titular.trim() === "") {
+          console.log("⚠️ TITULAR VAZIO/NULL na conta encontrada!");
           return "Titular não cadastrado";
         }
         return conta.titular;
@@ -121,10 +120,10 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
       
       // Estratégia 3: Apenas pelo banco
       if (recebimento.conta_depositada === conta.banco) {
-        console.log("✅ Encontrou por banco:", conta);
-        console.log("🎯 Titular encontrado:", conta.titular);
-        if (!conta.titular) {
-          console.log("⚠️ ATENÇÃO: Conta encontrada mas titular está vazio/null!");
+        console.log("✅ MATCH por banco!");
+        console.log("🎯 Titular da conta encontrada:", conta.titular);
+        if (!conta.titular || conta.titular.trim() === "") {
+          console.log("⚠️ TITULAR VAZIO/NULL na conta encontrada!");
           return "Titular não cadastrado";
         }
         return conta.titular;
@@ -132,6 +131,13 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     }
     
     console.log("❌ NENHUMA conta encontrada para:", recebimento.conta_depositada);
+    console.log("📋 Valores disponíveis para comparação:");
+    contasBancarias.forEach(conta => {
+      console.log(`- Nome: "${conta.nome}"`);
+      console.log(`- Formato completo: "${conta.banco} - ${conta.agencia}/${conta.conta}"`);
+      console.log(`- Banco: "${conta.banco}"`);
+    });
+    
     return "Conta não encontrada";
   };
 
