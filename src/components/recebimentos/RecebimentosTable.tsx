@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -55,19 +54,35 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
   };
 
   const getTitularByRecebimento = (recebimento: Recebimento) => {
-    console.log("🔍 Debug getTitularByRecebimento:", { recebimento, contasBancarias });
+    console.log("🔍 Debug getTitularByRecebimento:", { 
+      recebimento: {
+        id: recebimento.id,
+        tipo_deposito: recebimento.tipo_deposito,
+        conta_depositada: recebimento.conta_depositada,
+        responsavel: recebimento.responsavel
+      }, 
+      contasBancarias: contasBancarias.map(c => ({
+        id: c.id,
+        nome: c.nome,
+        banco: c.banco,
+        titular: c.titular
+      }))
+    });
     
     // Para recebimentos em espécie, mostrar o responsável
     if (recebimento.tipo_deposito === "especie") {
       console.log("💰 Recebimento em espécie, responsável:", recebimento.responsavel?.nome);
-      return recebimento.responsavel?.nome || "-";
+      return recebimento.responsavel?.nome || "Responsável não informado";
     }
     
     // Para outros tipos, buscar pela conta bancária
     if (!recebimento.conta_depositada) {
       console.log("❌ Sem conta depositada");
-      return "-";
+      return "Conta não informada";
     }
+    
+    console.log("🔍 Tentando encontrar conta para:", recebimento.conta_depositada);
+    console.log("🔍 Contas disponíveis:", contasBancarias);
     
     // Primeiro tenta encontrar pela correspondência exata do nome
     let conta = contasBancarias.find(c => c.nome === recebimento.conta_depositada);
@@ -87,14 +102,14 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
       console.log("🔍 Busca por banco:", conta);
     }
     
-    // Se encontrou a conta e tem titular, retorna o titular
-    if (conta && conta.titular) {
-      console.log("✅ Titular encontrado:", conta.titular);
-      return conta.titular;
+    // Se encontrou a conta, retorna o titular
+    if (conta) {
+      console.log("✅ Conta encontrada:", conta);
+      return conta.titular || "Titular não informado";
     }
     
     console.log("❌ Titular não encontrado para:", recebimento.conta_depositada);
-    return "-";
+    return "Conta não encontrada";
   };
 
   // Função para agrupar recebimentos
