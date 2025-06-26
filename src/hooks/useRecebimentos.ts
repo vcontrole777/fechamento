@@ -11,6 +11,7 @@ export type Recebimento = {
   id_tripeiro: number;
   id_equipe: number;
   id_responsavel: number | null;
+  id_conta_bancaria: number | null;
   banco: string | null;
   conta_depositada: string | null;
   tipo_deposito: string | null;
@@ -23,6 +24,14 @@ export type Recebimento = {
     nome: string;
   };
   responsavel?: {
+    nome: string;
+  };
+  conta_bancaria?: {
+    id: number;
+    titular: string | null;
+    banco: string;
+    agencia: string;
+    conta: string;
     nome: string;
   };
 };
@@ -65,7 +74,8 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
           .select(`
             *,
             tripeiro:pessoas!recebimentos_id_tripeiro_fkey(id, nome),
-            responsavel:pessoas!recebimentos_id_responsavel_fkey(nome)
+            responsavel:pessoas!recebimentos_id_responsavel_fkey(nome),
+            conta_bancaria:contas_bancarias!recebimentos_id_conta_bancaria_fkey(id, titular, banco, agencia, conta, nome)
           `)
           .order("data", { ascending: false });
 
@@ -82,7 +92,8 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
         .select(`
           *,
           tripeiro:pessoas!recebimentos_id_tripeiro_fkey(id, nome),
-          responsavel:pessoas!recebimentos_id_responsavel_fkey(nome)
+          responsavel:pessoas!recebimentos_id_responsavel_fkey(nome),
+          conta_bancaria:contas_bancarias!recebimentos_id_conta_bancaria_fkey(id, titular, banco, agencia, conta, nome)
         `)
         .eq("id_equipe", profile.id_equipe); // Filter by user's team
 
@@ -141,8 +152,7 @@ export function useAddRecebimento() {
       valores_massa?: number[];
       id_tripeiro: number;
       id_responsavel?: number;
-      banco?: string;
-      conta_depositada?: string;
+      id_conta_bancaria?: number;
       tipo_deposito?: string;
       numero_comprovante?: string;
       observacoes?: string;
@@ -167,8 +177,7 @@ export function useAddRecebimento() {
         data: format(data.data, 'yyyy-MM-dd'),
         id_tripeiro: data.id_tripeiro,
         id_responsavel: data.id_responsavel,
-        banco: data.banco,
-        conta_depositada: data.conta_depositada,
+        id_conta_bancaria: data.id_conta_bancaria,
         tipo_deposito: data.tipo_deposito,
         numero_comprovante: data.numero_comprovante,
         observacoes: data.observacoes,
@@ -249,8 +258,7 @@ export function useUpdateRecebimento() {
       valor: number;
       id_tripeiro: number;
       id_responsavel?: number;
-      banco?: string;
-      conta_depositada?: string;
+      id_conta_bancaria?: number;
       tipo_deposito?: string;
       numero_comprovante?: string;
       observacoes?: string;
@@ -262,8 +270,7 @@ export function useUpdateRecebimento() {
           valor: data.valor,
           id_tripeiro: data.id_tripeiro,
           id_responsavel: data.id_responsavel,
-          banco: data.banco,
-          conta_depositada: data.conta_depositada,
+          id_conta_bancaria: data.id_conta_bancaria,
           tipo_deposito: data.tipo_deposito,
           numero_comprovante: data.numero_comprovante,
           observacoes: data.observacoes,

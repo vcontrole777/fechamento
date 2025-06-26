@@ -283,6 +283,7 @@ export type Database = {
           criado_em: string
           data: string
           id: number
+          id_conta_bancaria: number | null
           id_equipe: number
           id_responsavel: number | null
           id_tripeiro: number
@@ -298,6 +299,7 @@ export type Database = {
           criado_em?: string
           data: string
           id?: number
+          id_conta_bancaria?: number | null
           id_equipe: number
           id_responsavel?: number | null
           id_tripeiro: number
@@ -313,6 +315,7 @@ export type Database = {
           criado_em?: string
           data?: string
           id?: number
+          id_conta_bancaria?: number | null
           id_equipe?: number
           id_responsavel?: number | null
           id_tripeiro?: number
@@ -322,6 +325,13 @@ export type Database = {
           valor?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_recebimentos_conta_bancaria"
+            columns: ["id_conta_bancaria"]
+            isOneToOne: false
+            referencedRelation: "contas_bancarias"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "recebimentos_id_equipe_fkey"
             columns: ["id_equipe"]

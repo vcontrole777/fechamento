@@ -7,7 +7,6 @@ import { EditRecebimentoDialog } from "./EditRecebimentoDialog";
 import { DeleteRecebimentoDialog } from "./DeleteRecebimentoDialog";
 import { ViewRecebimentoDetailsDialog } from "./ViewRecebimentoDetailsDialog";
 import { GroupedRecebimentoActions } from "./GroupedRecebimentoActions";
-import { useContasBancarias } from "@/hooks/useContasBancarias";
 
 interface RecebimentosTableProps {
   recebimentos: Recebimento[];
@@ -20,6 +19,7 @@ interface GroupedRecebimento {
   data: string;
   conta: string;
   banco: string;
+  titular: string;
   totalValor: number;
   recebimentos: Recebimento[];
   tipos: string[];
@@ -27,8 +27,6 @@ interface GroupedRecebimento {
 }
 
 export function RecebimentosTable({ recebimentos, formatCurrency }: RecebimentosTableProps) {
-  const { data: contasBancarias = [] } = useContasBancarias();
-
   const formatDate = (dateString: string) => {
     try {
       const [year, month, day] = dateString.split('-').map(Number);
@@ -55,90 +53,41 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
   };
 
   const getTitularByRecebimento = (recebimento: Recebimento) => {
-    console.log("🔍 INICIANDO getTitularByRecebimento para recebimento ID:", recebimento.id);
-    console.log("📋 Conta depositada:", recebimento.conta_depositada);
-    
-    // Log detalhado de TODAS as contas bancárias disponíveis
-    console.log("🏦 CONTAS BANCÁRIAS DISPONÍVEIS:");
-    console.log("Total de contas:", contasBancarias.length);
-    
-    contasBancarias.forEach((conta, index) => {
-      console.log(`--- CONTA ${index + 1} ---`);
-      console.log("ID:", conta.id);
-      console.log("Nome:", conta.nome);
-      console.log("Banco:", conta.banco);
-      console.log("Agência:", conta.agencia);
-      console.log("Conta:", conta.conta);
-      console.log("Titular:", conta.titular);
-      console.log("Titular é null?", conta.titular === null);
-      console.log("Titular é undefined?", conta.titular === undefined);
-      console.log("Titular é string vazia?", conta.titular === "");
-      console.log("Tipo do titular:", typeof conta.titular);
-      console.log("--------------------");
-    });
-    
     // Para recebimentos em espécie, mostrar o responsável
     if (recebimento.tipo_deposito === "especie") {
-      console.log("💰 Recebimento em espécie, responsável:", recebimento.responsavel?.nome);
       return recebimento.responsavel?.nome || "Responsável não informado";
     }
     
-    // Para outros tipos, buscar pela conta bancária
-    if (!recebimento.conta_depositada) {
-      console.log("❌ Sem conta depositada");
-      return "Conta não informada";
+    // Para outros tipos, usar a conta bancária relacionada
+    if (recebimento.conta_bancaria) {
+      return recebimento.conta_bancaria.titular || "Titular não cadastrado";
     }
     
-    console.log("🔍 Buscando conta para:", recebimento.conta_depositada);
-    
-    // Testar cada estratégia de busca
-    for (const conta of contasBancarias) {
-      console.log(`🔎 Testando conta ID ${conta.id}: ${conta.nome}`);
-      
-      // Estratégia 1: Correspondência exata do nome
-      if (recebimento.conta_depositada === conta.nome) {
-        console.log("✅ MATCH por nome exato!");
-        console.log("🎯 Titular da conta encontrada:", conta.titular);
-        if (!conta.titular || conta.titular.trim() === "") {
-          console.log("⚠️ TITULAR VAZIO/NULL na conta encontrada!");
-          return "Titular não cadastrado";
-        }
-        return conta.titular;
-      }
-      
-      // Estratégia 2: Formato "banco - agencia/conta"
-      const formatoCompleto = `${conta.banco} - ${conta.agencia}/${conta.conta}`;
-      if (recebimento.conta_depositada === formatoCompleto) {
-        console.log("✅ MATCH por formato completo!");
-        console.log("🎯 Titular da conta encontrada:", conta.titular);
-        if (!conta.titular || conta.titular.trim() === "") {
-          console.log("⚠️ TITULAR VAZIO/NULL na conta encontrada!");
-          return "Titular não cadastrado";
-        }
-        return conta.titular;
-      }
-      
-      // Estratégia 3: Apenas pelo banco
-      if (recebimento.conta_depositada === conta.banco) {
-        console.log("✅ MATCH por banco!");
-        console.log("🎯 Titular da conta encontrada:", conta.titular);
-        if (!conta.titular || conta.titular.trim() === "") {
-          console.log("⚠️ TITULAR VAZIO/NULL na conta encontrada!");
-          return "Titular não cadastrado";
-        }
-        return conta.titular;
-      }
+    return "Conta não informada";
+  };
+
+  const getBancoByRecebimento = (recebimento: Recebimento) => {
+    if (recebimento.tipo_deposito === "especie") {
+      return "Espécie";
     }
     
-    console.log("❌ NENHUMA conta encontrada para:", recebimento.conta_depositada);
-    console.log("📋 Valores disponíveis para comparação:");
-    contasBancarias.forEach(conta => {
-      console.log(`- Nome: "${conta.nome}"`);
-      console.log(`- Formato completo: "${conta.banco} - ${conta.agencia}/${conta.conta}"`);
-      console.log(`- Banco: "${conta.banco}"`);
-    });
+    if (recebimento.conta_bancaria) {
+      return recebimento.conta_bancaria.banco;
+    }
     
-    return "Conta não encontrada";
+    return recebimento.banco || "Banco não informado";
+  };
+
+  const getContaByRecebimento = (recebimento: Recebimento) => {
+    if (recebimento.tipo_deposito === "especie") {
+      return "Espécie";
+    }
+    
+    if (recebimento.conta_bancaria) {
+      return recebimento.conta_bancaria.nome;
+    }
+    
+    return recebimento.conta_depositada || "Conta não informada";
   };
 
   // Função para agrupar recebimentos
@@ -146,7 +95,11 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     const groups = new Map<string, GroupedRecebimento>();
 
     recebimentos.forEach(recebimento => {
-      const key = `${recebimento.id_tripeiro}-${recebimento.data}-${recebimento.conta_depositada || 'sem-conta'}`;
+      const contaKey = recebimento.id_conta_bancaria ? 
+        `conta-${recebimento.id_conta_bancaria}` : 
+        `sem-conta-${recebimento.conta_depositada || 'unknown'}`;
+      
+      const key = `${recebimento.id_tripeiro}-${recebimento.data}-${contaKey}`;
       
       if (groups.has(key)) {
         const existing = groups.get(key)!;
@@ -168,8 +121,9 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
           key,
           tripeiro: recebimento.tripeiro,
           data: recebimento.data,
-          conta: recebimento.conta_depositada || "-",
-          banco: recebimento.banco || "-",
+          conta: getContaByRecebimento(recebimento),
+          banco: getBancoByRecebimento(recebimento),
+          titular: getTitularByRecebimento(recebimento),
           totalValor: Number(recebimento.valor),
           recebimentos: [recebimento],
           tipos: recebimento.tipo_deposito ? [formatTipoDeposito(recebimento.tipo_deposito)] : [],
@@ -219,9 +173,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
                   )}
                 </TableCell>
                 <TableCell>{group.banco}</TableCell>
-                <TableCell>
-                  {getTitularByRecebimento(group.recebimentos[0])}
-                </TableCell>
+                <TableCell>{group.titular}</TableCell>
                 <TableCell>
                   {group.tipos.length > 0 ? group.tipos.join(", ") : "-"}
                 </TableCell>

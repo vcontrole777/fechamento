@@ -34,7 +34,7 @@ const recebimentoSchema = z.object({
 type RecebimentoFormValues = z.infer<typeof recebimentoSchema>;
 
 interface RecebimentoFormProps {
-  onSubmit: (values: RecebimentoFormValues & { conta_info?: any }) => void;
+  onSubmit: (values: RecebimentoFormValues) => void;
   isSubmitting?: boolean;
   defaultValues?: Partial<RecebimentoFormValues>;
 }
@@ -90,20 +90,13 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
   };
 
   const handleSubmit = (values: RecebimentoFormValues) => {
-    const contaSelecionada = !isEspecieSelected ? contasBancarias.find(
-      conta => conta.id.toString() === values.id_conta_bancaria
-    ) : null;
-
     // Se estiver em modo massa, incluir os valores adicionais
     const valoresParaSubmeter = adicionarEmMassa ? {
       ...values,
       valores_massa: valoresMassa.filter(v => v > 0),
     } : values;
 
-    onSubmit({
-      ...valoresParaSubmeter,
-      conta_info: contaSelecionada,
-    });
+    onSubmit(valoresParaSubmeter);
   };
 
   const calcularTotalMassa = () => {
