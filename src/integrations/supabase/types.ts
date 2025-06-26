@@ -18,7 +18,6 @@ export type Database = {
           criado_em: string
           id: number
           id_equipe: number
-          nome: string
           titular: string | null
         }
         Insert: {
@@ -29,7 +28,6 @@ export type Database = {
           criado_em?: string
           id?: number
           id_equipe: number
-          nome: string
           titular?: string | null
         }
         Update: {
@@ -40,7 +38,6 @@ export type Database = {
           criado_em?: string
           id?: number
           id_equipe?: number
-          nome?: string
           titular?: string | null
         }
         Relationships: []

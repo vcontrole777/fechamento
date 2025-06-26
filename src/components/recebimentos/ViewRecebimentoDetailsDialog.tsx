@@ -50,7 +50,7 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
     }
     
     if (recebimento.conta_bancaria) {
-      return recebimento.conta_bancaria.nome;
+      return `${recebimento.conta_bancaria.banco} - ${recebimento.conta_bancaria.agencia}/${recebimento.conta_bancaria.conta}`;
     }
     
     return "Conta não informada";

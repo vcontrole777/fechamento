@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -84,7 +83,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     }
     
     if (recebimento.conta_bancaria) {
-      return recebimento.conta_bancaria.nome;
+      return `${recebimento.conta_bancaria.banco} - ${recebimento.conta_bancaria.agencia}/${recebimento.conta_bancaria.conta}`;
     }
     
     return "Conta não informada";

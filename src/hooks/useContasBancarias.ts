@@ -1,11 +1,9 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 export type ContaBancaria = {
   id: number;
-  nome: string;
   banco: string;
   agencia: string;
   conta: string;
@@ -22,7 +20,7 @@ export function useContasBancarias() {
       const { data, error } = await supabase
         .from("contas_bancarias")
         .select("*")
-        .order("nome");
+        .order("banco");
 
       if (error) {
         toast({
@@ -48,14 +46,10 @@ export function useAddContaBancaria() {
       conta: string;
       titular: string;
     }) => {
-      // Generate a default name based on bank and account info
-      const nome = `${data.banco} - ${data.agencia}/${data.conta}`;
-      
       const { data: result, error } = await supabase
         .from("contas_bancarias")
         .insert([{
           ...data,
-          nome,
           id_equipe: 1 // TODO: Get from user context
         }])
         .select()
@@ -93,12 +87,10 @@ export function useUpdateContaBancaria() {
       titular: string;
     }) => {
       const { id, ...updateData } = data;
-      // Generate a default name based on bank and account info
-      const nome = `${data.banco} - ${data.agencia}/${data.conta}`;
       
       const { data: result, error } = await supabase
         .from("contas_bancarias")
-        .update({ ...updateData, nome })
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
