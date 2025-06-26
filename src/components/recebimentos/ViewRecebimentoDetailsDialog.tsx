@@ -77,13 +77,16 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
           </DialogTitle>
           <div className="text-sm text-muted-foreground space-y-1">
             <p>{formatDate(recebimentos[0]?.data)}</p>
-            {contaInfo && (
+            {contaInfo && contaInfo !== "Espécie" && typeof contaInfo === "object" && (
               <div className="space-y-1">
                 <p><strong>Banco:</strong> {contaInfo.banco}</p>
                 <p><strong>Titular:</strong> {contaInfo.titular || "Não informado"}</p>
                 <p><strong>Agência:</strong> {contaInfo.agencia}</p>
                 <p><strong>Conta:</strong> {contaInfo.conta}</p>
               </div>
+            )}
+            {contaInfo === "Espécie" && (
+              <p><strong>Tipo:</strong> Pagamento em Espécie</p>
             )}
           </div>
         </DialogHeader>
