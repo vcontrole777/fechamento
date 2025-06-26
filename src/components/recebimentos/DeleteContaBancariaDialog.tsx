@@ -32,6 +32,8 @@ export function DeleteContaBancariaDialog({ conta }: DeleteContaBancariaDialogPr
     }
   };
 
+  const contaDisplayName = `${conta.banco} - ${conta.agencia}/${conta.conta}`;
+
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
@@ -47,7 +49,7 @@ export function DeleteContaBancariaDialog({ conta }: DeleteContaBancariaDialogPr
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir a conta bancária "{conta.nome}"?
+            Tem certeza que deseja excluir a conta bancária "{contaDisplayName}"?
             Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
