@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -96,7 +97,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
     recebimentos.forEach(recebimento => {
       const contaKey = recebimento.id_conta_bancaria ? 
         `conta-${recebimento.id_conta_bancaria}` : 
-        `sem-conta-${recebimento.conta_depositada || 'unknown'}`;
+        `sem-conta-unknown`;
       
       const key = `${recebimento.id_tripeiro}-${recebimento.data}-${contaKey}`;
       

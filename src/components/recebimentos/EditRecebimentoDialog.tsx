@@ -28,7 +28,6 @@ export function EditRecebimentoDialog({ recebimento }: EditRecebimentoDialogProp
         id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : undefined,
         id_conta_bancaria: values.id_conta_bancaria ? parseInt(values.id_conta_bancaria) : undefined,
         tipo_deposito: values.tipo_deposito,
-        numero_comprovante: values.numero_comprovante,
         observacoes: values.observacoes,
       };
 
@@ -48,7 +47,6 @@ export function EditRecebimentoDialog({ recebimento }: EditRecebimentoDialogProp
     id_responsavel: recebimento.id_responsavel?.toString(),
     id_conta_bancaria: recebimento.id_conta_bancaria?.toString(),
     tipo_deposito: recebimento.tipo_deposito || "deposito",
-    numero_comprovante: recebimento.numero_comprovante,
     observacoes: recebimento.observacoes,
   };
 

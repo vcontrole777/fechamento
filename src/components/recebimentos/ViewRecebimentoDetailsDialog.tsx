@@ -44,6 +44,18 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
 
   const totalGeral = recebimentos.reduce((total, recebimento) => total + Number(recebimento.valor), 0);
 
+  const getContaInfo = (recebimento: Recebimento) => {
+    if (recebimento.tipo_deposito === "especie") {
+      return "Espécie";
+    }
+    
+    if (recebimento.conta_bancaria) {
+      return recebimento.conta_bancaria.nome;
+    }
+    
+    return "Conta não informada";
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -61,7 +73,7 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
             Detalhes dos Recebimentos - {recebimentos[0]?.tripeiro?.nome}
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            {formatDate(recebimentos[0]?.data)} • {recebimentos[0]?.banco} • {recebimentos[0]?.conta_depositada}
+            {formatDate(recebimentos[0]?.data)} • {recebimentos[0]?.banco} • {getContaInfo(recebimentos[0])}
           </p>
         </DialogHeader>
         
