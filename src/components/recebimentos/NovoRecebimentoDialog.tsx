@@ -25,7 +25,6 @@ export function NovoRecebimentoDialog({ open, onOpenChange }: NovoRecebimentoDia
         id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : undefined,
         id_conta_bancaria: values.id_conta_bancaria ? parseInt(values.id_conta_bancaria) : undefined,
         tipo_deposito: values.tipo_deposito,
-        numero_comprovante: values.numero_comprovante,
         observacoes: values.observacoes,
       };
 

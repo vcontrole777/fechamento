@@ -13,9 +13,7 @@ export type Recebimento = {
   id_responsavel: number | null;
   id_conta_bancaria: number | null;
   banco: string | null;
-  conta_depositada: string | null;
   tipo_deposito: string | null;
-  numero_comprovante: string | null;
   observacoes: string | null;
   criado_em: string;
   atualizado_em: string;
@@ -154,7 +152,6 @@ export function useAddRecebimento() {
       id_responsavel?: number;
       id_conta_bancaria?: number;
       tipo_deposito?: string;
-      numero_comprovante?: string;
       observacoes?: string;
     }) => {
       // Get the user's team ID from their profile
@@ -179,7 +176,6 @@ export function useAddRecebimento() {
         id_responsavel: data.id_responsavel,
         id_conta_bancaria: data.id_conta_bancaria,
         tipo_deposito: data.tipo_deposito,
-        numero_comprovante: data.numero_comprovante,
         observacoes: data.observacoes,
         id_equipe: profile.id_equipe
       };
@@ -260,7 +256,6 @@ export function useUpdateRecebimento() {
       id_responsavel?: number;
       id_conta_bancaria?: number;
       tipo_deposito?: string;
-      numero_comprovante?: string;
       observacoes?: string;
     }) => {
       const { data: result, error } = await supabase
@@ -272,7 +267,6 @@ export function useUpdateRecebimento() {
           id_responsavel: data.id_responsavel,
           id_conta_bancaria: data.id_conta_bancaria,
           tipo_deposito: data.tipo_deposito,
-          numero_comprovante: data.numero_comprovante,
           observacoes: data.observacoes,
         })
         .eq("id", data.id)

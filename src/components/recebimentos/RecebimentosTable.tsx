@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -87,7 +86,7 @@ export function RecebimentosTable({ recebimentos, formatCurrency }: Recebimentos
       return recebimento.conta_bancaria.nome;
     }
     
-    return recebimento.conta_depositada || "Conta não informada";
+    return "Conta não informada";
   };
 
   // Função para agrupar recebimentos

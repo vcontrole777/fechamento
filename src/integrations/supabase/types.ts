@@ -279,7 +279,6 @@ export type Database = {
         Row: {
           atualizado_em: string
           banco: string | null
-          conta_depositada: string | null
           criado_em: string
           data: string
           id: number
@@ -287,7 +286,6 @@ export type Database = {
           id_equipe: number
           id_responsavel: number | null
           id_tripeiro: number
-          numero_comprovante: string | null
           observacoes: string | null
           tipo_deposito: string | null
           valor: number
@@ -295,7 +293,6 @@ export type Database = {
         Insert: {
           atualizado_em?: string
           banco?: string | null
-          conta_depositada?: string | null
           criado_em?: string
           data: string
           id?: number
@@ -303,7 +300,6 @@ export type Database = {
           id_equipe: number
           id_responsavel?: number | null
           id_tripeiro: number
-          numero_comprovante?: string | null
           observacoes?: string | null
           tipo_deposito?: string | null
           valor: number
@@ -311,7 +307,6 @@ export type Database = {
         Update: {
           atualizado_em?: string
           banco?: string | null
-          conta_depositada?: string | null
           criado_em?: string
           data?: string
           id?: number
@@ -319,7 +314,6 @@ export type Database = {
           id_equipe?: number
           id_responsavel?: number | null
           id_tripeiro?: number
-          numero_comprovante?: string | null
           observacoes?: string | null
           tipo_deposito?: string | null
           valor?: number
