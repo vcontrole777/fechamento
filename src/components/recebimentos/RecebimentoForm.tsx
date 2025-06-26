@@ -74,6 +74,26 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
   const tipoDeposito = form.watch("tipo_deposito");
   const isEspecieSelected = tipoDeposito === "especie";
 
+  // Função para formatar valores monetários no padrão brasileiro
+  const formatBrazilianCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
+  // Função para converter valor formatado para número
+  const parseBrazilianCurrency = (value: string): number => {
+    const cleanValue = value.replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleanValue) || 0;
+  };
+
+  // Função para formatar valor no input
+  const formatInputValue = (value: number): string => {
+    if (value === 0) return '';
+    return formatBrazilianCurrency(value);
+  };
+
   const adicionarValor = () => {
     setValoresMassa([...valoresMassa, 0]);
   };
@@ -184,11 +204,12 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
                 </FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    placeholder="0,00"
+                    value={formatInputValue(field.value)}
+                    onChange={(e) => {
+                      const numericValue = parseBrazilianCurrency(e.target.value);
+                      field.onChange(numericValue);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -214,11 +235,12 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
               {valoresMassa.map((valor, index) => (
                 <div key={index} className="flex gap-2">
                   <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={valor || ""}
-                    onChange={(e) => atualizarValor(index, parseFloat(e.target.value) || 0)}
+                    placeholder="0,00"
+                    value={formatInputValue(valor)}
+                    onChange={(e) => {
+                      const numericValue = parseBrazilianCurrency(e.target.value);
+                      atualizarValor(index, numericValue);
+                    }}
                     className="flex-1"
                   />
                   <Button
@@ -235,10 +257,7 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
               {valoresMassa.length > 0 && (
                 <div className="bg-muted p-3 rounded-lg">
                   <p className="text-sm font-medium">
-                    Total Geral: {new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL'
-                    }).format(calcularTotalMassa())}
+                    Total Geral: R$ {formatBrazilianCurrency(calcularTotalMassa())}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {valoresMassa.filter(v => v > 0).length + 1} recebimentos serão criados

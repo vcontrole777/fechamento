@@ -1,96 +1,62 @@
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { expenseFormSchema, ExpenseFormValues } from "./schemas/expenseFormSchema";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { expenseFormSchema, type ExpenseFormValues } from "./schemas/expenseFormSchema";
 import { useResponsaveis } from "./hooks/useResponsaveis";
-import { DialogFooter } from "@/components/ui/dialog";
 
 interface ExpenseFormProps {
-  defaultValues: Partial<ExpenseFormValues>;
-  onSubmit: (values: ExpenseFormValues) => Promise<void>;
-  submitButtonText?: string;
+  onSubmit: (values: ExpenseFormValues) => void;
+  isSubmitting?: boolean;
+  defaultValues?: Partial<ExpenseFormValues>;
 }
 
-export function ExpenseForm({
-  defaultValues,
-  onSubmit,
-  submitButtonText = "Salvar",
-}: ExpenseFormProps) {
+export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: ExpenseFormProps) {
+  const { data: responsaveis = [] } = useResponsaveis();
+  
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
-    defaultValues,
+    defaultValues: {
+      data: new Date(),
+      valor: 0,
+      descricao: "",
+      ...defaultValues,
+    },
   });
 
-  const { data: responsaveis, isLoading: isLoadingResponsaveis } = useResponsaveis();
+  // Função para formatar valores monetários no padrão brasileiro
+  const formatBrazilianCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
 
-  const handleSubmit = async (values: ExpenseFormValues) => {
-    console.log("Submitting expense form with date:", values.data);
-    await onSubmit(values);
-    form.reset();
+  // Função para converter valor formatado para número
+  const parseBrazilianCurrency = (value: string): number => {
+    const cleanValue = value.replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleanValue) || 0;
+  };
+
+  // Função para formatar valor no input
+  const formatInputValue = (value: number): string => {
+    if (value === 0) return '';
+    return formatBrazilianCurrency(value);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="descricao"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descrição</FormLabel>
-              <FormControl>
-                <Input placeholder="Descrição da despesa" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="valor"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="0,00"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="data"
@@ -101,7 +67,7 @@ export function ExpenseForm({
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
-                      variant={"outline"}
+                      variant="outline"
                       className={cn(
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
@@ -120,32 +86,9 @@ export function ExpenseForm({
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={(date) => {
-                      if (date) {
-                        console.log("Calendar date selected for expense:", date);
-                        console.log("Selected date components:", {
-                          year: date.getFullYear(),
-                          month: date.getMonth() + 1,
-                          day: date.getDate()
-                        });
-                        
-                        // Create a new date with only the date part to avoid timezone issues
-                        const normalizedDate = new Date(
-                          date.getFullYear(), 
-                          date.getMonth(), 
-                          date.getDate(), 
-                          12, // noon to avoid any timezone issues
-                          0, 
-                          0
-                        );
-                        
-                        console.log("Normalized expense date:", normalizedDate.toISOString());
-                        field.onChange(normalizedDate);
-                      }
-                    }}
+                    onSelect={field.onChange}
+                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                     initialFocus
-                    locale={ptBR}
-                    className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
               </Popover>
@@ -153,28 +96,64 @@ export function ExpenseForm({
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="valor"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Valor</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="0,00"
+                  value={formatInputValue(field.value)}
+                  onChange={(e) => {
+                    const numericValue = parseBrazilianCurrency(e.target.value);
+                    field.onChange(numericValue);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="descricao"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descrição</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descrição da despesa"
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="id_responsavel"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Responsável</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                value={field.value}
+              <Select 
+                onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
+                value={field.value ? field.value.toString() : undefined}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um responsável" />
+                    <SelectValue placeholder="Selecione um responsável (opcional)" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {responsaveis?.map((responsavel) => (
-                    <SelectItem
-                      key={responsavel.id}
-                      value={responsavel.id.toString()}
-                    >
+                  {responsaveis.map((responsavel) => (
+                    <SelectItem key={responsavel.id} value={responsavel.id.toString()}>
                       {responsavel.nome}
                     </SelectItem>
                   ))}
@@ -184,9 +163,12 @@ export function ExpenseForm({
             </FormItem>
           )}
         />
-        <DialogFooter>
-          <Button type="submit">{submitButtonText}</Button>
-        </DialogFooter>
+
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Salvando..." : "Salvar Despesa"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
