@@ -295,14 +295,14 @@ const Admin = () => {
               <Select
                 value={filters.equipe_id?.toString() || ""}
                 onValueChange={(value) =>
-                  setFilters({ ...filters, equipe_id: value ? Number(value) : undefined })
+                  setFilters({ ...filters, equipe_id: value === "all" ? undefined : Number(value) })
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todas as equipes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as equipes</SelectItem>
+                  <SelectItem value="all">Todas as equipes</SelectItem>
                   {allTeams.map((team) => (
                     <SelectItem key={team.id} value={team.id.toString()}>
                       {team.nome}
