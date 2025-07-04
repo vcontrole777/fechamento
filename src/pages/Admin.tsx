@@ -12,10 +12,16 @@ interface Team {
   id: number;
   nome: string;
   criado_em: string;
-  _count?: {
-    users: number;
-    pagamentos: number;
-    despesas: number;
+  stats?: {
+    total_atendentes: number;
+    total_tripeiros: number;
+    total_pagamentos: number;
+    valor_pagamentos: number;
+    total_despesas: number;
+    valor_despesas: number;
+    total_recebimentos: number;
+    valor_recebimentos: number;
+    usuarios_count: number;
   };
 }
 
@@ -51,6 +57,68 @@ const Admin = () => {
 
       if (teamsError) throw teamsError;
 
+      // Fetch team statistics
+      const teamsWithStats = await Promise.all(
+        (teamsData || []).map(async (team) => {
+          // Count atendentes
+          const { count: atendentesCount } = await supabase
+            .from("pessoas")
+            .select("*", { count: "exact", head: true })
+            .eq("id_equipe", team.id)
+            .eq("tipo", "atendente");
+
+          // Count tripeiros
+          const { count: tripeirosCount } = await supabase
+            .from("pessoas")
+            .select("*", { count: "exact", head: true })
+            .eq("id_equipe", team.id)
+            .eq("tipo", "tripeiro");
+
+          // Count users in team
+          const { count: usersCount } = await supabase
+            .from("profiles")
+            .select("*", { count: "exact", head: true })
+            .eq("id_equipe", team.id);
+
+          // Get pagamentos stats
+          const { data: pagamentosData } = await supabase
+            .from("pagamentos")
+            .select("valor")
+            .eq("id_equipe", team.id);
+
+          // Get despesas stats
+          const { data: despesasData } = await supabase
+            .from("despesas")
+            .select("valor")
+            .eq("id_equipe", team.id);
+
+          // Get recebimentos stats
+          const { data: recebimentosData } = await supabase
+            .from("recebimentos")
+            .select("valor")
+            .eq("id_equipe", team.id);
+
+          const pagamentosTotal = pagamentosData?.reduce((sum, p) => sum + Number(p.valor), 0) || 0;
+          const despesasTotal = despesasData?.reduce((sum, d) => sum + Number(d.valor), 0) || 0;
+          const recebimentosTotal = recebimentosData?.reduce((sum, r) => sum + Number(r.valor), 0) || 0;
+
+          return {
+            ...team,
+            stats: {
+              total_atendentes: atendentesCount || 0,
+              total_tripeiros: tripeirosCount || 0,
+              total_pagamentos: pagamentosData?.length || 0,
+              valor_pagamentos: pagamentosTotal,
+              total_despesas: despesasData?.length || 0,
+              valor_despesas: despesasTotal,
+              total_recebimentos: recebimentosData?.length || 0,
+              valor_recebimentos: recebimentosTotal,
+              usuarios_count: usersCount || 0,
+            }
+          };
+        })
+      );
+
       // Fetch users with team info
       const { data: usersData, error: usersError } = await supabase
         .from("profiles")
@@ -65,7 +133,7 @@ const Admin = () => {
 
       if (usersError) throw usersError;
 
-      setTeams(teamsData || []);
+      setTeams(teamsWithStats);
       setUsers(usersData || []);
     } catch (error) {
       console.error("Error fetching admin data:", error);
@@ -129,8 +197,8 @@ const Admin = () => {
       {loadingData ? (
         <div className="text-center py-12">Carregando dados...</div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Teams Section */}
+        <div className="grid gap-6">
+          {/* Teams Section - Full Width */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -139,19 +207,60 @@ const Admin = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {teams.map((team) => (
                   <div
                     key={team.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
+                    className="p-4 border rounded-lg space-y-3"
                   >
-                    <div>
-                      <h3 className="font-medium">{team.nome}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Criada em {new Date(team.criado_em).toLocaleDateString('pt-BR')}
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-lg">{team.nome}</h3>
+                      <Badge variant="outline">ID: {team.id}</Badge>
                     </div>
-                    <Badge variant="outline">ID: {team.id}</Badge>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Usuários:</span>
+                        <span className="font-medium">{team.stats?.usuarios_count || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Atendentes:</span>
+                        <span className="font-medium">{team.stats?.total_atendentes || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Tripeiros:</span>
+                        <span className="font-medium">{team.stats?.total_tripeiros || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Pagamentos:</span>
+                        <span className="font-medium">{team.stats?.total_pagamentos || 0}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 text-sm border-t pt-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Pagamentos:</span>
+                        <span className="font-medium text-green-600">
+                          R$ {(team.stats?.valor_pagamentos || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Despesas:</span>
+                        <span className="font-medium text-red-600">
+                          R$ {(team.stats?.valor_despesas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Recebimentos:</span>
+                        <span className="font-medium text-blue-600">
+                          R$ {(team.stats?.valor_recebimentos || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-muted-foreground border-t pt-2">
+                      Criada em {new Date(team.criado_em).toLocaleDateString('pt-BR')}
+                    </div>
                   </div>
                 ))}
               </div>
