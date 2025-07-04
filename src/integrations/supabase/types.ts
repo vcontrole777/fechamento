@@ -248,18 +248,21 @@ export type Database = {
           id: string
           id_equipe: number | null
           nome: string | null
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
           id: string
           id_equipe?: number | null
           nome?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
           id?: string
           id_equipe?: number | null
           nome?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Relationships: [
@@ -355,11 +358,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       status_pagamento: "concluido" | "pendente" | "bloqueado"
       tipo_pagamento: "boleto" | "pix"
       tipo_pessoa: "atendente" | "tripeiro" | "responsavel"
+      user_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -478,6 +486,7 @@ export const Constants = {
       status_pagamento: ["concluido", "pendente", "bloqueado"],
       tipo_pagamento: ["boleto", "pix"],
       tipo_pessoa: ["atendente", "tripeiro", "responsavel"],
+      user_role: ["admin", "user"],
     },
   },
 } as const

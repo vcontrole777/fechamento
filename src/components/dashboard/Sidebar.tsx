@@ -13,9 +13,11 @@ import {
   ChevronRight,
   LogOut,
   Banknote,
+  Settings,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth"; 
+import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "@/hooks/use-toast";
 
 interface SidebarProps {
@@ -25,8 +27,9 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { signOut } = useAuth();
+  const { isAdmin } = useUserRole();
 
-  const menuItems = [
+  const baseMenuItems = [
     { name: "Painel", icon: BarChart3, path: "/" },
     { name: "Pagamentos", icon: CircleDollarSign, path: "/pagamentos" },
     { name: "Atendentes", icon: Users, path: "/atendentes" },
@@ -34,7 +37,15 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Despesas", icon: Receipt, path: "/despesas" },
     { name: "Recebimentos", icon: Banknote, path: "/recebimentos" },
     { name: "Fechamento", icon: FileBarChart, path: "/fechamento" },
-    { name: "Minha Conta", icon: User, path: "/minha-conta" },
+  ];
+
+  const adminMenuItem = { name: "Administração", icon: Settings, path: "/admin" };
+  const accountMenuItem = { name: "Minha Conta", icon: User, path: "/minha-conta" };
+
+  const menuItems = [
+    ...baseMenuItems,
+    ...(isAdmin ? [adminMenuItem] : []),
+    accountMenuItem,
   ];
 
   const handleSignOut = async () => {
