@@ -5,14 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Users, Building2, Settings, Calendar as CalendarIcon, Filter, X } from "lucide-react";
+import { Users, Building2, Settings, Filter, X } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { DateFilter, DateFilterOption, DateRange } from "@/components/common/DateFilter";
 
 interface Team {
   id: number;
@@ -43,8 +40,7 @@ interface User {
 
 interface Filters {
   equipe_id?: number;
-  data_inicio?: Date;
-  data_fim?: Date;
+  dateRange: DateRange;
 }
 
 const Admin = () => {
@@ -52,7 +48,9 @@ const Admin = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [filters, setFilters] = useState<Filters>({});
+  const [filters, setFilters] = useState<Filters>({
+    dateRange: { from: null, to: null }
+  });
   const [allTeams, setAllTeams] = useState<{ id: number; nome: string }[]>([]);
 
   useEffect(() => {
@@ -121,11 +119,11 @@ const Admin = () => {
             .select("valor")
             .eq("id_equipe", team.id);
 
-          if (filters.data_inicio) {
-            pagamentosQuery = pagamentosQuery.gte("data", format(filters.data_inicio, "yyyy-MM-dd"));
+          if (filters.dateRange.from) {
+            pagamentosQuery = pagamentosQuery.gte("data", format(filters.dateRange.from, "yyyy-MM-dd"));
           }
-          if (filters.data_fim) {
-            pagamentosQuery = pagamentosQuery.lte("data", format(filters.data_fim, "yyyy-MM-dd"));
+          if (filters.dateRange.to) {
+            pagamentosQuery = pagamentosQuery.lte("data", format(filters.dateRange.to, "yyyy-MM-dd"));
           }
 
           const { data: pagamentosData } = await pagamentosQuery;
@@ -136,11 +134,11 @@ const Admin = () => {
             .select("valor")
             .eq("id_equipe", team.id);
 
-          if (filters.data_inicio) {
-            despesasQuery = despesasQuery.gte("data", format(filters.data_inicio, "yyyy-MM-dd"));
+          if (filters.dateRange.from) {
+            despesasQuery = despesasQuery.gte("data", format(filters.dateRange.from, "yyyy-MM-dd"));
           }
-          if (filters.data_fim) {
-            despesasQuery = despesasQuery.lte("data", format(filters.data_fim, "yyyy-MM-dd"));
+          if (filters.dateRange.to) {
+            despesasQuery = despesasQuery.lte("data", format(filters.dateRange.to, "yyyy-MM-dd"));
           }
 
           const { data: despesasData } = await despesasQuery;
@@ -151,11 +149,11 @@ const Admin = () => {
             .select("valor")
             .eq("id_equipe", team.id);
 
-          if (filters.data_inicio) {
-            recebimentosQuery = recebimentosQuery.gte("data", format(filters.data_inicio, "yyyy-MM-dd"));
+          if (filters.dateRange.from) {
+            recebimentosQuery = recebimentosQuery.gte("data", format(filters.dateRange.from, "yyyy-MM-dd"));
           }
-          if (filters.data_fim) {
-            recebimentosQuery = recebimentosQuery.lte("data", format(filters.data_fim, "yyyy-MM-dd"));
+          if (filters.dateRange.to) {
+            recebimentosQuery = recebimentosQuery.lte("data", format(filters.dateRange.to, "yyyy-MM-dd"));
           }
 
           const { data: recebimentosData } = await recebimentosQuery;
@@ -216,10 +214,16 @@ const Admin = () => {
   };
 
   const clearFilters = () => {
-    setFilters({});
+    setFilters({
+      dateRange: { from: null, to: null }
+    });
   };
 
-  const hasActiveFilters = Object.keys(filters).length > 0;
+  const hasActiveFilters = filters.equipe_id || filters.dateRange.from || filters.dateRange.to;
+
+  const handleDateFilterChange = (dateRange: DateRange, option: DateFilterOption) => {
+    setFilters({ ...filters, dateRange });
+  };
 
   const toggleUserRole = async (userId: string, currentRole: 'admin' | 'user') => {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
@@ -288,7 +292,7 @@ const Admin = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             {/* Team Filter */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Equipe</label>
@@ -312,68 +316,10 @@ const Admin = () => {
               </Select>
             </div>
 
-            {/* Date From Filter */}
+            {/* Period Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Data Início</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !filters.data_inicio && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.data_inicio ? (
-                      format(filters.data_inicio, "dd/MM/yyyy", { locale: ptBR })
-                    ) : (
-                      <span>Selecionar data</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.data_inicio}
-                    onSelect={(date) => setFilters({ ...filters, data_inicio: date })}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Date To Filter */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Data Fim</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !filters.data_fim && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.data_fim ? (
-                      format(filters.data_fim, "dd/MM/yyyy", { locale: ptBR })
-                    ) : (
-                      <span>Selecionar data</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.data_fim}
-                    onSelect={(date) => setFilters({ ...filters, data_fim: date })}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+              <label className="text-sm font-medium">Período</label>
+              <DateFilter onFilterChange={handleDateFilterChange} />
             </div>
           </div>
         </CardContent>
