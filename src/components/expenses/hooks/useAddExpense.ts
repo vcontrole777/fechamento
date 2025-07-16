@@ -45,7 +45,7 @@ export function useAddExpense() {
       descricao: values.descricao,
       valor: values.valor,
       data: formattedDate,
-      id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : null,
+      id_responsavel: values.id_responsavel || null,
       id_equipe: id_equipe,
     });
 

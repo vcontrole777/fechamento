@@ -61,7 +61,7 @@ export default function EditExpenseDialog({
         descricao: expense.descricao,
         valor: expense.valor,
         data: parsedDate,
-        id_responsavel: expense.id_responsavel?.toString(),
+        id_responsavel: expense.id_responsavel,
       };
     } catch (error) {
       console.error("Error parsing expense date for form:", error);
@@ -70,7 +70,7 @@ export default function EditExpenseDialog({
         descricao: expense.descricao,
         valor: expense.valor,
         data: new Date(),
-        id_responsavel: expense.id_responsavel?.toString(),
+        id_responsavel: expense.id_responsavel,
       };
     }
   };
@@ -91,7 +91,7 @@ export default function EditExpenseDialog({
           descricao: values.descricao,
           valor: values.valor,
           data: formattedDate,
-          id_responsavel: values.id_responsavel ? parseInt(values.id_responsavel) : null,
+          id_responsavel: values.id_responsavel || null,
         })
         .eq("id", expense.id);
 

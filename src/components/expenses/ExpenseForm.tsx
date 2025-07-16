@@ -142,9 +142,9 @@ export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: E
           render={({ field }) => (
             <FormItem>
               <FormLabel>Responsável</FormLabel>
-              <Select 
+               <Select 
                 onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
-                value={field.value ? field.value.toString() : undefined}
+                value={field.value ? field.value.toString() : ""}
               >
                 <FormControl>
                   <SelectTrigger>
