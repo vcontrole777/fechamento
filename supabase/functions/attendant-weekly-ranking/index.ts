@@ -13,7 +13,31 @@ serve(async (req) => {
   }
 
   try {
-    const { teamId, startDate: customStartDate, endDate: customEndDate } = await req.json();
+    const { teamId, startDate: customStartDate, endDate: customEndDate, debug } = await req.json();
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Se modo debug, retornar informações sobre as equipes
+    if (debug) {
+      const { data: teams } = await supabase
+        .from("pagamentos")
+        .select("id_equipe")
+        .gte("data", "2025-07-01")
+        .lte("data", "2025-07-03");
+      
+      const uniqueTeams = [...new Set(teams?.map(t => t.id_equipe))];
+      
+      return new Response(
+        JSON.stringify({
+          message: "Equipes com dados entre 2025-07-01 e 2025-07-03",
+          teams: uniqueTeams,
+          totalRecords: teams?.length || 0
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (!teamId) {
       return new Response(
@@ -24,10 +48,6 @@ serve(async (req) => {
         }
       );
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Usar datas customizadas ou calcular semana atual
     let startDate, endDate;
@@ -63,37 +83,20 @@ serve(async (req) => {
 
     if (error) {
       console.error("Erro na consulta:", error);
-      throw new Error("Erro ao buscar dados");
+      return new Response(
+        JSON.stringify({ error: "Erro ao buscar dados: " + error.message }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     }
 
     console.log(`Query retornou ${payments?.length || 0} registros total`);
     
-    // Debug: verificar alguns registros
-    if (payments && payments.length > 0) {
-      console.log("Exemplo de pagamento encontrado:", JSON.stringify(payments[0]));
-      
-      // Contar por status
-      const statusCount = payments.reduce((acc, p) => {
-        acc[p.status] = (acc[p.status] || 0) + 1;
-        return acc;
-      }, {});
-      console.log("Contagem por status:", statusCount);
-    }
-
     // Filtrar apenas pagamentos concluídos
     const completedPayments = payments?.filter(p => p.status === "concluido") || [];
     console.log(`Pagamentos concluídos: ${completedPayments.length}`);
-
-    if (completedPayments.length === 0) {
-      // Debug: verificar se existem pagamentos para essa equipe em qualquer data
-      const { data: anyPayments } = await supabase
-        .from("pagamentos")
-        .select("id, data, status, id_equipe")
-        .eq("id_equipe", teamId)
-        .limit(5);
-      
-      console.log(`Debug - Qualquer pagamento da equipe ${teamId}:`, anyPayments);
-    }
 
     // Agrupar por atendente e calcular totais (apenas pagamentos concluídos)
     const rankingMap = new Map();
