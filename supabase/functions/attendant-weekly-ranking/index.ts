@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { teamId } = await req.json();
+    const { teamId, startDate: customStartDate, endDate: customEndDate } = await req.json();
 
     if (!teamId) {
       return new Response(
@@ -29,10 +29,16 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Calcular semana atual (domingo a sábado)
-    const now = new Date();
-    const startDate = startOfWeek(now, { weekStartsOn: 0 });
-    const endDate = endOfWeek(now, { weekStartsOn: 0 });
+    // Usar datas customizadas ou calcular semana atual
+    let startDate, endDate;
+    if (customStartDate && customEndDate) {
+      startDate = new Date(customStartDate);
+      endDate = new Date(customEndDate);
+    } else {
+      const now = new Date();
+      startDate = startOfWeek(now, { weekStartsOn: 0 });
+      endDate = endOfWeek(now, { weekStartsOn: 0 });
+    }
     
     const formattedStartDate = format(startDate, 'yyyy-MM-dd');
     const formattedEndDate = format(endDate, 'yyyy-MM-dd');
