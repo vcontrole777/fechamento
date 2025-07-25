@@ -51,12 +51,14 @@ serve(async (req) => {
       .select(`
         id_atendente,
         valor,
+        data,
+        status,
+        id_equipe,
         atendente:pessoas!pagamentos_id_atendente_fkey(nome)
       `)
       .eq("id_equipe", teamId)
       .gte("data", formattedStartDate)
       .lte("data", formattedEndDate)
-      .eq("status", "concluido")
       .not("id_atendente", "is", null);
 
     if (error) {
@@ -64,12 +66,39 @@ serve(async (req) => {
       throw new Error("Erro ao buscar dados");
     }
 
-    console.log(`Encontrados ${payments?.length || 0} pagamentos`);
+    console.log(`Query retornou ${payments?.length || 0} registros total`);
+    
+    // Debug: verificar alguns registros
+    if (payments && payments.length > 0) {
+      console.log("Exemplo de pagamento encontrado:", JSON.stringify(payments[0]));
+      
+      // Contar por status
+      const statusCount = payments.reduce((acc, p) => {
+        acc[p.status] = (acc[p.status] || 0) + 1;
+        return acc;
+      }, {});
+      console.log("Contagem por status:", statusCount);
+    }
 
-    // Agrupar por atendente e calcular totais
+    // Filtrar apenas pagamentos concluídos
+    const completedPayments = payments?.filter(p => p.status === "concluido") || [];
+    console.log(`Pagamentos concluídos: ${completedPayments.length}`);
+
+    if (completedPayments.length === 0) {
+      // Debug: verificar se existem pagamentos para essa equipe em qualquer data
+      const { data: anyPayments } = await supabase
+        .from("pagamentos")
+        .select("id, data, status, id_equipe")
+        .eq("id_equipe", teamId)
+        .limit(5);
+      
+      console.log(`Debug - Qualquer pagamento da equipe ${teamId}:`, anyPayments);
+    }
+
+    // Agrupar por atendente e calcular totais (apenas pagamentos concluídos)
     const rankingMap = new Map();
     
-    payments?.forEach(payment => {
+    completedPayments.forEach(payment => {
       const attendantId = payment.id_atendente;
       const attendantName = payment.atendente?.nome;
       const amount = Number(payment.valor) || 0;
