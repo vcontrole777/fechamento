@@ -16,24 +16,37 @@ serve(async (req) => {
     const { teamId, startDate: customStartDate, endDate: customEndDate, debug } = await req.json();
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Se modo debug, retornar informações sobre as equipes
     if (debug) {
-      const { data: teams } = await supabase
+      console.log("Modo debug ativado - buscando equipes com dados");
+      
+      const { data: teams, error: teamsError } = await supabase
         .from("pagamentos")
-        .select("id_equipe")
+        .select("id_equipe, data, status")
         .gte("data", "2025-07-01")
         .lte("data", "2025-07-03");
       
+      if (teamsError) {
+        console.error("Erro ao buscar equipes:", teamsError);
+        return new Response(
+          JSON.stringify({ error: "Erro ao buscar equipes: " + teamsError.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
       const uniqueTeams = [...new Set(teams?.map(t => t.id_equipe))];
+      
+      console.log(`Encontradas ${teams?.length} registros de ${uniqueTeams.length} equipes`);
       
       return new Response(
         JSON.stringify({
           message: "Equipes com dados entre 2025-07-01 e 2025-07-03",
           teams: uniqueTeams,
-          totalRecords: teams?.length || 0
+          totalRecords: teams?.length || 0,
+          sampleData: teams?.slice(0, 3) || []
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
