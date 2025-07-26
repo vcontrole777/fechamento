@@ -31,17 +31,42 @@ interface CurrencyInputProps extends Omit<React.ComponentProps<"input">, "onChan
 // Standalone Currency Input Component
 export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
   ({ className, value, onChange, ...props }, ref) => {
+    const [displayValue, setDisplayValue] = React.useState('');
+    const [isFocused, setIsFocused] = React.useState(false);
+
+    React.useEffect(() => {
+      if (!isFocused) {
+        setDisplayValue(formatInputValue(value));
+      }
+    }, [value, isFocused]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      setDisplayValue(inputValue);
+      const numericValue = parseBrazilianCurrency(inputValue);
+      onChange(numericValue);
+    };
+
+    const handleFocus = () => {
+      setIsFocused(true);
+      setDisplayValue(value > 0 ? value.toString().replace('.', ',') : '');
+    };
+
+    const handleBlur = () => {
+      setIsFocused(false);
+      setDisplayValue(formatInputValue(value));
+    };
+
     return (
       <Input
         {...props}
         ref={ref}
         className={className}
         placeholder="0,00"
-        value={formatInputValue(value)}
-        onChange={(e) => {
-          const numericValue = parseBrazilianCurrency(e.target.value);
-          onChange(numericValue);
-        }}
+        value={displayValue}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
     );
   }
