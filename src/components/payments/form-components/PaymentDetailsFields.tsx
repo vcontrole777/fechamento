@@ -38,6 +38,7 @@ export function PaymentDetailsFields({ control }: PaymentDetailsFieldsProps) {
               <SelectContent>
                 <SelectItem value="pix">PIX</SelectItem>
                 <SelectItem value="boleto">Boleto</SelectItem>
+                <SelectItem value="link">Link</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />

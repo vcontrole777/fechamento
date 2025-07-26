@@ -374,7 +374,7 @@ export type Database = {
     }
     Enums: {
       status_pagamento: "concluido" | "pendente" | "bloqueado"
-      tipo_pagamento: "boleto" | "pix"
+      tipo_pagamento: "boleto" | "pix" | "link"
       tipo_pessoa: "atendente" | "tripeiro" | "responsavel"
       user_role: "admin" | "user"
     }
@@ -505,7 +505,7 @@ export const Constants = {
   public: {
     Enums: {
       status_pagamento: ["concluido", "pendente", "bloqueado"],
-      tipo_pagamento: ["boleto", "pix"],
+      tipo_pagamento: ["boleto", "pix", "link"],
       tipo_pessoa: ["atendente", "tripeiro", "responsavel"],
       user_role: ["admin", "user"],
     },

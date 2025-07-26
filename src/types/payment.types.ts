@@ -15,7 +15,7 @@ export type Payment = {
   id: number;
   data: string;
   valor: number;
-  tipo: "boleto" | "pix";
+  tipo: "boleto" | "pix" | "link";
   status: "concluido" | "pendente" | "bloqueado";
   id_atendente: number | null;
   id_tripeiro: number | null;
