@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -12,6 +11,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CurrencyFormField } from "@/components/ui/currency-input";
 import { expenseFormSchema, type ExpenseFormValues } from "./schemas/expenseFormSchema";
 import { useResponsaveis } from "./hooks/useResponsaveis";
 
@@ -34,25 +34,6 @@ export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: E
     },
   });
 
-  // Função para formatar valores monetários no padrão brasileiro
-  const formatBrazilianCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
-  };
-
-  // Função para converter valor formatado para número
-  const parseBrazilianCurrency = (value: string): number => {
-    const cleanValue = value.replace(/\./g, '').replace(',', '.');
-    return parseFloat(cleanValue) || 0;
-  };
-
-  // Função para formatar valor no input
-  const formatInputValue = (value: number): string => {
-    if (value === 0) return '';
-    return formatBrazilianCurrency(value);
-  };
 
   return (
     <Form {...form}>
@@ -97,25 +78,10 @@ export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: E
           )}
         />
 
-        <FormField
+        <CurrencyFormField
           control={form.control}
           name="valor"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="0,00"
-                  value={formatInputValue(field.value)}
-                  onChange={(e) => {
-                    const numericValue = parseBrazilianCurrency(e.target.value);
-                    field.onChange(numericValue);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Valor"
         />
 
         <FormField

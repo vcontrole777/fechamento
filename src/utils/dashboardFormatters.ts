@@ -1,6 +1,7 @@
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatBrazilianCurrency } from "@/components/ui/currency-input";
 
 // Define a type for the status to ensure type safety
 type TransactionStatus = "completed" | "pending" | "failed";
@@ -23,10 +24,7 @@ export function formatRecentPayments(payments: any[]) {
       id: payment.id.toString(),
       name: payment.atendente?.nome || "Não atribuído",
       type: payment.tipo === "pix" ? "PIX" : "Boleto",
-      amount: payment.valor.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }),
+      amount: `R$ ${formatBrazilianCurrency(payment.valor)}`,
       status,
       date: format(new Date(payment.data), "dd/MM/yyyy", { locale: ptBR })
     };
@@ -40,10 +38,7 @@ export function formatRecentExpenses(expenses: any[]) {
     id: expense.id.toString(),
     name: expense.responsavel?.nome || expense.descricao,
     type: "Despesa",
-    amount: expense.valor.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }),
+    amount: `R$ ${formatBrazilianCurrency(expense.valor)}`,
     status: "completed" as TransactionStatus, // Explicitly type as TransactionStatus
     date: format(new Date(expense.data), "dd/MM/yyyy", { locale: ptBR })
   }));

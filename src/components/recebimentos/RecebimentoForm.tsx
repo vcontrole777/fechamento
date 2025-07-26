@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,6 +17,7 @@ import { useResponsaveis } from "@/components/expenses/hooks/useResponsaveis";
 import { useState, useEffect } from "react";
 import { NovaContaBancariaDialog } from "./NovaContaBancariaDialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CurrencyFormField, CurrencyInput, formatBrazilianCurrency, formatInputValue, parseBrazilianCurrency } from "@/components/ui/currency-input";
 
 const recebimentoSchema = z.object({
   data: z.date({ required_error: "Data é obrigatória" }),
@@ -74,25 +74,6 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
   const tipoDeposito = form.watch("tipo_deposito");
   const isEspecieSelected = tipoDeposito === "especie";
 
-  // Função para formatar valores monetários no padrão brasileiro
-  const formatBrazilianCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
-  };
-
-  // Função para converter valor formatado para número
-  const parseBrazilianCurrency = (value: string): number => {
-    const cleanValue = value.replace(/\./g, '').replace(',', '.');
-    return parseFloat(cleanValue) || 0;
-  };
-
-  // Função para formatar valor no input
-  const formatInputValue = (value: number): string => {
-    if (value === 0) return '';
-    return formatBrazilianCurrency(value);
-  };
 
   const adicionarValor = () => {
     setValoresMassa([...valoresMassa, 0]);
@@ -194,27 +175,10 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
             />
           )}
 
-          <FormField
+          <CurrencyFormField
             control={form.control}
             name="valor"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {adicionarEmMassa && !isEditMode ? "Primeiro Valor" : "Valor"}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="0,00"
-                    value={formatInputValue(field.value)}
-                    onChange={(e) => {
-                      const numericValue = parseBrazilianCurrency(e.target.value);
-                      field.onChange(numericValue);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label={adicionarEmMassa && !isEditMode ? "Primeiro Valor" : "Valor"}
           />
 
           {adicionarEmMassa && !isEditMode && (
@@ -234,13 +198,9 @@ export function RecebimentoForm({ onSubmit, isSubmitting = false, defaultValues 
               
               {valoresMassa.map((valor, index) => (
                 <div key={index} className="flex gap-2">
-                  <Input
-                    placeholder="0,00"
-                    value={formatInputValue(valor)}
-                    onChange={(e) => {
-                      const numericValue = parseBrazilianCurrency(e.target.value);
-                      atualizarValor(index, numericValue);
-                    }}
+                  <CurrencyInput
+                    value={valor}
+                    onChange={(numericValue) => atualizarValor(index, numericValue)}
                     className="flex-1"
                   />
                   <Button

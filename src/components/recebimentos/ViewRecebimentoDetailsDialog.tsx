@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Recebimento } from "@/hooks/useRecebimentos";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatBrazilianCurrency } from "@/components/ui/currency-input";
 import { EditRecebimentoDialog } from "./EditRecebimentoDialog";
 import { DeleteRecebimentoDialog } from "./DeleteRecebimentoDialog";
 
@@ -59,13 +60,6 @@ export function ViewRecebimentoDetailsDialog({ recebimentos, formatCurrency }: V
 
   const contaInfo = getContaInfo(recebimentos[0]);
 
-  // Função para formatar valores monetários no padrão brasileiro
-  const formatBrazilianCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
