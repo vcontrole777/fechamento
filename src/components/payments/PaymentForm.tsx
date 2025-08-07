@@ -100,11 +100,23 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   // Initialize percentages for editing mode
   useEffect(() => {
     if (payment && attendants.length > 0 && tripeiros.length > 0) {
+      console.log("Initializing edit mode for payment:", payment.id);
+      console.log("Payment tripeiro percentage:", payment.porcentagem_tripeiro);
+      
       // Check if payment has custom percentages
       const selectedTripeiro = tripeiros.find(t => t.id === payment.id_tripeiro);
+      console.log("Selected tripeiro:", selectedTripeiro);
+      
       if (selectedTripeiro && payment.porcentagem_tripeiro !== selectedTripeiro.porcentagem) {
+        console.log("Using custom percentage in edit mode");
         setUseCustomTripeiroPercentage(true);
         setCustomTripeiroPercentage(payment.porcentagem_tripeiro);
+      } else {
+        console.log("Using default percentage in edit mode");
+        setUseCustomTripeiroPercentage(false);
+        if (selectedTripeiro) {
+          setCustomTripeiroPercentage(selectedTripeiro.porcentagem);
+        }
       }
     }
   }, [payment, attendants, tripeiros]);
