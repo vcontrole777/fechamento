@@ -117,15 +117,21 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   };
 
   const handleSliderChange = (value: number[]) => {
+    console.log("Slider changed to:", value[0]);
     setCustomTripeiroPercentage(value[0]);
   };
 
   const handleToggleCustomPercentage = (value: boolean) => {
+    console.log("Toggle custom percentage:", value);
     setUseCustomTripeiroPercentage(value);
   };
 
   const handleSubmit = (values: PaymentFormValues) => {
     console.log("Submitting form with date:", values.data);
+    console.log("Use custom tripeiro percentage:", useCustomTripeiroPercentage);
+    console.log("Custom tripeiro percentage:", customTripeiroPercentage);
+    console.log("Selected tripeiro percentage:", selectedTripeiroPercentage);
+    
     // Ensure date is properly recorded as a Date object
     const date = values.data instanceof Date ? values.data : new Date(values.data);
     console.log("Date type:", Object.prototype.toString.call(date));
@@ -140,6 +146,8 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
     const tripeiroPercentageToSubmit = useCustomTripeiroPercentage 
       ? customTripeiroPercentage 
       : selectedTripeiroPercentage;
+    
+    console.log("Final tripeiro percentage to submit:", tripeiroPercentageToSubmit);
     
     onSubmit(submissionValues, selectedAttendantPercentage, tripeiroPercentageToSubmit);
   };
