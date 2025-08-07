@@ -24,6 +24,8 @@ export default function EditPaymentDialog({
   payment,
   onSuccess,
 }: EditPaymentDialogProps) {
+  console.log("EditPaymentDialog render - open:", open, "payment:", payment?.id);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { updatePayment } = useUpdatePayment();
 
