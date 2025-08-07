@@ -31,6 +31,8 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   const [useCustomTripeiroPercentage, setUseCustomTripeiroPercentage] = useState<boolean>(false);
   const [customTripeiroPercentage, setCustomTripeiroPercentage] = useState<number>(0);
 
+  console.log("PaymentForm render - useCustom:", useCustomTripeiroPercentage, "custom:", customTripeiroPercentage);
+
   const getInitialDate = () => {
     if (payment) {
       console.log("Payment date from database:", payment.data);
@@ -97,29 +99,32 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
     useCustomTripeiroPercentage
   ]);
 
-  // Initialize percentages for editing mode
+  // Initialize percentages for editing mode - run once when component mounts
   useEffect(() => {
-    if (payment && attendants.length > 0 && tripeiros.length > 0) {
-      console.log("Initializing edit mode for payment:", payment.id);
+    if (payment && tripeiros.length > 0) {
+      console.log("=== EDIT MODE INITIALIZATION ===");
+      console.log("Payment ID:", payment.id);
       console.log("Payment tripeiro percentage:", payment.porcentagem_tripeiro);
       
-      // Check if payment has custom percentages
       const selectedTripeiro = tripeiros.find(t => t.id === payment.id_tripeiro);
       console.log("Selected tripeiro:", selectedTripeiro);
       
-      if (selectedTripeiro && payment.porcentagem_tripeiro !== selectedTripeiro.porcentagem) {
-        console.log("Using custom percentage in edit mode");
-        setUseCustomTripeiroPercentage(true);
-        setCustomTripeiroPercentage(payment.porcentagem_tripeiro);
-      } else {
-        console.log("Using default percentage in edit mode");
-        setUseCustomTripeiroPercentage(false);
-        if (selectedTripeiro) {
+      if (selectedTripeiro) {
+        setSelectedTripeiroPercentage(selectedTripeiro.porcentagem);
+        
+        // If payment percentage differs from tripeiro default, enable custom mode
+        if (payment.porcentagem_tripeiro !== selectedTripeiro.porcentagem) {
+          console.log("Enabling custom percentage mode");
+          setUseCustomTripeiroPercentage(true);
+          setCustomTripeiroPercentage(payment.porcentagem_tripeiro);
+        } else {
+          console.log("Using default percentage");
+          setUseCustomTripeiroPercentage(false);
           setCustomTripeiroPercentage(selectedTripeiro.porcentagem);
         }
       }
     }
-  }, [payment, attendants, tripeiros]);
+  }, [payment?.id, tripeiros]); // Only depend on payment ID and tripeiros
 
   const handleTripeiroChange = (value: string) => {
     // Only reset custom percentage if we're not in editing mode with a custom percentage
