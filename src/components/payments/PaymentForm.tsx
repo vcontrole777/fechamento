@@ -83,6 +83,7 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
       const tripeiro = tripeiros.find(t => t.id.toString() === tripeiroId);
       if (tripeiro) {
         setSelectedTripeiroPercentage(tripeiro.porcentagem);
+        // Only update custom percentage if we're not already using a custom one
         if (!useCustomTripeiroPercentage) {
           setCustomTripeiroPercentage(tripeiro.porcentagem);
         }
@@ -96,8 +97,23 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
     useCustomTripeiroPercentage
   ]);
 
+  // Initialize percentages for editing mode
+  useEffect(() => {
+    if (payment && attendants.length > 0 && tripeiros.length > 0) {
+      // Check if payment has custom percentages
+      const selectedTripeiro = tripeiros.find(t => t.id === payment.id_tripeiro);
+      if (selectedTripeiro && payment.porcentagem_tripeiro !== selectedTripeiro.porcentagem) {
+        setUseCustomTripeiroPercentage(true);
+        setCustomTripeiroPercentage(payment.porcentagem_tripeiro);
+      }
+    }
+  }, [payment, attendants, tripeiros]);
+
   const handleTripeiroChange = (value: string) => {
-    setUseCustomTripeiroPercentage(false);
+    // Only reset custom percentage if we're not in editing mode with a custom percentage
+    if (!payment || !useCustomTripeiroPercentage) {
+      setUseCustomTripeiroPercentage(false);
+    }
   };
 
   const handleSliderChange = (value: number[]) => {
