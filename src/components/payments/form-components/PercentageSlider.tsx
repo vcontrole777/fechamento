@@ -1,5 +1,6 @@
 
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PercentageSliderProps {
   useCustomPercentage: boolean;
@@ -16,15 +17,18 @@ export function PercentageSlider({
   onPercentageChange,
   onToggleCustomPercentage,
 }: PercentageSliderProps) {
+  console.log("PercentageSlider render:", { useCustomPercentage, customPercentage, defaultPercentage });
+  
   return (
     <div className="space-y-4 p-4 bg-muted/50 rounded-md">
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
+        <Checkbox
           id="custom-percentage"
           checked={useCustomPercentage}
-          onChange={(e) => onToggleCustomPercentage(e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+          onCheckedChange={(checked) => {
+            console.log("Checkbox changed to:", checked);
+            onToggleCustomPercentage(checked === true);
+          }}
         />
         <label htmlFor="custom-percentage" className="text-sm font-medium">
           Personalizar porcentagem do tripeiro
@@ -44,7 +48,10 @@ export function PercentageSlider({
             min={0}
             max={50}
             step={0.5}
-            onValueChange={onPercentageChange}
+            onValueChange={(value) => {
+              console.log("Slider value changed to:", value[0]);
+              onPercentageChange(value);
+            }}
           />
           <div className="flex gap-2 justify-between text-xs text-muted-foreground">
             <span>0%</span>
