@@ -17,7 +17,9 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Save, Shield, Download } from "lucide-react";
+import { Save, Shield, Download, Trash2 } from "lucide-react";
+import { ClearDataDialog } from "@/components/ui/clear-data-dialog";
+import { useClearTeamData } from "@/hooks/useClearTeamData";
 
 const passwordSchema = z.object({
   password: z.string()
@@ -34,6 +36,7 @@ export default function AccountPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
+  const { clearTeamData, loading: clearLoading } = useClearTeamData();
   const [profileData, setProfileData] = useState<{
     nome: string | null;
     id_equipe: number | null;
@@ -191,6 +194,16 @@ export default function AccountPage() {
     }
   };
 
+  const handleClearData = async () => {
+    if (!profileData.id_equipe) return;
+    
+    const result = await clearTeamData(profileData.id_equipe);
+    if (result.success) {
+      // Optional: Reload the page or redirect to refresh data
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="container max-w-4xl p-6 space-y-6">
       <h1 className="text-2xl font-bold">Minha Conta</h1>
@@ -291,6 +304,32 @@ export default function AccountPage() {
           >
             {backupLoading ? "Gerando backup..." : "Fazer Backup dos Dados"}
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-5 w-5" />
+            Zona de Perigo
+          </CardTitle>
+          <CardDescription>Ações irreversíveis que afetam todos os dados da equipe</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+              <h4 className="font-medium text-destructive mb-2">Limpar Todos os Dados</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                Remove permanentemente todos os dados da equipe: pagamentos, recebimentos, despesas, 
+                contas bancárias e pessoas cadastradas. Esta ação não pode ser desfeita.
+              </p>
+              <ClearDataDialog
+                onConfirm={handleClearData}
+                loading={clearLoading}
+                teamName={profileData.equipeName || "Equipe"}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
