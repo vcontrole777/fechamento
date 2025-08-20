@@ -31,20 +31,20 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   const [useCustomTripeiroPercentage, setUseCustomTripeiroPercentage] = useState<boolean>(false);
   const [customTripeiroPercentage, setCustomTripeiroPercentage] = useState<number>(0);
 
-  console.log("PaymentForm render - useCustom:", useCustomTripeiroPercentage, "custom:", customTripeiroPercentage);
+  
 
   const getInitialDate = () => {
     if (payment) {
-      console.log("Payment date from database:", payment.data);
+      
       try {
         // Parse the date string in YYYY-MM-DD format
         const [year, month, day] = payment.data.split('-').map(num => parseInt(num));
-        console.log(`Creating date from parts: year=${year}, month=${month-1}, day=${day}`);
+        
         
         // Create a new date with the year, month (0-indexed), and day
         return new Date(year, month - 1, day);
       } catch (error) {
-        console.error("Error parsing date:", error);
+        
         return new Date();
       }
     }
@@ -102,23 +102,16 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   // Initialize percentages for editing mode - run once when component mounts
   useEffect(() => {
     if (payment && tripeiros.length > 0) {
-      console.log("=== EDIT MODE INITIALIZATION ===");
-      console.log("Payment ID:", payment.id);
-      console.log("Payment tripeiro percentage:", payment.porcentagem_tripeiro);
-      
       const selectedTripeiro = tripeiros.find(t => t.id === payment.id_tripeiro);
-      console.log("Selected tripeiro:", selectedTripeiro);
       
       if (selectedTripeiro) {
         setSelectedTripeiroPercentage(selectedTripeiro.porcentagem);
         
         // If payment percentage differs from tripeiro default, enable custom mode
         if (payment.porcentagem_tripeiro !== selectedTripeiro.porcentagem) {
-          console.log("Enabling custom percentage mode");
           setUseCustomTripeiroPercentage(true);
           setCustomTripeiroPercentage(payment.porcentagem_tripeiro);
         } else {
-          console.log("Using default percentage");
           setUseCustomTripeiroPercentage(false);
           setCustomTripeiroPercentage(selectedTripeiro.porcentagem);
         }
@@ -134,25 +127,16 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   };
 
   const handleSliderChange = (value: number[]) => {
-    console.log("Slider changed to:", value[0]);
     setCustomTripeiroPercentage(value[0]);
   };
 
   const handleToggleCustomPercentage = (value: boolean) => {
-    console.log("Toggle custom percentage:", value);
     setUseCustomTripeiroPercentage(value);
   };
 
   const handleSubmit = (values: PaymentFormValues) => {
-    console.log("Submitting form with date:", values.data);
-    console.log("Use custom tripeiro percentage:", useCustomTripeiroPercentage);
-    console.log("Custom tripeiro percentage:", customTripeiroPercentage);
-    console.log("Selected tripeiro percentage:", selectedTripeiroPercentage);
-    
     // Ensure date is properly recorded as a Date object
     const date = values.data instanceof Date ? values.data : new Date(values.data);
-    console.log("Date type:", Object.prototype.toString.call(date));
-    console.log("Date year/month/day:", date.getFullYear(), date.getMonth() + 1, date.getDate());
     
     // Pass the values with a guaranteed Date object
     const submissionValues = {
@@ -163,8 +147,6 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
     const tripeiroPercentageToSubmit = useCustomTripeiroPercentage 
       ? customTripeiroPercentage 
       : selectedTripeiroPercentage;
-    
-    console.log("Final tripeiro percentage to submit:", tripeiroPercentageToSubmit);
     
     onSubmit(submissionValues, selectedAttendantPercentage, tripeiroPercentageToSubmit);
   };

@@ -28,7 +28,7 @@ export function useSharedDateFilter() {
           option: parsedState.option as DateFilterOption
         };
       } catch (e) {
-        console.error("Failed to parse saved date filter state:", e);
+        // Silently handle error
       }
     }
     

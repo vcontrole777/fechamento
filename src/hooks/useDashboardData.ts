@@ -90,11 +90,6 @@ export function useDashboardData() {
       to: range.to ? endOfDay(range.to) : null
     };
     
-    console.log("Updating dashboard date range:", {
-      from: newRange.from ? format(newRange.from, 'yyyy-MM-dd') : null,
-      to: newRange.to ? format(newRange.to, 'yyyy-MM-dd') : null
-    });
-    
     setDateRange(newRange);
   };
 
