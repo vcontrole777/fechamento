@@ -4,9 +4,8 @@ import { useClosingData } from "@/hooks/useClosingData";
 import { ClosingSummary } from "@/components/closing/ClosingSummary";
 import { TripeiroReceivablesTable } from "@/components/closing/TripeiroReceivablesTable";
 import { AttendantCommissionsTable } from "@/components/closing/AttendantCommissionsTable";
-import { CopyToWhatsAppButton } from "@/components/closing/CopyToWhatsAppButton";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
-import { GeneratePDFButton } from "@/components/closing/GeneratePDFButton";
+import { ExportMenu } from "@/components/closing/ExportMenu";
 import { RegisterAttendantPaymentDialog } from "@/components/closing/RegisterAttendantPaymentDialog";
 import { AttendantPaymentHistory } from "@/components/closing/AttendantPaymentHistory";
 import { format } from "date-fns";
@@ -225,7 +224,7 @@ export default function Closing() {
         </div>
         <div className="flex flex-wrap gap-2">
           <DateFilter onFilterChange={handleDateFilterChange} />
-          <GeneratePDFButton
+          <ExportMenu
             closingSummary={closingSummary}
             tripeiroSummaries={tripeiroSummaries}
             attendantSummaries={attendantSummaries}
@@ -233,14 +232,6 @@ export default function Closing() {
             dateRange={dateRange}
             isLoading={isLoading}
             formatCurrency={formatCurrency}
-          />
-          <CopyToWhatsAppButton 
-            closingSummary={closingSummary}
-            tripeiroSummaries={tripeiroSummaries}
-            attendantSummaries={attendantSummaries}
-            expenses={expenses}
-            dateRange={dateRange}
-            isLoading={isLoading}
           />
         </div>
       </div>
