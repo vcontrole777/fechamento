@@ -41,39 +41,6 @@ export type Database = {
         }
         Relationships: []
       }
-      contas_bancarias: {
-        Row: {
-          agencia: string
-          atualizado_em: string
-          banco: string
-          conta: string
-          criado_em: string
-          id: number
-          id_equipe: number
-          titular: string | null
-        }
-        Insert: {
-          agencia: string
-          atualizado_em?: string
-          banco: string
-          conta: string
-          criado_em?: string
-          id?: number
-          id_equipe: number
-          titular?: string | null
-        }
-        Update: {
-          agencia?: string
-          atualizado_em?: string
-          banco?: string
-          conta?: string
-          criado_em?: string
-          id?: number
-          id_equipe?: number
-          titular?: string | null
-        }
-        Relationships: []
-      }
       despesas: {
         Row: {
           criado_em: string
@@ -354,80 +321,6 @@ export type Database = {
             columns: ["id_equipe"]
             isOneToOne: false
             referencedRelation: "equipes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      recebimentos: {
-        Row: {
-          atualizado_em: string
-          banco: string | null
-          criado_em: string
-          data: string
-          id: number
-          id_conta_bancaria: number | null
-          id_equipe: number
-          id_responsavel: number | null
-          id_tripeiro: number
-          observacoes: string | null
-          tipo_deposito: string | null
-          valor: number
-        }
-        Insert: {
-          atualizado_em?: string
-          banco?: string | null
-          criado_em?: string
-          data: string
-          id?: number
-          id_conta_bancaria?: number | null
-          id_equipe: number
-          id_responsavel?: number | null
-          id_tripeiro: number
-          observacoes?: string | null
-          tipo_deposito?: string | null
-          valor: number
-        }
-        Update: {
-          atualizado_em?: string
-          banco?: string | null
-          criado_em?: string
-          data?: string
-          id?: number
-          id_conta_bancaria?: number | null
-          id_equipe?: number
-          id_responsavel?: number | null
-          id_tripeiro?: number
-          observacoes?: string | null
-          tipo_deposito?: string | null
-          valor?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_recebimentos_conta_bancaria"
-            columns: ["id_conta_bancaria"]
-            isOneToOne: false
-            referencedRelation: "contas_bancarias"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recebimentos_id_equipe_fkey"
-            columns: ["id_equipe"]
-            isOneToOne: false
-            referencedRelation: "equipes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recebimentos_id_responsavel_fkey"
-            columns: ["id_responsavel"]
-            isOneToOne: false
-            referencedRelation: "pessoas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recebimentos_id_tripeiro_fkey"
-            columns: ["id_tripeiro"]
-            isOneToOne: false
-            referencedRelation: "pessoas"
             referencedColumns: ["id"]
           },
         ]

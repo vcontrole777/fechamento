@@ -36,7 +36,6 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Atendentes", icon: Users, path: "/atendentes" },
     { name: "Tripeiros", icon: Truck, path: "/tripeiros" },
     { name: "Despesas", icon: Receipt, path: "/despesas" },
-    { name: "Recebimentos", icon: Banknote, path: "/recebimentos" },
     { name: "Fechamento", icon: FileBarChart, path: "/fechamento" },
     { name: "Minha Conta", icon: User, path: "/minha-conta" },
   ];

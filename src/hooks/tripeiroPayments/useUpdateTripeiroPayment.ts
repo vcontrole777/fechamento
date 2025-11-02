@@ -1,0 +1,54 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+
+interface UpdateTripeiroPaymentData {
+  id: string;
+  valor_pago: number;
+  data_pagamento: string;
+  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outros';
+  observacoes?: string;
+  valor_a_receber: number;
+}
+
+export function useUpdateTripeiroPayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, valor_a_receber, ...data }: UpdateTripeiroPaymentData) => {
+      // Determinar o status baseado nos valores
+      let status: 'pendente' | 'parcialmente_pago' | 'pago' = 'pendente';
+      
+      if (data.valor_pago >= valor_a_receber) {
+        status = 'pago';
+      } else if (data.valor_pago > 0) {
+        status = 'parcialmente_pago';
+      }
+
+      const { data: payment, error } = await supabase
+        .from("pagamentos_tripeiros")
+        .update({ ...data, status })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return payment;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tripeiro-payments"] });
+      toast({
+        title: "Pagamento atualizado",
+        description: "O pagamento foi atualizado com sucesso.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating tripeiro payment:", error);
+      toast({
+        title: "Erro ao atualizar pagamento",
+        description: "Ocorreu um erro ao atualizar o pagamento.",
+        variant: "destructive",
+      });
+    },
+  });
+}
