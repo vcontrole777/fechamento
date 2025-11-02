@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       contas_bancarias: {
         Row: {
           agencia: string
@@ -354,29 +381,120 @@ export type Database = {
           },
         ]
       }
+      system_notifications: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string | null
+          end_date: string | null
+          id: string
+          message: string
+          priority: number | null
+          start_date: string | null
+          title: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          message: string
+          priority?: number | null
+          start_date?: string | null
+          title: string
+          type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          message?: string
+          priority?: number | null
+          start_date?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_notification_reads: {
+        Row: {
+          id: string
+          notification_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "system_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_user_equipe_id: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never>
+      get_user_equipe_id: { Args: never; Returns: number }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
         Returns: boolean
       }
-      limpar_dados_equipe: {
-        Args: { equipe_id: number }
-        Returns: undefined
-      }
-      make_user_admin: {
-        Args: { user_email: string }
-        Returns: undefined
-      }
+      is_admin: { Args: never; Returns: boolean }
+      limpar_dados_equipe: { Args: { equipe_id: number }; Returns: undefined }
+      make_user_admin: { Args: { user_email: string }; Returns: undefined }
     }
     Enums: {
+      app_role: "admin" | "user"
       status_pagamento: "concluido" | "pendente" | "bloqueado"
       tipo_pagamento: "boleto" | "pix" | "link"
       tipo_pessoa: "atendente" | "tripeiro" | "responsavel"
@@ -508,6 +626,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       status_pagamento: ["concluido", "pendente", "bloqueado"],
       tipo_pagamento: ["boleto", "pix", "link"],
       tipo_pessoa: ["atendente", "tripeiro", "responsavel"],
