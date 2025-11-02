@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Pencil, Trash2, ArrowUpDown } from "lucide-react";
+import { Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -148,23 +148,98 @@ export default function PaymentsTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>
-                <SortButton field="data">Data</SortButton>
+              <TableHead
+                onClick={() => handleSort("data")}
+                aria-sort={sortField === "data" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                className="cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <span>Data</span>
+                  {sortField === "data" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-primary" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
               </TableHead>
-              <TableHead>
-                <SortButton field="valor">Valor Total</SortButton>
+              <TableHead
+                onClick={() => handleSort("valor")}
+                aria-sort={sortField === "valor" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                className="cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <span>Valor Total</span>
+                  {sortField === "valor" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-primary" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
               </TableHead>
-              <TableHead>
-                <SortButton field="atendente">Atendente</SortButton>
+              <TableHead
+                onClick={() => handleSort("atendente")}
+                aria-sort={sortField === "atendente" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                className="cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <span>Atendente</span>
+                  {sortField === "atendente" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-primary" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
               </TableHead>
               <TableHead>% Atendente</TableHead>
-              <TableHead>
-                <SortButton field="tripeiro">Tripeiro</SortButton>
+              <TableHead
+                onClick={() => handleSort("tripeiro")}
+                aria-sort={sortField === "tripeiro" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                className="cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <span>Tripeiro</span>
+                  {sortField === "tripeiro" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-primary" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
               </TableHead>
               <TableHead>% Tripeiro</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead>
-                <SortButton field="status">Status</SortButton>
+              <TableHead
+                onClick={() => handleSort("status")}
+                aria-sort={sortField === "status" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                className="cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <span>Status</span>
+                  {sortField === "status" ? (
+                    sortOrder === "asc" ? (
+                      <ArrowUp className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-primary" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
               </TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
