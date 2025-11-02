@@ -13,6 +13,7 @@ export type AttendantSummary = {
   id: number;
   nome: string;
   totalCommission: number;
+  totalPaymentAmount: number; // Total original payment amount
   paymentsCount: number;
   porcentagemDecimal: number; // Add percentage as decimal
 };
@@ -147,6 +148,7 @@ export function useClosingCalculations() {
       if (attendantsMap.has(attendantId)) {
         const existingSummary = attendantsMap.get(attendantId)!;
         existingSummary.totalCommission += attendantCommission;
+        existingSummary.totalPaymentAmount += paymentAmount;
         existingSummary.paymentsCount += 1;
         // Update the percentage to the latest one
         existingSummary.porcentagemDecimal = attendantPercentageDecimal;
@@ -155,6 +157,7 @@ export function useClosingCalculations() {
           id: attendantId,
           nome: attendantName,
           totalCommission: attendantCommission,
+          totalPaymentAmount: paymentAmount,
           paymentsCount: 1,
           porcentagemDecimal: attendantPercentageDecimal
         });
