@@ -66,9 +66,18 @@ export function AttendantPaymentForm({
   const valorPago = form.watch('valor_pago');
   const newRemaining = remainingAmount - (valorPago || 0);
 
+  const handleFormSubmit = (data: AttendantPaymentFormData) => {
+    console.log('=== AttendantPaymentForm - handleFormSubmit ===');
+    console.log('Dados do formulário:', data);
+    console.log('Valor pago:', data.valor_pago);
+    console.log('Data pagamento:', data.data_pagamento);
+    console.log('Método:', data.metodo_pagamento);
+    onSubmit(data);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <div className="space-y-2">
           <div className="text-sm">
             <span className="font-medium">Atendente:</span> {attendantName}

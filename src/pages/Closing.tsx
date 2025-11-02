@@ -19,6 +19,7 @@ import { RegisterTripeiroPaymentDialog } from "@/components/closing/RegisterTrip
 import { TripeiroPaymentHistory } from "@/components/closing/TripeiroPaymentHistory";
 import { TripeiroPaymentFormData } from "@/components/closing/schemas/tripeiroPaymentSchema";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export default function Closing() {
   const {
@@ -92,33 +93,68 @@ export default function Closing() {
   };
 
   const handleSubmitPayment = async (data: AttendantPaymentFormData) => {
-    if (!selectedAttendantForPayment) return;
+    console.log('=== handleSubmitPayment chamado ===');
+    console.log('Data recebida:', data);
+    console.log('selectedAttendantForPayment:', selectedAttendantForPayment);
+    console.log('dateRange:', dateRange);
+    
+    if (!selectedAttendantForPayment) {
+      console.error('Nenhum atendente selecionado');
+      return;
+    }
+
+    if (!dateRange.from || !dateRange.to) {
+      console.error('Intervalo de datas inválido');
+      toast({
+        title: "Erro",
+        description: "Intervalo de datas inválido",
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Get user's team ID from profile
-    const { data: profileData } = await supabase
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('id_equipe')
       .eq('id', (await supabase.auth.getUser()).data.user?.id)
       .single();
 
+    console.log('Profile data:', profileData);
+    console.log('Profile error:', profileError);
+
     if (!profileData?.id_equipe) {
+      console.error('Equipe não encontrada no perfil');
+      toast({
+        title: "Erro",
+        description: "Equipe não encontrada. Verifique seu perfil.",
+        variant: "destructive"
+      });
       return;
     }
 
-    await attendantPaymentsHook.addPayment.mutateAsync({
+    const paymentData = {
       id_atendente: selectedAttendantForPayment.id,
       id_equipe: profileData.id_equipe,
       valor_comissao: selectedAttendantForPayment.commission,
       valor_pago: data.valor_pago,
       data_pagamento: data.data_pagamento,
-      periodo_inicio: dateRange.from!,
-      periodo_fim: dateRange.to!,
+      periodo_inicio: dateRange.from,
+      periodo_fim: dateRange.to,
       metodo_pagamento: data.metodo_pagamento,
       observacoes: data.observacoes,
-    });
+    };
 
-    attendantPaymentsHook.closeRegisterDialog();
-    setSelectedAttendantForPayment(null);
+    console.log('Dados que serão enviados:', paymentData);
+
+    try {
+      await attendantPaymentsHook.addPayment.mutateAsync(paymentData);
+      console.log('Pagamento registrado com sucesso');
+      attendantPaymentsHook.closeRegisterDialog();
+      setSelectedAttendantForPayment(null);
+    } catch (error) {
+      console.error('Erro ao registrar pagamento:', error);
+    }
   };
 
   const handleDeletePayment = (paymentId: string) => {
