@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -51,6 +52,7 @@ export function AttendantPaymentForm({
   attendantName,
   isSubmitting = false,
 }: AttendantPaymentFormProps) {
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const remainingAmount = totalCommission - totalPaid;
 
   const form = useForm<AttendantPaymentFormData>({
@@ -135,7 +137,7 @@ export function AttendantPaymentForm({
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Data do Pagamento *</FormLabel>
-              <Popover>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
@@ -158,7 +160,10 @@ export function AttendantPaymentForm({
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                      setIsCalendarOpen(false);
+                    }}
                     disabled={(date) => date > new Date()}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
