@@ -8,7 +8,7 @@ export interface TripeiroPayment {
   valor_a_receber: number;
   valor_pago: number;
   metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outros';
-  status: 'pendente' | 'parcialmente_pago' | 'pago';
+  status: 'pendente' | 'pago_parcial' | 'pago_total';
   observacoes?: string;
   criado_por?: string;
   criado_em: string;

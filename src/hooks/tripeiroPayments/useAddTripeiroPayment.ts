@@ -22,12 +22,12 @@ export function useAddTripeiroPayment() {
   return useMutation({
     mutationFn: async (data: AddTripeiroPaymentData) => {
       // Determinar o status baseado nos valores
-      let status: 'pendente' | 'parcialmente_pago' | 'pago' = 'pendente';
+      let status: 'pendente' | 'pago_parcial' | 'pago_total' = 'pendente';
       
       if (data.valor_pago >= data.valor_a_receber) {
-        status = 'pago';
+        status = 'pago_total';
       } else if (data.valor_pago > 0) {
-        status = 'parcialmente_pago';
+        status = 'pago_parcial';
       }
 
       const { data: payment, error } = await supabase

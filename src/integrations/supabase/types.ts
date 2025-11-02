@@ -255,6 +255,72 @@ export type Database = {
         }
         Relationships: []
       }
+      pagamentos_tripeiros: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          criado_por: string | null
+          data_pagamento: string
+          id: string
+          id_equipe: number
+          id_tripeiro: number
+          metodo_pagamento: Database["public"]["Enums"]["metodo_pagamento"]
+          observacoes: string | null
+          periodo_fim: string
+          periodo_inicio: string
+          status: Database["public"]["Enums"]["status_pagamento_atendente"]
+          valor_a_receber: number
+          valor_pago: number
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          data_pagamento: string
+          id?: string
+          id_equipe: number
+          id_tripeiro: number
+          metodo_pagamento: Database["public"]["Enums"]["metodo_pagamento"]
+          observacoes?: string | null
+          periodo_fim: string
+          periodo_inicio: string
+          status?: Database["public"]["Enums"]["status_pagamento_atendente"]
+          valor_a_receber: number
+          valor_pago?: number
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          data_pagamento?: string
+          id?: string
+          id_equipe?: number
+          id_tripeiro?: number
+          metodo_pagamento?: Database["public"]["Enums"]["metodo_pagamento"]
+          observacoes?: string | null
+          periodo_fim?: string
+          periodo_inicio?: string
+          status?: Database["public"]["Enums"]["status_pagamento_atendente"]
+          valor_a_receber?: number
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_tripeiros_id_equipe_fkey"
+            columns: ["id_equipe"]
+            isOneToOne: false
+            referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_tripeiros_id_tripeiro_fkey"
+            columns: ["id_tripeiro"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pessoas: {
         Row: {
           criado_em: string
@@ -443,6 +509,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      metodo_pagamento: "dinheiro" | "pix" | "transferencia" | "outros"
       metodo_pagamento_atendente: "dinheiro" | "pix" | "transferencia" | "outro"
       status_pagamento: "concluido" | "pendente" | "bloqueado"
       status_pagamento_atendente: "pendente" | "pago_parcial" | "pago_total"
@@ -577,6 +644,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      metodo_pagamento: ["dinheiro", "pix", "transferencia", "outros"],
       metodo_pagamento_atendente: ["dinheiro", "pix", "transferencia", "outro"],
       status_pagamento: ["concluido", "pendente", "bloqueado"],
       status_pagamento_atendente: ["pendente", "pago_parcial", "pago_total"],

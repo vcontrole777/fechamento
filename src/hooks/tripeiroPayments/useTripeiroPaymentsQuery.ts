@@ -4,10 +4,10 @@ import { TripeiroPayment } from "@/types/tripeiroPayment.types";
 import { useTeamView } from "@/contexts/TeamViewContext";
 
 export function useTripeiroPaymentsQuery(tripeiroId: number, periodoInicio: string, periodoFim: string) {
-  const { viewingAsTeamId } = useTeamView();
+  const { viewingTeamId } = useTeamView();
 
   return useQuery({
-    queryKey: ["tripeiro-payments", tripeiroId, periodoInicio, periodoFim, viewingAsTeamId],
+    queryKey: ["tripeiro-payments", tripeiroId, periodoInicio, periodoFim, viewingTeamId],
     queryFn: async () => {
       let query = supabase
         .from("pagamentos_tripeiros")
@@ -18,8 +18,8 @@ export function useTripeiroPaymentsQuery(tripeiroId: number, periodoInicio: stri
         .eq("periodo_inicio", periodoInicio)
         .eq("periodo_fim", periodoFim);
 
-      if (viewingAsTeamId !== null) {
-        query = query.eq("id_equipe", viewingAsTeamId);
+      if (viewingTeamId !== null) {
+        query = query.eq("id_equipe", viewingTeamId);
       }
 
       const { data, error } = await query.order("data_pagamento", { ascending: false });

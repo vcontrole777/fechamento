@@ -47,7 +47,7 @@ export function TripeiroPaymentForm({
               <FormControl>
                 <CurrencyInput
                   value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
+                  onChange={(value) => field.onChange(value)}
                   placeholder="R$ 0,00"
                 />
               </FormControl>

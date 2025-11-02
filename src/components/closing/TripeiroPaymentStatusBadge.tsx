@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 
 interface TripeiroPaymentStatusBadgeProps {
-  status: 'pendente' | 'parcialmente_pago' | 'pago';
+  status: 'pendente' | 'pago_parcial' | 'pago_total';
   valorPago: number;
   valorAReceber: number;
   formatCurrency: (value: number) => string;
@@ -15,12 +15,12 @@ export function TripeiroPaymentStatusBadge({
 }: TripeiroPaymentStatusBadgeProps) {
   const getStatusConfig = () => {
     switch (status) {
-      case 'pago':
+      case 'pago_total':
         return {
           label: 'Pago',
           className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
         };
-      case 'parcialmente_pago':
+      case 'pago_parcial':
         return {
           label: 'Parcialmente Pago',
           className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
