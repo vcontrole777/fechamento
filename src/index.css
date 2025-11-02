@@ -124,4 +124,31 @@
                 0 0 20px hsl(var(--glow-primary) / 0.2),
                 inset 0 0 10px hsl(var(--glow-primary) / 0.1);
   }
+  
+  @keyframes grid-scan {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(50px);
+    }
+  }
+  
+  @keyframes glitch {
+    0%, 100% {
+      transform: translate(0);
+    }
+    20% {
+      transform: translate(-2px, 2px);
+    }
+    40% {
+      transform: translate(-2px, -2px);
+    }
+    60% {
+      transform: translate(2px, 2px);
+    }
+    80% {
+      transform: translate(2px, -2px);
+    }
+  }
 }
