@@ -40,17 +40,21 @@ const formSchema = z.object({
   existingTeamId: z.string().optional(),
   newTeamName: z.string().optional(),
   isAdmin: z.boolean().default(false),
-}).refine((data) => {
+}).superRefine((data, ctx) => {
   if (data.teamOption === "existing" && !data.existingTeamId) {
-    return false;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Selecione uma equipe",
+      path: ["existingTeamId"],
+    });
   }
   if (data.teamOption === "new" && !data.newTeamName) {
-    return false;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Digite o nome da nova equipe",
+      path: ["newTeamName"],
+    });
   }
-  return true;
-}, {
-  message: "Selecione ou crie uma equipe",
-  path: ["teamOption"],
 });
 
 interface CreateUserDialogProps {
@@ -79,11 +83,13 @@ export function CreateUserDialog({ teams, onSuccess }: CreateUserDialogProps) {
   const teamOption = form.watch("teamOption");
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log('Form submitted with values:', values);
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Sessão inválida");
 
+      console.log('Calling admin-create-user function...');
       const response = await supabase.functions.invoke('admin-create-user', {
         headers: {
           Authorization: `Bearer ${session.access_token}`
@@ -98,6 +104,8 @@ export function CreateUserDialog({ teams, onSuccess }: CreateUserDialogProps) {
           isAdmin: values.isAdmin,
         }
       });
+
+      console.log('Function response:', response);
 
       if (response.error) throw response.error;
 
