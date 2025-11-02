@@ -49,19 +49,38 @@ export function ExportMenu({
     try {
       const doc = new jsPDF();
       
-      // Add title and date range
-      doc.setFontSize(18);
-      doc.text("Relatório de Fechamento", 105, 15, { align: "center" });
+      // Header with background color
+      doc.setFillColor(41, 128, 185);
+      doc.rect(0, 0, 210, 35, 'F');
       
-      doc.setFontSize(12);
+      // Title
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont(undefined, 'bold');
+      doc.text("RELATÓRIO DE FECHAMENTO", 105, 15, { align: "center" });
+      
+      // Period
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
       const periodText = dateRange.from && dateRange.to 
         ? `Período: ${format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} a ${format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}`
         : "Período: Todos os registros";
-      doc.text(periodText, 105, 25, { align: "center" });
+      doc.text(periodText, 105, 23, { align: "center" });
       
-      // Add summary section
+      // Generation date
+      doc.setFontSize(9);
+      doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 105, 30, { align: "center" });
+      
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+      
+      // Add summary section with better styling
       doc.setFontSize(14);
-      doc.text("Resumo Financeiro", 15, 40);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(41, 128, 185);
+      doc.text("📊 RESUMO FINANCEIRO", 15, 45);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, 'normal');
       
       const summaryData = [
         ["Faturamento Total", formatCurrency(closingSummary.totalRevenue)],
@@ -72,18 +91,38 @@ export function ExportMenu({
       ];
       
       (doc as any).autoTable({
-        startY: 45,
+        startY: 50,
         head: [["Item", "Valor"]],
         body: summaryData,
-        theme: "grid",
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        theme: "striped",
+        headStyles: { 
+          fillColor: [41, 128, 185], 
+          textColor: 255,
+          fontSize: 11,
+          fontStyle: 'bold',
+          halign: 'left'
+        },
+        bodyStyles: {
+          fontSize: 10,
+        },
+        columnStyles: {
+          0: { cellWidth: 120, fontStyle: 'bold' },
+          1: { cellWidth: 'auto', halign: 'right', fontStyle: 'bold', textColor: [41, 128, 185] }
+        },
         margin: { left: 15, right: 15 },
+        alternateRowStyles: {
+          fillColor: [245, 247, 250]
+        }
       });
       
-      // Add Tripeiros section
+      // Add Tripeiros section with better styling
       const tripeiroEndY = (doc as any).lastAutoTable.finalY + 15;
       doc.setFontSize(14);
-      doc.text("Valores a Receber (Tripeiros)", 15, tripeiroEndY);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(41, 128, 185);
+      doc.text("💰 VALORES A RECEBER (TRIPEIROS)", 15, tripeiroEndY);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, 'normal');
       
       const tripeiroData = tripeiroSummaries.map(tripeiro => [
         tripeiro.nome,
@@ -94,15 +133,34 @@ export function ExportMenu({
         startY: tripeiroEndY + 5,
         head: [["Tripeiro", "Valor a Receber"]],
         body: tripeiroData,
-        theme: "grid",
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        theme: "striped",
+        headStyles: { 
+          fillColor: [46, 204, 113], 
+          textColor: 255,
+          fontSize: 11,
+          fontStyle: 'bold'
+        },
+        bodyStyles: {
+          fontSize: 10,
+        },
+        columnStyles: {
+          0: { cellWidth: 120 },
+          1: { halign: 'right', textColor: [46, 204, 113], fontStyle: 'bold' }
+        },
         margin: { left: 15, right: 15 },
+        alternateRowStyles: {
+          fillColor: [245, 247, 250]
+        }
       });
       
-      // Add Attendants section
+      // Add Attendants section with better styling
       const attendantEndY = (doc as any).lastAutoTable.finalY + 15;
       doc.setFontSize(14);
-      doc.text("Comissões (Atendentes)", 15, attendantEndY);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(41, 128, 185);
+      doc.text("👥 COMISSÕES (ATENDENTES)", 15, attendantEndY);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont(undefined, 'normal');
       
       const attendantData = attendantSummaries.map(attendant => [
         attendant.nome,
@@ -113,16 +171,35 @@ export function ExportMenu({
         startY: attendantEndY + 5,
         head: [["Atendente", "Comissão"]],
         body: attendantData,
-        theme: "grid",
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        theme: "striped",
+        headStyles: { 
+          fillColor: [230, 126, 34], 
+          textColor: 255,
+          fontSize: 11,
+          fontStyle: 'bold'
+        },
+        bodyStyles: {
+          fontSize: 10,
+        },
+        columnStyles: {
+          0: { cellWidth: 120 },
+          1: { halign: 'right', textColor: [230, 126, 34], fontStyle: 'bold' }
+        },
         margin: { left: 15, right: 15 },
+        alternateRowStyles: {
+          fillColor: [245, 247, 250]
+        }
       });
       
-      // Add Expenses section if there are any
+      // Add Expenses section if there are any with better styling
       if (expenses && expenses.length > 0) {
         const expensesEndY = (doc as any).lastAutoTable.finalY + 15;
         doc.setFontSize(14);
-        doc.text("Despesas", 15, expensesEndY);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(41, 128, 185);
+        doc.text("💸 DESPESAS", 15, expensesEndY);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(undefined, 'normal');
         
         const expensesData = expenses.map(expense => [
           format(new Date(expense.data), "dd/MM/yyyy", { locale: ptBR }),
@@ -135,22 +212,52 @@ export function ExportMenu({
           startY: expensesEndY + 5,
           head: [["Data", "Descrição", "Responsável", "Valor"]],
           body: expensesData,
-          theme: "grid",
-          headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+          theme: "striped",
+          headStyles: { 
+            fillColor: [231, 76, 60], 
+            textColor: 255,
+            fontSize: 11,
+            fontStyle: 'bold'
+          },
+          bodyStyles: {
+            fontSize: 9,
+          },
+          columnStyles: {
+            0: { cellWidth: 25, halign: 'center' },
+            1: { cellWidth: 70 },
+            2: { cellWidth: 50 },
+            3: { halign: 'right', textColor: [231, 76, 60], fontStyle: 'bold' }
+          },
           margin: { left: 15, right: 15 },
+          alternateRowStyles: {
+            fillColor: [245, 247, 250]
+          }
         });
       }
       
-      // Add footer
+      // Add footer with better styling
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setFontSize(10);
+        
+        // Footer line
+        doc.setDrawColor(41, 128, 185);
+        doc.setLineWidth(0.5);
+        doc.line(15, doc.internal.pageSize.height - 15, 195, doc.internal.pageSize.height - 15);
+        
+        // Footer text
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
         doc.text(
-          `Página ${i} de ${pageCount} - Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`,
-          105,
+          `Página ${i} de ${pageCount}`,
+          15,
+          doc.internal.pageSize.height - 10
+        );
+        doc.text(
+          `Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`,
+          195,
           doc.internal.pageSize.height - 10,
-          { align: "center" }
+          { align: "right" }
         );
       }
       
@@ -217,46 +324,64 @@ export function ExportMenu({
 
   const handleExportCSV = () => {
     try {
-      // Criar CSV com todas as informações
-      let csv = "Relatório de Fechamento\n\n";
+      // Header com BOM para UTF-8
+      let csv = "\uFEFF";
+      csv += "RELATÓRIO DE FECHAMENTO\n";
+      csv += "=".repeat(80) + "\n\n";
       
-      // Período
+      // Período e data de geração
       if (dateRange.from && dateRange.to) {
-        csv += `Período,${format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })},${format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}\n\n`;
+        csv += `Período:,${format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })},até,${format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}\n`;
+      } else {
+        csv += "Período:,Todos os registros\n";
       }
+      csv += `Gerado em:,${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}\n\n`;
+      csv += "=".repeat(80) + "\n\n";
       
-      // Resumo
-      csv += "Resumo Financeiro\n";
+      // Resumo Financeiro
+      csv += "RESUMO FINANCEIRO\n";
+      csv += "-".repeat(80) + "\n";
       csv += "Item,Valor\n";
       csv += `Faturamento Total,${formatCurrency(closingSummary.totalRevenue)}\n`;
       csv += `Comissão Atendentes,${formatCurrency(closingSummary.totalAttendantCommission)}\n`;
       csv += `A Receber Tripeiros,${formatCurrency(closingSummary.totalTripeiroCommission)}\n`;
       csv += `Total Despesas,${formatCurrency(closingSummary.totalExpenses)}\n`;
       csv += `Lucro Líquido,${formatCurrency(closingSummary.netProfit)}\n\n`;
+      csv += "=".repeat(80) + "\n\n";
       
       // Tripeiros
-      csv += "Valores a Receber (Tripeiros)\n";
-      csv += "Nome,Valor a Receber\n";
+      csv += "VALORES A RECEBER (TRIPEIROS)\n";
+      csv += "-".repeat(80) + "\n";
+      csv += "Tripeiro,Valor a Receber\n";
       tripeiroSummaries.forEach(tripeiro => {
-        csv += `${tripeiro.nome},${formatCurrency(tripeiro.totalReceivable)}\n`;
+        csv += `"${tripeiro.nome}",${formatCurrency(tripeiro.totalReceivable)}\n`;
       });
-      csv += "\n";
+      const totalTripeiros = tripeiroSummaries.reduce((sum, t) => sum + t.totalReceivable, 0);
+      csv += `TOTAL,${formatCurrency(totalTripeiros)}\n\n`;
+      csv += "=".repeat(80) + "\n\n";
       
       // Atendentes
-      csv += "Comissões (Atendentes)\n";
-      csv += "Nome,Comissão\n";
+      csv += "COMISSÕES (ATENDENTES)\n";
+      csv += "-".repeat(80) + "\n";
+      csv += "Atendente,Comissão\n";
       attendantSummaries.forEach(attendant => {
-        csv += `${attendant.nome},${formatCurrency(attendant.totalCommission)}\n`;
+        csv += `"${attendant.nome}",${formatCurrency(attendant.totalCommission)}\n`;
       });
+      const totalAtendentes = attendantSummaries.reduce((sum, a) => sum + a.totalCommission, 0);
+      csv += `TOTAL,${formatCurrency(totalAtendentes)}\n\n`;
+      csv += "=".repeat(80) + "\n\n";
       
       // Despesas
       if (expenses && expenses.length > 0) {
-        csv += "\n";
-        csv += "Despesas\n";
+        csv += "DESPESAS\n";
+        csv += "-".repeat(80) + "\n";
         csv += "Data,Descrição,Responsável,Valor\n";
         expenses.forEach(expense => {
-          csv += `${format(new Date(expense.data), "dd/MM/yyyy", { locale: ptBR })},${expense.descricao},${expense.responsavel},${formatCurrency(expense.valor)}\n`;
+          csv += `${format(new Date(expense.data), "dd/MM/yyyy", { locale: ptBR })},"${expense.descricao}","${expense.responsavel}",${formatCurrency(expense.valor)}\n`;
         });
+        const totalDespesas = expenses.reduce((sum, e) => sum + e.valor, 0);
+        csv += `,,TOTAL,${formatCurrency(totalDespesas)}\n\n`;
+        csv += "=".repeat(80) + "\n";
       }
       
       // Criar e baixar arquivo

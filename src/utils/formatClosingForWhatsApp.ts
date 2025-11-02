@@ -12,7 +12,6 @@ export function formatClosingForWhatsApp(
   dateRange: DateRange,
   expenses: Expense[] = []
 ): string {
-  // Format currency in Brazilian style (R$ 1.000,00)
   const formatCurrency = (value: number): string => {
     return value.toLocaleString('pt-BR', {
       style: 'currency',
@@ -20,74 +19,106 @@ export function formatClosingForWhatsApp(
     });
   };
 
-  // Format the date range
-  const dateRangeFormatted = dateRange.from && dateRange.to
-    ? `${format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} a ${format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}`
-    : dateRange.from
-      ? `A partir de ${format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })}`
-      : dateRange.to
-        ? `Até ${format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}`
-        : "Período completo";
+  const formatDate = (date: Date | null): string => {
+    if (!date) return 'N/A';
+    return format(date, "dd/MM/yyyy", { locale: ptBR });
+  };
 
-  // Start composing the message
-  let whatsappText = `📊 *RELATÓRIO DE FECHAMENTO* 📊\n`;
-  whatsappText += `*Período:* ${dateRangeFormatted}\n\n`;
+  let message = `╔═══════════════════════════╗\n`;
+  message += `║   📊 *RELATÓRIO DE FECHAMENTO*   ║\n`;
+  message += `╚═══════════════════════════╝\n\n`;
   
-  // Add summary data
-  whatsappText += `*RESUMO*\n`;
-  whatsappText += `Faturamento Total: ${formatCurrency(closingSummary.totalRevenue)}\n`;
-  whatsappText += `Comissão Atendentes: ${formatCurrency(closingSummary.totalAttendantCommission)}\n`;
-  whatsappText += `Comissão Tripeiros: ${formatCurrency(closingSummary.totalTripeiroCommission)}\n`;
-  whatsappText += `Despesas: ${formatCurrency(closingSummary.totalExpenses)}\n`;
-  whatsappText += `*Lucro Líquido: ${formatCurrency(closingSummary.netProfit)}*\n\n`;
+  // Período e data de geração
+  if (dateRange.from && dateRange.to) {
+    message += `📅 *Período:*\n${formatDate(dateRange.from)} até ${formatDate(dateRange.to)}\n\n`;
+  } else {
+    message += `📅 *Período:* Todos os registros\n\n`;
+  }
+  message += `🕐 Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}\n`;
+  message += `\n${'━'.repeat(35)}\n\n`;
+
+  // Resumo Financeiro com melhor formatação
+  message += `💰 *RESUMO FINANCEIRO*\n\n`;
+  message += `┌─────────────────────────────┐\n`;
+  message += `│ 💵 Faturamento Total\n`;
+  message += `│    *${formatCurrency(closingSummary.totalRevenue)}*\n`;
+  message += `├─────────────────────────────┤\n`;
+  message += `│ 👥 Comissão Atendentes\n`;
+  message += `│    ${formatCurrency(closingSummary.totalAttendantCommission)}\n`;
+  message += `├─────────────────────────────┤\n`;
+  message += `│ 🤝 A Receber Tripeiros\n`;
+  message += `│    ${formatCurrency(closingSummary.totalTripeiroCommission)}\n`;
+  message += `├─────────────────────────────┤\n`;
+  message += `│ 💸 Total Despesas\n`;
+  message += `│    ${formatCurrency(closingSummary.totalExpenses)}\n`;
+  message += `├─────────────────────────────┤\n`;
+  message += `│ ✨ *LUCRO LÍQUIDO*\n`;
+  message += `│    *${formatCurrency(closingSummary.netProfit)}*\n`;
+  message += `└─────────────────────────────┘\n`;
+  message += `\n${'━'.repeat(35)}\n\n`;
   
-  // Add tripeiro data
-  if (tripeiroSummaries.length > 0) {
-    // Calculate total payments value - this is the full amount before tripeiro commission
-    const totalPaymentsValue = tripeiroSummaries.reduce((total, tripeiro) => {
-      return total + tripeiro.totalReceivable;
-    }, 0);
+  // Valores a Receber (Tripeiros) com melhor formatação
+  if (tripeiroSummaries && tripeiroSummaries.length > 0) {
+    message += `💰 *VALORES A RECEBER (TRIPEIROS)*\n\n`;
     
-    // Calculate total receivable for all tripeiros
-    const totalReceivable = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.totalReceivable, 0);
-    const totalPayments = tripeiroSummaries.reduce((acc, tripeiro) => acc + tripeiro.paymentsCount, 0);
-    
-    whatsappText += `*VALORES A RECEBER (TRIPEIROS)*\n`;
-    tripeiroSummaries.forEach((tripeiro) => {
-      whatsappText += `${tripeiro.nome}: ${formatCurrency(tripeiro.totalReceivable)} → A receber: ${formatCurrency(tripeiro.totalReceivable)} (${tripeiro.paymentsCount} pagamentos)\n`;
+    tripeiroSummaries.forEach((tripeiro, index) => {
+      message += `${index + 1}. 👤 ${tripeiro.nome}\n`;
+      message += `   💵 *${formatCurrency(tripeiro.totalReceivable)}*\n`;
+      message += `   📊 ${tripeiro.paymentsCount} pagamento(s)\n\n`;
     });
-    whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsValue)}* (${totalPayments} pagamentos)\n\n`;
+    
+    const totalTripeiros = tripeiroSummaries.reduce((sum, t) => sum + t.totalReceivable, 0);
+    const totalPagamentos = tripeiroSummaries.reduce((sum, t) => sum + t.paymentsCount, 0);
+    message += `┌─────────────────────────────┐\n`;
+    message += `│ 📊 TOTAL: *${formatCurrency(totalTripeiros)}*\n`;
+    message += `│ 📝 ${totalPagamentos} pagamento(s)\n`;
+    message += `└─────────────────────────────┘\n`;
+    message += `\n${'━'.repeat(35)}\n\n`;
   }
   
-  // Add attendant data
-  if (attendantSummaries.length > 0) {
-    // Calculate total payment value for attendants (after tripeiro's commission)
-    const totalPaymentsAfterTripeiro = attendantSummaries.reduce((total, attendant) => {
-      return total + attendant.totalCommission;
-    }, 0);
+  // Comissões (Atendentes) com melhor formatação
+  if (attendantSummaries && attendantSummaries.length > 0) {
+    message += `👥 *COMISSÕES (ATENDENTES)*\n\n`;
     
-    // Calculate total commission for all attendants
-    const totalCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
-    const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
-    
-    whatsappText += `*COMISSÕES (ATENDENTES)*\n`;
-    attendantSummaries.forEach((attendant) => {
-      whatsappText += `${attendant.nome}: ${formatCurrency(attendant.totalCommission)} → Comissão: ${formatCurrency(attendant.totalCommission)} (${attendant.paymentsCount} pagamentos)\n`;
+    attendantSummaries.forEach((attendant, index) => {
+      message += `${index + 1}. 👤 ${attendant.nome}\n`;
+      message += `   💰 *${formatCurrency(attendant.totalCommission)}*\n`;
+      message += `   📊 ${attendant.paymentsCount} pagamento(s)\n\n`;
     });
-    whatsappText += `*TOTAL: ${formatCurrency(totalPaymentsAfterTripeiro)}* (${totalPayments} pagamentos)\n\n`;
+    
+    const totalAtendentes = attendantSummaries.reduce((sum, a) => sum + a.totalCommission, 0);
+    const totalPagamentos = attendantSummaries.reduce((sum, a) => sum + a.paymentsCount, 0);
+    message += `┌─────────────────────────────┐\n`;
+    message += `│ 📊 TOTAL: *${formatCurrency(totalAtendentes)}*\n`;
+    message += `│ 📝 ${totalPagamentos} pagamento(s)\n`;
+    message += `└─────────────────────────────┘\n`;
+    message += `\n${'━'.repeat(35)}\n\n`;
   }
   
-  // Add expenses data
-  if (expenses.length > 0) {
-    const totalExpenses = expenses.reduce((acc, expense) => acc + Number(expense.valor), 0);
+  // Despesas com melhor formatação
+  if (expenses && expenses.length > 0) {
+    message += `💸 *DESPESAS DO PERÍODO*\n\n`;
     
-    whatsappText += `*DESPESAS*\n`;
-    expenses.forEach((expense) => {
-      const responsavelName = expense.responsavel?.nome ? ` (${expense.responsavel.nome})` : '';
-      whatsappText += `${format(new Date(expense.data), "dd/MM/yyyy")}: ${formatCurrency(Number(expense.valor))} - ${expense.descricao}${responsavelName}\n`;
+    expenses.forEach((expense, index) => {
+      const expenseDate = format(new Date(expense.data), "dd/MM/yyyy", { locale: ptBR });
+      const responsavelName = expense.responsavel?.nome || expense.responsavel || 'N/A';
+      message += `${index + 1}. 📅 ${expenseDate}\n`;
+      message += `   📝 ${expense.descricao}\n`;
+      message += `   👤 ${responsavelName}\n`;
+      message += `   💵 *${formatCurrency(Number(expense.valor))}*\n\n`;
     });
-    whatsappText += `*TOTAL: ${formatCurrency(totalExpenses)}*\n`;
+    
+    const totalDespesas = expenses.reduce((sum, e) => sum + Number(e.valor), 0);
+    message += `┌─────────────────────────────┐\n`;
+    message += `│ 📊 TOTAL: *${formatCurrency(totalDespesas)}*\n`;
+    message += `└─────────────────────────────┘\n`;
+    message += `\n${'━'.repeat(35)}\n\n`;
   }
 
-  return whatsappText;
+  message += `╔═══════════════════════════╗\n`;
+  message += `║  ✅ Relatório completo gerado  ║\n`;
+  message += `╚═══════════════════════════╝\n\n`;
+  message += `_${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}_`;
+
+  return message;
 }
