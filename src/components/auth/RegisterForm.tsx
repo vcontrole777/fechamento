@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  nome: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome deve ter no máximo 100 caracteres"),
+  nomeEquipe: z.string().trim().min(1, "Nome da equipe é obrigatório").max(100, "Nome da equipe deve ter no máximo 100 caracteres"),
+  email: z.string().trim().email("Email inválido").max(255, "Email deve ter no máximo 255 caracteres"),
+  password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres").max(128, "Senha deve ter no máximo 128 caracteres"),
+});
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -18,6 +26,25 @@ const RegisterForm = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthLoading(true);
+
+    // Validate inputs
+    const validation = registerSchema.safeParse({
+      nome,
+      nomeEquipe,
+      email,
+      password,
+    });
+
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Erro de validação",
+        description: firstError.message,
+        variant: "destructive",
+      });
+      setAuthLoading(false);
+      return;
+    }
 
     try {
       console.log("Iniciando processo de registro");
@@ -54,6 +81,7 @@ const RegisterForm = () => {
             nome,
             id_equipe: equipeId.toString(),
           },
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
