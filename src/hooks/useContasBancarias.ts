@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 export type ContaBancaria = {
   id: number;
@@ -14,13 +15,40 @@ export type ContaBancaria = {
 };
 
 export function useContasBancarias() {
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
+  
   return useQuery({
-    queryKey: ["contas-bancarias"],
+    queryKey: ["contas-bancarias", viewingTeamId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get team ID to filter by
+      let teamId: number | null = null;
+      
+      if (isViewingAsTeam && viewingTeamId) {
+        teamId = viewingTeamId;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          teamId = profile?.id_equipe || null;
+        }
+      }
+
+      let query = supabase
         .from("contas_bancarias")
-        .select("*")
-        .order("banco");
+        .select("*");
+
+      // Filter by team
+      if (teamId) {
+        query = query.eq("id_equipe", teamId);
+      }
+
+      query = query.order("banco");
+
+      const { data, error } = await query;
 
       if (error) {
         toast({

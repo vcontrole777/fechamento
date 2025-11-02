@@ -5,6 +5,7 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { DateRange } from "@/components/common/date-filter/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 export type AttendantRanking = {
   position: number;
@@ -21,22 +22,27 @@ export type WeeklyRankingResponse = {
 
 export function useWeeklyAttendantRanking(dateRange: DateRange) {
   const { user } = useAuth();
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
   const formattedStartDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
   const formattedEndDate = dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
 
   return useQuery({
-    queryKey: ["weekly-attendant-ranking", formattedStartDate, formattedEndDate, user?.id],
+    queryKey: ["weekly-attendant-ranking", formattedStartDate, formattedEndDate, user?.id, viewingTeamId],
     queryFn: async (): Promise<WeeklyRankingResponse> => {
       try {
         console.log("Fetching weekly attendant ranking with date range:", {
           startDate: formattedStartDate,
-          endDate: formattedEndDate
+          endDate: formattedEndDate,
+          viewingTeamId
         });
 
-        // Get the user's team ID from user profile
+        // Get team ID - use viewingTeamId if admin is viewing another team
         let teamId;
         
-        if (user) {
+        if (isViewingAsTeam && viewingTeamId) {
+          teamId = viewingTeamId;
+          console.log("Using viewing team ID:", teamId);
+        } else if (user) {
           const { data: profileData, error: profileError } = await supabase
             .from("profiles")
             .select("id_equipe")

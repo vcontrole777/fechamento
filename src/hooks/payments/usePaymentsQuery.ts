@@ -5,10 +5,13 @@ import { toast } from "@/hooks/use-toast";
 import { Payment, PaymentFilters } from "@/types/payment.types";
 import { DateRange } from "@/components/common/date-filter/types";
 import { format } from "date-fns";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) {
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
+  
   return useQuery({
-    queryKey: ["payments", filters, dateRange],
+    queryKey: ["payments", filters, dateRange, viewingTeamId],
     queryFn: async () => {
       // Format dates properly for database query (YYYY-MM-DD)
       const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
@@ -16,8 +19,26 @@ export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) 
       
       console.log("Fetching payments with date range:", {
         from: fromDate,
-        to: toDate
+        to: toDate,
+        viewingTeamId
       });
+
+      // Get team ID to filter by
+      let teamId: number | null = null;
+      
+      if (isViewingAsTeam && viewingTeamId) {
+        teamId = viewingTeamId;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          teamId = profile?.id_equipe || null;
+        }
+      }
       
       let query = supabase
         .from("pagamentos")
@@ -26,6 +47,11 @@ export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) 
           atendente:pessoas!pagamentos_id_atendente_fkey(id, nome, porcentagem),
           tripeiro:pessoas!pagamentos_id_tripeiro_fkey(id, nome, porcentagem)
         `);
+
+      // Filter by team
+      if (teamId) {
+        query = query.eq("id_equipe", teamId);
+      }
 
       // Apply filters
       if (filters.attendantIds.length > 0) {

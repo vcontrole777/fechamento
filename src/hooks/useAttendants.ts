@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 export interface Attendant {
   id: number;
@@ -13,18 +14,44 @@ export interface Attendant {
 
 export function useAttendants() {
   const { toast } = useToast();
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
   const [attendants, setAttendants] = useState<Attendant[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAttendants = async () => {
     try {
       setLoading(true);
+
+      // Get team ID to filter by
+      let teamId: number | null = null;
       
-      const { data, error } = await supabase
+      if (isViewingAsTeam && viewingTeamId) {
+        teamId = viewingTeamId;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          teamId = profile?.id_equipe || null;
+        }
+      }
+      
+      let query = supabase
         .from("pessoas")
         .select("*")
-        .eq("tipo", "atendente")
-        .order("nome");
+        .eq("tipo", "atendente");
+
+      // Filter by team
+      if (teamId) {
+        query = query.eq("id_equipe", teamId);
+      }
+
+      query = query.order("nome");
+
+      const { data, error } = await query;
 
       if (error) {
         throw error;
@@ -51,7 +78,7 @@ export function useAttendants() {
 
   useEffect(() => {
     fetchAttendants();
-  }, []);
+  }, [viewingTeamId]);
 
   // Function to delete an attendant
   const deleteAttendant = async (id: number) => {

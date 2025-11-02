@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/date-filter/types";
 import { format } from "date-fns";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 export type Expense = {
   id: number;
@@ -19,8 +20,10 @@ export type Expense = {
 };
 
 export function useExpensesQuery(dateRange: DateRange) {
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
+  
   return useQuery({
-    queryKey: ["expenses", dateRange],
+    queryKey: ["expenses", dateRange, viewingTeamId],
     queryFn: async () => {
       // Format dates for database query (YYYY-MM-DD)
       const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
@@ -28,8 +31,26 @@ export function useExpensesQuery(dateRange: DateRange) {
       
       console.log("Fetching expenses with date range:", {
         from: fromDate,
-        to: toDate
+        to: toDate,
+        viewingTeamId
       });
+
+      // Get team ID to filter by
+      let teamId: number | null = null;
+      
+      if (isViewingAsTeam && viewingTeamId) {
+        teamId = viewingTeamId;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          teamId = profile?.id_equipe || null;
+        }
+      }
       
       let query = supabase
         .from("despesas")
@@ -37,6 +58,11 @@ export function useExpensesQuery(dateRange: DateRange) {
           *,
           responsavel:pessoas(nome)
         `);
+
+      // Filter by team
+      if (teamId) {
+        query = query.eq("id_equipe", teamId);
+      }
       
       // Apply date filter with exact date matching for same day
       if (fromDate && toDate && fromDate === toDate) {

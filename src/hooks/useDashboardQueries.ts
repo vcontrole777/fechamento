@@ -8,7 +8,7 @@ import { useTeamView } from "@/contexts/TeamViewContext";
 
 // Fetch payments data with date range filtering
 export function usePaymentsQuery(dateRange: DateRange) {
-  const { viewingTeamId } = useTeamView();
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
   
   return useQuery({
     queryKey: ["dashboard-payments", dateRange, viewingTeamId],
@@ -19,8 +19,26 @@ export function usePaymentsQuery(dateRange: DateRange) {
       
       console.log("Fetching dashboard payments with date range:", {
         from: fromDate,
-        to: toDate
+        to: toDate,
+        viewingTeamId
       });
+
+      // Get team ID to filter by
+      let teamId: number | null = null;
+      
+      if (isViewingAsTeam && viewingTeamId) {
+        teamId = viewingTeamId;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          teamId = profile?.id_equipe || null;
+        }
+      }
       
       let query = supabase
         .from("pagamentos")
@@ -30,6 +48,11 @@ export function usePaymentsQuery(dateRange: DateRange) {
           tripeiro:pessoas!pagamentos_id_tripeiro_fkey(nome, porcentagem)
         `)
         .order("data", { ascending: false });
+
+      // Filter by team
+      if (teamId) {
+        query = query.eq("id_equipe", teamId);
+      }
 
       // Apply date range filter with exact date matching
       if (fromDate) {
@@ -58,7 +81,7 @@ export function usePaymentsQuery(dateRange: DateRange) {
 
 // Fetch expenses data with date range filtering
 export function useExpensesQuery(dateRange: DateRange) {
-  const { viewingTeamId } = useTeamView();
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
   
   return useQuery({
     queryKey: ["dashboard-expenses", dateRange, viewingTeamId],
@@ -69,8 +92,26 @@ export function useExpensesQuery(dateRange: DateRange) {
       
       console.log("Fetching dashboard expenses with date range:", {
         from: fromDate,
-        to: toDate
+        to: toDate,
+        viewingTeamId
       });
+
+      // Get team ID to filter by
+      let teamId: number | null = null;
+      
+      if (isViewingAsTeam && viewingTeamId) {
+        teamId = viewingTeamId;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          teamId = profile?.id_equipe || null;
+        }
+      }
       
       let query = supabase
         .from("despesas")
@@ -79,6 +120,11 @@ export function useExpensesQuery(dateRange: DateRange) {
           responsavel:pessoas(nome)
         `)
         .order("data", { ascending: false });
+
+      // Filter by team
+      if (teamId) {
+        query = query.eq("id_equipe", teamId);
+      }
 
       // Apply date filter with exact date matching
       if (fromDate) {
@@ -109,16 +155,41 @@ export function useExpensesQuery(dateRange: DateRange) {
 
 // Fetch attendants data
 export function useAttendantsQuery() {
-  const { viewingTeamId } = useTeamView();
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
   
   return useQuery({
     queryKey: ["dashboard-attendants", viewingTeamId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get team ID to filter by
+      let teamId: number | null = null;
+      
+      if (isViewingAsTeam && viewingTeamId) {
+        teamId = viewingTeamId;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id_equipe")
+            .eq("id", user.id)
+            .single();
+          teamId = profile?.id_equipe || null;
+        }
+      }
+
+      let query = supabase
         .from("pessoas")
         .select("id, nome")
-        .eq("tipo", "atendente")
-        .order("nome");
+        .eq("tipo", "atendente");
+
+      // Filter by team
+      if (teamId) {
+        query = query.eq("id_equipe", teamId);
+      }
+
+      query = query.order("nome");
+
+      const { data, error } = await query;
 
       if (error) {
         toast({
