@@ -3,7 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Receipt, StickyNote } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export function QuickActions() {
+interface QuickActionsProps {
+  onOpenNoteDialog?: () => void;
+}
+
+export function QuickActions({ onOpenNoteDialog }: QuickActionsProps) {
   const navigate = useNavigate();
 
   return (
@@ -29,7 +33,7 @@ export function QuickActions() {
           <span className="text-sm">Nova Despesa</span>
         </Button>
         <Button 
-          onClick={() => {}} 
+          onClick={onOpenNoteDialog} 
           className="h-20 flex flex-col gap-2"
           variant="outline"
         >

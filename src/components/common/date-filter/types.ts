@@ -2,6 +2,7 @@
 import { Dispatch, SetStateAction } from "react";
 
 export type DateFilterOption = 
+  | "all"
   | "today" 
   | "yesterday" 
   | "last7days" 

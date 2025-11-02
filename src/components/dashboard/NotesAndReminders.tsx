@@ -8,10 +8,18 @@ import { NotesList } from "./notes/NotesList";
 import { NoteForm } from "./notes/NoteForm";
 import { useNotes } from "./notes/useNotes";
 
-export function NotesAndReminders({ className }: { className?: string }) {
+export function NotesAndReminders({ className, onOpenDialog }: { className?: string; onOpenDialog?: () => void }) {
   const { user } = useAuth();
   const { notesAndReminders, isLoading } = useDashboardData();
   const { open, setOpen, addNote, toggleComplete, deleteNote } = useNotes();
+
+  // Se onOpenDialog foi passado, usamos ele
+  const handleOpenDialog = () => {
+    if (onOpenDialog) {
+      onOpenDialog();
+    }
+    setOpen(true);
+  };
 
   // Verifica se o usuário está autenticado
   if (!user) {
@@ -39,7 +47,7 @@ export function NotesAndReminders({ className }: { className?: string }) {
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Notas e Lembretes</CardTitle>
-        <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
+        <Button variant="ghost" size="icon" onClick={handleOpenDialog}>
           <PlusCircle className="h-5 w-5" />
         </Button>
       </CardHeader>
@@ -49,7 +57,7 @@ export function NotesAndReminders({ className }: { className?: string }) {
           isLoading={isLoading}
           onToggleComplete={toggleComplete}
           onDelete={deleteNote}
-          onAddClick={() => setOpen(true)}
+          onAddClick={handleOpenDialog}
         />
         
         <NoteForm

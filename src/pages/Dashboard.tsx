@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Banknote, TrendingDown, TrendingUp, Users, Percent } from "lucide-react";
 import { StatCardEnhanced } from "@/components/dashboard/StatCardEnhanced";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
@@ -33,6 +34,9 @@ export default function Dashboard() {
 
   const { updateSharedDateFilter } = useSharedDateFilter();
   const isMobile = useIsMobile();
+  
+  // Estado para controlar o dialog de notas
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
 
   const formatCurrency = (value: number): string => {
     return value.toLocaleString('pt-BR', {
@@ -44,6 +48,10 @@ export default function Dashboard() {
   const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
     updateDateRange(newDateRange);
     updateSharedDateFilter(newDateRange, option);
+  };
+
+  const handleOpenNoteDialog = () => {
+    setNoteDialogOpen(true);
   };
 
   return (
@@ -63,7 +71,7 @@ export default function Dashboard() {
       {alerts.length > 0 && <DashboardAlerts alerts={alerts} />}
 
       {/* Quick Actions */}
-      <QuickActions />
+      <QuickActions onOpenNoteDialog={handleOpenNoteDialog} />
 
       {/* Main Stats - 5 cards */}
       <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
@@ -135,7 +143,7 @@ export default function Dashboard() {
 
       {/* Notes and Reminders */}
       <div className="grid gap-4 md:gap-6 grid-cols-1">
-        <NotesAndReminders />
+        <NotesAndReminders onOpenDialog={handleOpenNoteDialog} />
       </div>
 
       {/* Bottom Section - Top Attendants and Recent Transactions */}

@@ -7,6 +7,7 @@ export function formatDateRangeDisplay(
   selectedOption: DateFilterOption,
   date: DateRange
 ): string {
+  if (selectedOption === "all") return "Todo o Período";
   if (selectedOption === "today") return "Hoje";
   if (selectedOption === "yesterday") return "Ontem";
   if (selectedOption === "last7days") return "Últimos 7 dias";
@@ -33,6 +34,11 @@ export function getDateRangeFromOption(option: DateFilterOption): DateRange {
   const todayEnd = endOfDay(currentDate);
   
   switch (option) {
+    case "all":
+      return {
+        from: null,
+        to: null,
+      };
     case "today":
       return {
         from: todayStart,

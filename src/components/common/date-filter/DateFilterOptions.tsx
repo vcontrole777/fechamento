@@ -20,6 +20,10 @@ export function DateFilterOptions({ handleOptionSelect }: DateFilterOptionsProps
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[180px]">
+        <DropdownMenuItem onClick={() => handleOptionSelect("all")}>
+          Todo o Período
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => handleOptionSelect("today")}>
           Hoje
         </DropdownMenuItem>
