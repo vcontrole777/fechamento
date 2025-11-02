@@ -34,12 +34,12 @@ export default function Recebimentos() {
     <div className="space-y-6 p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Recebimentos</h1>
+          <h1 className="text-3xl font-bold glow-text">Recebimentos</h1>
           <p className="text-muted-foreground">
             Gerencie os recebimentos dos tripeiros
           </p>
         </div>
-        <Button onClick={() => setShowNovoRecebimentoDialog(true)}>
+        <Button onClick={() => setShowNovoRecebimentoDialog(true)} className="glow-border">
           <Plus className="mr-2 h-4 w-4" />
           Novo Recebimento
         </Button>
@@ -63,12 +63,12 @@ export default function Recebimentos() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
+            <Card className="glow-card border-2 border-success">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Recebido</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-success">
                   {formatCurrency(totalRecebido)}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -78,7 +78,7 @@ export default function Recebimentos() {
             </Card>
           </div>
 
-          <Card>
+          <Card className="glow-card border-2 border-primary">
             <CardHeader>
               <CardTitle>Histórico de Recebimentos</CardTitle>
             </CardHeader>

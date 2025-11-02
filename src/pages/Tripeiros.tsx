@@ -74,10 +74,10 @@ export default function Tripeiros() {
 
   return (
     <div className="p-6">
-      <Card>
+      <Card className="glow-card border-2 border-primary">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Tripeiros</CardTitle>
-          <Button onClick={handleOpenNewTrypeiroDialog}>
+          <CardTitle className="glow-text">Tripeiros</CardTitle>
+          <Button onClick={handleOpenNewTrypeiroDialog} className="glow-border">
             <Plus className="mr-2 h-4 w-4" /> Novo Tripeiro
           </Button>
         </CardHeader>

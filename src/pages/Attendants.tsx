@@ -71,10 +71,10 @@ export default function Attendants() {
 
   return (
     <div className="p-6">
-      <Card>
+      <Card className="glow-card border-2 border-primary">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Atendentes</CardTitle>
-          <Button onClick={handleOpenNewAttendantDialog}>
+          <CardTitle className="glow-text">Atendentes</CardTitle>
+          <Button onClick={handleOpenNewAttendantDialog} className="glow-border">
             <Plus className="mr-2 h-4 w-4" /> Novo Atendente
           </Button>
         </CardHeader>

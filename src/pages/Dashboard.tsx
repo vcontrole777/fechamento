@@ -38,7 +38,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-xl md:text-2xl font-bold glow-text">Dashboard</h1>
         <DateFilter onFilterChange={handleDateFilterChange} />
       </div>
 
@@ -49,7 +49,7 @@ export default function Dashboard() {
           icon={Banknote}
           trend={financialStats.revenueTrend}
           count={financialStats.paymentsCount}
-          className="bg-gradient-to-br from-accent/10 to-accent/5"
+          className="glow-card border-2 border-primary"
         />
         <StatCard
           title="Gastos"
@@ -57,7 +57,7 @@ export default function Dashboard() {
           icon={TrendingDown}
           trend={financialStats.expensesTrend}
           count={financialStats.expensesCount}
-          className="bg-gradient-to-br from-destructive/10 to-destructive/5"
+          className="glow-card border-2 border-destructive"
         />
         <StatCard
           title="Lucro Líquido"
@@ -65,7 +65,7 @@ export default function Dashboard() {
           description="Faturamento - Comissões - Gastos"
           icon={TrendingUp}
           trend={financialStats.profitTrend}
-          className="bg-gradient-to-br from-success/10 to-success/5"
+          className="glow-card border-2 border-success"
         />
       </div>
 

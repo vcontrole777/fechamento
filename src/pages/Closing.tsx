@@ -53,7 +53,7 @@ export default function Closing() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Fechamento</h1>
+        <h1 className="text-2xl font-bold tracking-tight glow-text">Fechamento</h1>
         <div className="flex space-x-2">
           <GeneratePDFButton
             closingSummary={closingSummary}

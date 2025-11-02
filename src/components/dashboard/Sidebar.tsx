@@ -56,14 +56,14 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col h-screen transition-all duration-300 bg-sidebar text-sidebar-foreground",
+        "flex flex-col h-screen transition-all duration-300 bg-sidebar text-sidebar-foreground border-r-2 border-primary glow-border",
         collapsed ? "w-16" : "w-64",
         className
       )}
     >
-      <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-muted">
+      <div className="flex items-center justify-between h-16 px-4 border-b-2 border-primary">
         {!collapsed && (
-          <h2 className="text-xl font-bold">Startup<span className="text-accent">OPS</span></h2>
+          <h2 className="text-xl font-bold glow-text">FECHAMENTO<span className="text-accent">.PRO</span></h2>
         )}
         <Button
           variant="ghost"
@@ -83,10 +83,10 @@ export function Sidebar({ className }: SidebarProps) {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center px-3 py-2 rounded-md transition-colors",
+                    "flex items-center px-3 py-2 rounded-md transition-colors border",
                     isActive
-                      ? "bg-sidebar-muted text-accent"
-                      : "text-sidebar-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
+                      ? "bg-primary/20 text-primary border-primary glow-border"
+                      : "text-sidebar-foreground hover:bg-sidebar-muted hover:text-primary border-transparent hover:border-primary/50"
                   )
                 }
               >
@@ -98,11 +98,11 @@ export function Sidebar({ className }: SidebarProps) {
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-sidebar-muted">
+      <div className="p-4 border-t-2 border-primary">
         <Button
           variant="ghost"
           className={cn(
-            "w-full flex items-center gap-2 text-sidebar-foreground hover:bg-sidebar-muted",
+            "w-full flex items-center gap-2 text-sidebar-foreground hover:bg-sidebar-muted hover:text-destructive hover:border-destructive border border-transparent transition-all",
             collapsed && "justify-center"
           )}
           onClick={handleSignOut}

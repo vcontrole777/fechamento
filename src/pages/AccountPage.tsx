@@ -206,9 +206,9 @@ export default function AccountPage() {
 
   return (
     <div className="container max-w-4xl p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Minha Conta</h1>
+      <h1 className="text-2xl font-bold glow-text">Minha Conta</h1>
       
-      <Card>
+      <Card className="glow-card border-2 border-primary">
         <CardHeader>
           <CardTitle>Informações do Usuário</CardTitle>
           <CardDescription>Detalhes da sua conta e equipe</CardDescription>
@@ -238,7 +238,7 @@ export default function AccountPage() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="glow-card border-2 border-secondary">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
@@ -285,7 +285,7 @@ export default function AccountPage() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="glow-card border-2 border-accent">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
@@ -307,7 +307,7 @@ export default function AccountPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="glow-card border-2 border-destructive">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <Trash2 className="h-5 w-5" />

@@ -68,8 +68,8 @@ export default function Payments() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Pagamentos</h1>
-        <Button onClick={openAddPaymentDialog}>
+        <h1 className="text-2xl font-bold tracking-tight glow-text">Pagamentos</h1>
+        <Button onClick={openAddPaymentDialog} className="glow-border">
           <PlusCircle className="mr-2 h-4 w-4" />
           Novo Pagamento
         </Button>

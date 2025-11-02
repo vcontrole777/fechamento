@@ -63,8 +63,8 @@ export default function Expenses() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Despesas</h1>
-        <Button onClick={openAddExpenseDialog}>
+        <h1 className="text-2xl font-bold glow-text">Despesas</h1>
+        <Button onClick={openAddExpenseDialog} className="glow-border">
           <Plus className="h-4 w-4 mr-2" />
           Nova Despesa
         </Button>
@@ -77,7 +77,7 @@ export default function Expenses() {
         
         <div className="w-full flex justify-center">
           <div className="grid gap-4 grid-cols-1 max-w-md">
-            <Card className="w-full">
+            <Card className="w-full glow-card border-2 border-primary">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">
                   Total de Despesas
@@ -96,7 +96,7 @@ export default function Expenses() {
         </div>
       </div>
 
-      <Card>
+      <Card className="glow-card border-2 border-primary">
         <CardHeader>
           <CardTitle>Todas as Despesas</CardTitle>
         </CardHeader>
