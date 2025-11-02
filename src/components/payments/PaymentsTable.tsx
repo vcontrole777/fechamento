@@ -132,15 +132,14 @@ export default function PaymentsTable({
   };
 
   const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="-ml-3 h-8 data-[state=open]:bg-accent"
+    <button
+      type="button"
+      className="-ml-3 h-8 flex items-center gap-2 px-3 hover:bg-accent/50 rounded-md transition-colors cursor-pointer"
       onClick={() => handleSort(field)}
     >
-      {children}
-      <ArrowUpDown className="ml-2 h-4 w-4" />
-    </Button>
+      <span>{children}</span>
+      <ArrowUpDown className={`h-4 w-4 transition-transform ${sortField === field ? 'text-primary' : 'text-muted-foreground'}`} />
+    </button>
   );
 
   return (
