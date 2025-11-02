@@ -13,9 +13,11 @@ import {
   ChevronRight,
   LogOut,
   Banknote,
+  Shield,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth"; 
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { toast } from "@/hooks/use-toast";
 import ThemeSelector from "@/components/ThemeSelector";
 
@@ -26,6 +28,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const { signOut } = useAuth();
+  const { isAdmin } = useAdminAuth();
 
   const menuItems = [
     { name: "Painel", icon: BarChart3, path: "/" },
@@ -36,6 +39,10 @@ export function Sidebar({ className }: SidebarProps) {
     { name: "Recebimentos", icon: Banknote, path: "/recebimentos" },
     { name: "Fechamento", icon: FileBarChart, path: "/fechamento" },
     { name: "Minha Conta", icon: User, path: "/minha-conta" },
+  ];
+
+  const adminItems = [
+    { name: "Admin", icon: Shield, path: "/admin" },
   ];
 
   const handleSignOut = async () => {
@@ -98,6 +105,37 @@ export function Sidebar({ className }: SidebarProps) {
           ))}
         </ul>
       </nav>
+
+      {/* Admin Section */}
+      {isAdmin && (
+        <div className="px-2 py-4 border-t border-primary/30">
+          {!collapsed && (
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+              Administração
+            </p>
+          )}
+          <ul className="space-y-1">
+            {adminItems.map((item) => (
+              <li key={item.name}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center px-3 py-2 rounded-md transition-colors border",
+                      isActive
+                        ? "bg-primary/20 text-primary border-primary glow-border"
+                        : "text-sidebar-foreground hover:bg-sidebar-muted hover:text-primary border-transparent hover:border-primary/50"
+                    )
+                  }
+                >
+                  <item.icon className={cn("h-5 w-5", collapsed ? "mx-auto" : "mr-3")} />
+                  {!collapsed && <span>{item.name}</span>}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="p-4 border-t-2 border-primary space-y-2">
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-end")}>

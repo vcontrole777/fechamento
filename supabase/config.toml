@@ -4,3 +4,12 @@ project_id = "nlrvqwoxcwdiivvbnvzw"
 [functions.weekly-attendant-ranking]
 verify_jwt = false
 
+[functions.admin-get-users]
+verify_jwt = true
+
+[functions.admin-update-user]
+verify_jwt = true
+
+[functions.admin-assign-role]
+verify_jwt = true
+

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { NavbarUserMenu } from "@/components/NavbarUserMenu";
+import { NotificationBell } from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Command, CommandInput } from "@/components/ui/command";
@@ -79,6 +80,7 @@ export function Navbar({ onToggleSidebar }: NavbarProps) {
               <p className="text-sm font-medium">{equipeName}</p>
             </div>
           )}
+          <NotificationBell />
           <ThemeToggle />
           <NavbarUserMenu />
         </div>
