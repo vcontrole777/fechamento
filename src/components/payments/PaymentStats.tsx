@@ -1,7 +1,7 @@
 
-import { DollarSign, CreditCard, UserCheck, InfoIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DollarSign, CreditCard, UserCheck, TrendingUp } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface PaymentStatsProps {
   totalPayments: number;
@@ -18,92 +18,99 @@ export function PaymentStats({
   isLoading,
   formatCurrency,
 }: PaymentStatsProps) {
+  const attendantPercentage = totalPayments > 0 ? (attendantCommission / totalPayments) * 100 : 0;
+  const tripeiroPercentage = totalPayments > 0 ? (tripeiroReceivable / totalPayments) * 100 : 0;
+
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-3 w-full max-w-4xl">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className="flex items-center">
-            <CardTitle className="text-sm font-medium">Total de Pagamentos</CardTitle>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 ml-2 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Somente pagamentos concluídos</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-3 w-full">
+      <Card className="border-2 hover:shadow-lg transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total de Pagamentos
+            </CardTitle>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-primary" />
+            </div>
           </div>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {isLoading ? (
-              <div className="h-8 w-24 animate-pulse rounded bg-muted"></div>
-            ) : (
-              formatCurrency(totalPayments)
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
+        <CardContent className="space-y-2">
+          {isLoading ? (
+            <div className="h-8 w-32 animate-pulse rounded bg-muted"></div>
+          ) : (
+            <>
+              <div className="text-3xl font-bold">
+                {formatCurrency(totalPayments)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Apenas pagamentos concluídos
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className="flex items-center">
-            <CardTitle className="text-sm font-medium">Comissão dos Atendentes</CardTitle>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 ml-2 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Somente pagamentos concluídos</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+      <Card className="border-2 hover:shadow-lg transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Comissão dos Atendentes
+            </CardTitle>
+            <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
+              <UserCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
           </div>
-          <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {isLoading ? (
-              <div className="h-8 w-24 animate-pulse rounded bg-muted"></div>
-            ) : (
-              formatCurrency(attendantCommission)
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
+        <CardContent className="space-y-2">
+          {isLoading ? (
+            <div className="h-8 w-32 animate-pulse rounded bg-muted"></div>
+          ) : (
+            <>
+              <div className="text-3xl font-bold">
+                {formatCurrency(attendantCommission)}
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {attendantPercentage.toFixed(1)}% do total
+                  </span>
+                </div>
+                <Progress value={attendantPercentage} className="h-2" />
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className="flex items-center">
-            <CardTitle className="text-sm font-medium">Valor a Receber do Tripeiro</CardTitle>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <InfoIcon className="h-4 w-4 ml-2 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Somente pagamentos concluídos</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+      <Card className="border-2 hover:shadow-lg transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Valor a Receber do Tripeiro
+            </CardTitle>
+            <div className="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+              <CreditCard className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            </div>
           </div>
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {isLoading ? (
-              <div className="h-8 w-24 animate-pulse rounded bg-muted"></div>
-            ) : (
-              formatCurrency(tripeiroReceivable)
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">Apenas pagamentos concluídos</p>
+        <CardContent className="space-y-2">
+          {isLoading ? (
+            <div className="h-8 w-32 animate-pulse rounded bg-muted"></div>
+          ) : (
+            <>
+              <div className="text-3xl font-bold">
+                {formatCurrency(tripeiroReceivable)}
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {tripeiroPercentage.toFixed(1)}% do total
+                  </span>
+                </div>
+                <Progress value={tripeiroPercentage} className="h-2" />
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

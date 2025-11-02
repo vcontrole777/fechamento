@@ -1,7 +1,8 @@
 
+import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -21,22 +22,63 @@ interface PaymentsTableProps {
   formatCurrency: (value: number) => string;
 }
 
+type SortField = "data" | "valor" | "atendente" | "tripeiro" | "status";
+type SortOrder = "asc" | "desc";
+
 export default function PaymentsTable({
   payments,
   onEditClick,
   onDeleteClick,
   formatCurrency,
 }: PaymentsTableProps) {
+  const [sortField, setSortField] = useState<SortField>("data");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const sortedPayments = [...payments].sort((a, b) => {
+    let compareValue = 0;
+    
+    switch (sortField) {
+      case "data":
+        compareValue = new Date(a.data).getTime() - new Date(b.data).getTime();
+        break;
+      case "valor":
+        compareValue = Number(a.valor) - Number(b.valor);
+        break;
+      case "atendente":
+        compareValue = (a.atendente?.nome || "").localeCompare(b.atendente?.nome || "");
+        break;
+      case "tripeiro":
+        compareValue = (a.tripeiro?.nome || "").localeCompare(b.tripeiro?.nome || "");
+        break;
+      case "status":
+        compareValue = a.status.localeCompare(b.status);
+        break;
+    }
+    
+    return sortOrder === "asc" ? compareValue : -compareValue;
+  });
+
+  const totalValue = sortedPayments.reduce((sum, payment) => sum + Number(payment.valor), 0);
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "concluido":
-        return "bg-green-500";
+        return "bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600";
       case "pendente":
-        return "bg-yellow-500";
+        return "bg-yellow-600 dark:bg-yellow-500 hover:bg-yellow-700 dark:hover:bg-yellow-600";
       case "bloqueado":
-        return "bg-red-500";
+        return "bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600";
       default:
-        return "bg-gray-500";
+        return "bg-gray-600 dark:bg-gray-500";
     }
   };
 
@@ -89,77 +131,116 @@ export default function PaymentsTable({
     return `${value}%`;
   };
 
+  const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="-ml-3 h-8 data-[state=open]:bg-accent"
+      onClick={() => handleSort(field)}
+    >
+      {children}
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    </Button>
+  );
+
   return (
     <div className="rounded-md border overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Data</TableHead>
-            <TableHead>Valor Total</TableHead>
-            <TableHead>Atendente</TableHead>
-            <TableHead>% Atendente</TableHead>
-            <TableHead>Tripeiro</TableHead>
-            <TableHead>% Tripeiro</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {payments.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={9} className="h-24 text-center">
-                Nenhum pagamento encontrado.
-              </TableCell>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead>
+                <SortButton field="data">Data</SortButton>
+              </TableHead>
+              <TableHead>
+                <SortButton field="valor">Valor Total</SortButton>
+              </TableHead>
+              <TableHead>
+                <SortButton field="atendente">Atendente</SortButton>
+              </TableHead>
+              <TableHead>% Atendente</TableHead>
+              <TableHead>
+                <SortButton field="tripeiro">Tripeiro</SortButton>
+              </TableHead>
+              <TableHead>% Tripeiro</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>
+                <SortButton field="status">Status</SortButton>
+              </TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
-          ) : (
-            payments.map((payment) => (
-              <TableRow key={payment.id}>
-                <TableCell>
-                  {formatDate(payment.data)}
-                </TableCell>
-                <TableCell>{formatCurrency(Number(payment.valor))}</TableCell>
-                <TableCell>
-                  {payment.atendente?.nome || "N/A"}
-                </TableCell>
-                <TableCell>
-                  {formatPercentage(payment.atendente?.porcentagem || payment.porcentagem_atendente)}
-                </TableCell>
-                <TableCell>
-                  {payment.tripeiro?.nome || "N/A"}
-                </TableCell>
-                <TableCell>
-                  {formatPercentage(payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro)}
-                </TableCell>
-                <TableCell className="capitalize">
-                  {payment.tipo === "pix" ? "PIX" : payment.tipo}
-                </TableCell>
-                <TableCell>
-                  <Badge className={getStatusBadgeColor(payment.status)}>
-                    {formatStatus(payment.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right space-x-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEditClick(payment)}
-                  >
-                    <Pencil className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDeleteClick(payment)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+          </TableHeader>
+          <TableBody>
+            {sortedPayments.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="h-24 text-center">
+                  Nenhum pagamento encontrado.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              <>
+                {sortedPayments.map((payment) => (
+                  <TableRow key={payment.id} className="hover:bg-muted/50 transition-colors">
+                    <TableCell className="font-medium">
+                      {formatDate(payment.data)}
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      {formatCurrency(Number(payment.valor))}
+                    </TableCell>
+                    <TableCell>
+                      {payment.atendente?.nome || <span className="text-muted-foreground">N/A</span>}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono">
+                        {formatPercentage(payment.atendente?.porcentagem || payment.porcentagem_atendente)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {payment.tripeiro?.nome || <span className="text-muted-foreground">N/A</span>}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono">
+                        {formatPercentage(payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {payment.tipo === "pix" ? "PIX" : payment.tipo}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusBadgeColor(payment.status)}>
+                        {formatStatus(payment.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEditClick(payment)}
+                        className="hover:bg-primary/10"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDeleteClick(payment)}
+                        className="hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow className="bg-muted/50 font-semibold hover:bg-muted/50">
+                  <TableCell>Total</TableCell>
+                  <TableCell className="text-lg">{formatCurrency(totalValue)}</TableCell>
+                  <TableCell colSpan={7}></TableCell>
+                </TableRow>
+              </>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { usePayments } from "@/hooks/usePayments";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
 import { PaymentStats } from "@/components/payments/PaymentStats";
 import PaymentsTable from "@/components/payments/PaymentsTable";
@@ -67,65 +68,65 @@ export default function Payments() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight glow-text">Pagamentos</h1>
-        <Button onClick={openAddPaymentDialog} className="glow-border">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Novo Pagamento
-        </Button>
-      </div>
-
-      <div className="flex flex-col space-y-4">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <DateFilter onFilterChange={handleDateFilterChange} />
+      {/* Header Moderno */}
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight glow-text">💰 Gestão de Pagamentos</h1>
+          <p className="text-muted-foreground mt-1">
+            Registre e acompanhe todos os pagamentos do sistema
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={openAddPaymentDialog} className="glow-border" size="default">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Novo Pagamento
+          </Button>
           <CopyToWhatsAppButton 
             payments={payments} 
             isVisible={!isLoading && payments.length > 0}
             filters={filters}
           />
         </div>
-        
-        <div className="w-full flex justify-center">
-          <PaymentStats
-            totalPayments={totalPayments}
-            attendantCommission={totalAttendantCommission}
-            tripeiroReceivable={totalTripeiroReceivable}
-            isLoading={isLoading}
-            formatCurrency={formatCurrency}
-          />
-        </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      {/* Filtro de Data */}
+      <div className="flex justify-start">
+        <DateFilter onFilterChange={handleDateFilterChange} />
+      </div>
+
+      {/* Cards de Estatísticas */}
+      <PaymentStats
+        totalPayments={totalPayments}
+        attendantCommission={totalAttendantCommission}
+        tripeiroReceivable={totalTripeiroReceivable}
+        isLoading={isLoading}
+        formatCurrency={formatCurrency}
+      />
+
+      {/* Seção de Filtros e Tabela */}
+      <Card className="border-2">
+        <CardContent className="pt-6 space-y-4">
           <PaymentFiltersComponent 
             filters={filters} 
             onUpdateFilters={updateFilters} 
           />
-          {hasActiveFilters && payments.length > 0 && (
-            <CopyToWhatsAppButton 
-              payments={payments} 
-              isVisible={true}
-              filters={filters}
-            />
-          )}
-        </div>
 
-        {isLoading ? (
-          <div className="w-full h-96 flex items-center justify-center">
-            <div className="animate-pulse">Carregando...</div>
-          </div>
-        ) : payments && payments.length > 0 ? (
-          <PaymentsTable
-            payments={payments}
-            onEditClick={openEditPaymentDialog}
-            onDeleteClick={openDeletePaymentDialog}
-            formatCurrency={formatCurrency}
-          />
-        ) : (
-          <EmptyPaymentsState onAddClick={openAddPaymentDialog} />
-        )}
-      </div>
+          {isLoading ? (
+            <div className="w-full h-96 flex items-center justify-center">
+              <div className="animate-pulse text-lg">Carregando pagamentos...</div>
+            </div>
+          ) : payments && payments.length > 0 ? (
+            <PaymentsTable
+              payments={payments}
+              onEditClick={openEditPaymentDialog}
+              onDeleteClick={openDeletePaymentDialog}
+              formatCurrency={formatCurrency}
+            />
+          ) : (
+            <EmptyPaymentsState onAddClick={openAddPaymentDialog} />
+          )}
+        </CardContent>
+      </Card>
 
       <NewPaymentDialog
         open={isAddingPayment}
