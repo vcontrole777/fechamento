@@ -5,6 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -13,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Shield, ShieldOff, Trash2, Search, RefreshCw } from "lucide-react";
+import { Shield, ShieldOff, Trash2, Search, RefreshCw, Filter } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +31,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface EnrichedUser {
   id: string;
@@ -40,10 +49,17 @@ interface EnrichedUser {
   } | null;
 }
 
+interface Team {
+  id: number;
+  nome: string;
+}
+
 export function UserManagement() {
   const [users, setUsers] = useState<EnrichedUser[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<EnrichedUser | null>(null);
   const [actionType, setActionType] = useState<'block' | 'unblock' | 'delete' | 'promote' | 'demote' | null>(null);
   const { toast } = useToast();
@@ -83,8 +99,23 @@ export function UserManagement() {
     }
   };
 
+  const fetchTeams = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('equipes')
+        .select('id, nome')
+        .order('nome');
+
+      if (error) throw error;
+      setTeams(data || []);
+    } catch (error: any) {
+      console.error('Error fetching teams:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchTeams();
   }, []);
 
   const handleAction = async () => {
@@ -135,10 +166,28 @@ export function UserManagement() {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.profile?.nome?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.profile?.nome?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesTeam = selectedTeam === "all" || 
+      user.profile?.id_equipe?.toString() === selectedTeam;
+    
+    return matchesSearch && matchesTeam;
+  });
+
+  const formatLastAccess = (lastSignIn: string | null) => {
+    if (!lastSignIn) return 'Nunca';
+    
+    try {
+      return formatDistanceToNow(new Date(lastSignIn), {
+        addSuffix: true,
+        locale: ptBR
+      });
+    } catch {
+      return 'Data inválida';
+    }
+  };
 
   return (
     <>
@@ -160,6 +209,20 @@ export function UserManagement() {
                 className="pl-8"
               />
             </div>
+            <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+              <SelectTrigger className="w-[200px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filtrar por equipe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as equipes</SelectItem>
+                {teams.map((team) => (
+                  <SelectItem key={team.id} value={team.id.toString()}>
+                    {team.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button onClick={fetchUsers} variant="outline" size="icon">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
@@ -174,19 +237,20 @@ export function UserManagement() {
                   <TableHead>Equipe</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Último Acesso</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       Carregando...
                     </TableCell>
                   </TableRow>
                 ) : filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       Nenhum usuário encontrado
                     </TableCell>
                   </TableRow>
@@ -209,6 +273,11 @@ export function UserManagement() {
                             Ativo
                           </Badge>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {formatLastAccess(user.last_sign_in_at)}
+                        </span>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
