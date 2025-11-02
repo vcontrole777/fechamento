@@ -14,6 +14,10 @@ import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
 import { DateRange } from "@/components/common/date-filter/types";
 import { useAttendantPayments } from "@/hooks/useAttendantPayments";
 import { AttendantPaymentFormData } from "@/components/closing/schemas/attendantPaymentSchema";
+import { useTripeiroPayments } from "@/hooks/closing/useTripeiroPayments";
+import { RegisterTripeiroPaymentDialog } from "@/components/closing/RegisterTripeiroPaymentDialog";
+import { TripeiroPaymentHistory } from "@/components/closing/TripeiroPaymentHistory";
+import { TripeiroPaymentFormData } from "@/components/closing/schemas/tripeiroPaymentSchema";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Closing() {
@@ -36,6 +40,14 @@ export default function Closing() {
     id: number;
     name: string;
     commission: number;
+  } | null>(null);
+
+  // Tripeiro payments hook
+  const tripeiroPaymentsHook = useTripeiroPayments(dateRange);
+  const [selectedTripeiroForPayment, setSelectedTripeiroForPayment] = useState<{
+    id: number;
+    name: string;
+    receivable: number;
   } | null>(null);
 
   // Force refetch when component mounts
@@ -113,6 +125,57 @@ export default function Closing() {
     attendantPaymentsHook.deletePayment.mutate(paymentId);
   };
 
+  // Tripeiro payment handlers
+  const handleRegisterTripeiroPayment = (tripeiroId: number) => {
+    const tripeiro = tripeiroSummaries.find(t => t.id === tripeiroId);
+    if (tripeiro) {
+      setSelectedTripeiroForPayment({
+        id: tripeiro.id,
+        name: tripeiro.nome,
+        receivable: tripeiro.totalReceivable,
+      });
+      tripeiroPaymentsHook.openRegisterDialog(tripeiroId);
+    }
+  };
+
+  const handleViewTripeiroHistory = (tripeiroId: number) => {
+    tripeiroPaymentsHook.openHistoryDialog(tripeiroId);
+  };
+
+  const handleSubmitTripeiroPayment = async (data: TripeiroPaymentFormData) => {
+    if (!selectedTripeiroForPayment) return;
+
+    // Get user's team ID from profile
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id_equipe')
+      .eq('id', (await supabase.auth.getUser()).data.user?.id)
+      .single();
+
+    if (!profileData?.id_equipe) {
+      return;
+    }
+
+    await tripeiroPaymentsHook.addPayment.mutateAsync({
+      id_tripeiro: selectedTripeiroForPayment.id,
+      id_equipe: profileData.id_equipe,
+      valor_a_receber: selectedTripeiroForPayment.receivable,
+      valor_pago: data.valor_pago,
+      data_pagamento: data.data_pagamento,
+      periodo_inicio: format(dateRange.from!, 'yyyy-MM-dd'),
+      periodo_fim: format(dateRange.to!, 'yyyy-MM-dd'),
+      metodo_pagamento: data.metodo_pagamento,
+      observacoes: data.observacoes,
+    });
+
+    tripeiroPaymentsHook.closeRegisterDialog();
+    setSelectedTripeiroForPayment(null);
+  };
+
+  const handleDeleteTripeiroPayment = (paymentId: string) => {
+    tripeiroPaymentsHook.deletePayment.mutate(paymentId);
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -155,7 +218,11 @@ export default function Closing() {
           <h2 className="text-xl font-semibold">Valores a Receber (Tripeiros)</h2>
           <TripeiroReceivablesTable 
             tripeiroSummaries={tripeiroSummaries} 
-            formatCurrency={formatCurrency} 
+            formatCurrency={formatCurrency}
+            onRegisterPayment={handleRegisterTripeiroPayment}
+            onViewHistory={handleViewTripeiroHistory}
+            getPaymentStatus={tripeiroPaymentsHook.getTripeiroPaymentStatus}
+            getTotalPaid={tripeiroPaymentsHook.getTotalPaidForTripeiro}
           />
         </div>
         
@@ -203,6 +270,40 @@ export default function Closing() {
           payments={attendantPaymentsHook.getPaymentsForAttendant(attendantPaymentsHook.selectedAttendantId)}
           formatCurrency={formatCurrency}
           onDeletePayment={handleDeletePayment}
+        />
+      )}
+
+      {/* Tripeiro Payment Dialogs */}
+      {selectedTripeiroForPayment && (
+        <RegisterTripeiroPaymentDialog
+          open={tripeiroPaymentsHook.isRegisterDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              tripeiroPaymentsHook.closeRegisterDialog();
+              setSelectedTripeiroForPayment(null);
+            }
+          }}
+          tripeiro={{
+            id: selectedTripeiroForPayment.id,
+            nome: selectedTripeiroForPayment.name,
+            valorAReceber: selectedTripeiroForPayment.receivable,
+            periodoInicio: format(dateRange.from!, 'yyyy-MM-dd'),
+            periodoFim: format(dateRange.to!, 'yyyy-MM-dd'),
+          }}
+        />
+      )}
+
+      {tripeiroPaymentsHook.selectedTripeiroId && (
+        <TripeiroPaymentHistory
+          open={tripeiroPaymentsHook.isHistoryDialogOpen}
+          onOpenChange={tripeiroPaymentsHook.closeHistoryDialog}
+          tripeiro={{
+            id: tripeiroPaymentsHook.selectedTripeiroId,
+            nome: tripeiroSummaries.find(t => t.id === tripeiroPaymentsHook.selectedTripeiroId)?.nome || '',
+            periodoInicio: format(dateRange.from!, 'yyyy-MM-dd'),
+            periodoFim: format(dateRange.to!, 'yyyy-MM-dd'),
+          }}
+          formatCurrency={formatCurrency}
         />
       )}
     </div>
