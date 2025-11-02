@@ -1,73 +1,84 @@
-# Welcome to your Lovable project
+# FECHAMENTO.PRO
 
-## Project info
+Sistema completo de gestão financeira e controle de comissões para equipes.
 
-**URL**: https://lovable.dev/projects/248a4ca6-b973-4074-a9a4-ddb3d90cccde
+## Funcionalidades
 
-## How can I edit this code?
+- **Dashboard**: Visualização de métricas financeiras e KPIs em tempo real
+- **Gestão de Pagamentos**: Controle completo de pagamentos PIX e Boleto
+- **Gestão de Despesas**: Registro e controle de todas as despesas
+- **Gestão de Recebimentos**: Acompanhamento de todos os recebimentos
+- **Fechamento**: Relatórios de fechamento com cálculo de comissões
+- **Gestão de Equipe**: Controle de atendentes e tripeiros
+- **Painel Administrativo**: Gerenciamento de usuários e permissões
+- **Sistema de Notificações**: Comunicação com todos os usuários
+- **Contas Bancárias**: Gestão de contas bancárias da equipe
 
-There are several ways of editing your application.
+## Tecnologias
 
-**Use Lovable**
+Este projeto utiliza:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/248a4ca6-b973-4074-a9a4-ddb3d90cccde) and start prompting.
+- **Frontend**: React + TypeScript + Vite
+- **UI**: Tailwind CSS + shadcn-ui
+- **Backend**: Supabase (PostgreSQL + Edge Functions)
+- **Autenticação**: Supabase Auth
+- **Hospedagem**: Deploy automático
 
-Changes made via Lovable will be committed automatically to this repo.
+## Como executar localmente
 
-**Use your preferred IDE**
+### Pré-requisitos
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js (versão 18 ou superior)
+- npm ou yarn
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Instalação
 
-Follow these steps:
+```bash
+# Clone o repositório
+git clone <SEU_REPO_URL>
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Entre na pasta do projeto
+cd <NOME_DO_PROJETO>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Instale as dependências
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Inicie o servidor de desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+O projeto estará disponível em `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Estrutura do Projeto
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/     # Componentes React reutilizáveis
+├── pages/         # Páginas da aplicação
+├── hooks/         # Custom hooks
+├── layouts/       # Layouts principais
+├── contexts/      # Contextos React
+├── utils/         # Funções utilitárias
+└── integrations/  # Integrações (Supabase)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+supabase/
+├── functions/     # Edge Functions
+└── migrations/    # Migrações do banco de dados
+```
 
-## What technologies are used for this project?
+## Scripts Disponíveis
 
-This project is built with:
+- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run build` - Cria o build de produção
+- `npm run preview` - Visualiza o build de produção localmente
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Permissões e Roles
 
-## How can I deploy this project?
+O sistema possui dois níveis de acesso:
 
-Simply open [Lovable](https://lovable.dev/projects/248a4ca6-b973-4074-a9a4-ddb3d90cccde) and click on Share -> Publish.
+- **Admin**: Acesso total ao sistema, incluindo painel administrativo
+- **User**: Acesso às funcionalidades de gestão da própria equipe
 
-## Can I connect a custom domain to my Lovable project?
+## Suporte
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Para questões e suporte, entre em contato através do sistema de notificações internas.
