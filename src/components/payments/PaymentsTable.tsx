@@ -35,35 +35,62 @@ export default function PaymentsTable({
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
   const handleSort = (field: SortField) => {
+    console.log("PaymentsTable sort clicked", { field, sortField, sortOrder });
     if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortField(field);
       setSortOrder("asc");
     }
   };
 
+  const parseDateForSort = (value: unknown): number => {
+    try {
+      if (!value) return 0;
+      if (value instanceof Date) return value.getTime();
+      if (typeof value === 'string') {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          const [y, m, d] = value.split('-').map(Number);
+          return new Date(y, m - 1, d).getTime();
+        }
+        const iso = new Date(value);
+        if (!Number.isNaN(iso.getTime())) return iso.getTime();
+        const m = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (m) {
+          const day = parseInt(m[1], 10);
+          const month = parseInt(m[2], 10);
+          const year = parseInt(m[3], 10);
+          return new Date(year, month - 1, day).getTime();
+        }
+      }
+    } catch {}
+    return 0;
+  };
+
+  const cmpStr = (a?: string, b?: string) => (a || "").localeCompare(b || "", 'pt-BR', { sensitivity: 'base' });
+
   const sortedPayments = [...payments].sort((a, b) => {
     let compareValue = 0;
-    
+
     switch (sortField) {
       case "data":
-        compareValue = new Date(a.data).getTime() - new Date(b.data).getTime();
+        compareValue = parseDateForSort(a.data) - parseDateForSort(b.data);
         break;
       case "valor":
-        compareValue = Number(a.valor) - Number(b.valor);
+        compareValue = Number(a.valor || 0) - Number(b.valor || 0);
         break;
       case "atendente":
-        compareValue = (a.atendente?.nome || "").localeCompare(b.atendente?.nome || "");
+        compareValue = cmpStr(a.atendente?.nome, b.atendente?.nome);
         break;
       case "tripeiro":
-        compareValue = (a.tripeiro?.nome || "").localeCompare(b.tripeiro?.nome || "");
+        compareValue = cmpStr(a.tripeiro?.nome, b.tripeiro?.nome);
         break;
       case "status":
-        compareValue = a.status.localeCompare(b.status);
+        compareValue = cmpStr(a.status, b.status);
         break;
     }
-    
+
+    if (Number.isNaN(compareValue)) compareValue = 0;
     return sortOrder === "asc" ? compareValue : -compareValue;
   });
 
@@ -150,7 +177,10 @@ export default function PaymentsTable({
             <TableRow className="bg-muted/50">
               <TableHead
                 onClick={() => handleSort("data")}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSort("data"); }}
                 aria-sort={sortField === "data" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                role="button"
+                tabIndex={0}
                 className="cursor-pointer select-none"
               >
                 <div className="flex items-center gap-2">
@@ -168,7 +198,10 @@ export default function PaymentsTable({
               </TableHead>
               <TableHead
                 onClick={() => handleSort("valor")}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSort("valor"); }}
                 aria-sort={sortField === "valor" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                role="button"
+                tabIndex={0}
                 className="cursor-pointer select-none"
               >
                 <div className="flex items-center gap-2">
@@ -186,7 +219,10 @@ export default function PaymentsTable({
               </TableHead>
               <TableHead
                 onClick={() => handleSort("atendente")}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSort("atendente"); }}
                 aria-sort={sortField === "atendente" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                role="button"
+                tabIndex={0}
                 className="cursor-pointer select-none"
               >
                 <div className="flex items-center gap-2">
@@ -205,7 +241,10 @@ export default function PaymentsTable({
               <TableHead>% Atendente</TableHead>
               <TableHead
                 onClick={() => handleSort("tripeiro")}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSort("tripeiro"); }}
                 aria-sort={sortField === "tripeiro" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                role="button"
+                tabIndex={0}
                 className="cursor-pointer select-none"
               >
                 <div className="flex items-center gap-2">
@@ -225,7 +264,10 @@ export default function PaymentsTable({
               <TableHead>Tipo</TableHead>
               <TableHead
                 onClick={() => handleSort("status")}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSort("status"); }}
                 aria-sort={sortField === "status" ? (sortOrder === "asc" ? "ascending" : "descending") : "none"}
+                role="button"
+                tabIndex={0}
                 className="cursor-pointer select-none"
               >
                 <div className="flex items-center gap-2">
