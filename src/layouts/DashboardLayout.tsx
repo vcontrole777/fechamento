@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Navbar } from "@/components/dashboard/Navbar";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import { TeamViewBanner } from "@/components/admin/TeamViewBanner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ export function DashboardLayout() {
       
       <div className="flex flex-col flex-1 overflow-hidden">
         <Navbar onToggleSidebar={toggleSidebar} />
+        <TeamViewBanner />
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>

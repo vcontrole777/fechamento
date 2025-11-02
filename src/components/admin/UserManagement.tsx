@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useTeamView } from "@/contexts/TeamViewContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Shield, ShieldOff, Trash2, Search, RefreshCw, Filter } from "lucide-react";
+import { Shield, ShieldOff, Trash2, Search, RefreshCw, Filter, Eye } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +48,7 @@ interface EnrichedUser {
     nome: string | null;
     id_equipe: number | null;
     equipes: { nome: string } | null;
+    equipe_nome?: string;
   } | null;
 }
 
@@ -63,6 +66,8 @@ export function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<EnrichedUser | null>(null);
   const [actionType, setActionType] = useState<'block' | 'unblock' | 'delete' | 'promote' | 'demote' | null>(null);
   const { toast } = useToast();
+  const { setViewingTeam } = useTeamView();
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -189,6 +194,20 @@ export function UserManagement() {
     }
   };
 
+  const handleViewAsTeam = (user: EnrichedUser) => {
+    const teamId = user.profile?.id_equipe;
+    const teamName = user.profile?.equipes?.nome || user.profile?.equipe_nome;
+    
+    if (teamId && teamName) {
+      setViewingTeam(teamId, teamName);
+      navigate("/");
+      toast({
+        title: "Modo de visualização ativado",
+        description: `Agora você está visualizando os dados da equipe "${teamName}"`,
+      });
+    }
+  };
+
   return (
     <>
       <Card>
@@ -238,19 +257,20 @@ export function UserManagement() {
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Último Acesso</TableHead>
+                  <TableHead>Visualizar</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       Carregando...
                     </TableCell>
                   </TableRow>
                 ) : filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       Nenhum usuário encontrado
                     </TableCell>
                   </TableRow>
@@ -278,6 +298,20 @@ export function UserManagement() {
                         <span className="text-sm text-muted-foreground">
                           {formatLastAccess(user.last_sign_in_at)}
                         </span>
+                      </TableCell>
+                      <TableCell>
+                        {user.profile?.id_equipe ? (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleViewAsTeam(user)}
+                            title="Ver dados desta equipe"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">-</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">

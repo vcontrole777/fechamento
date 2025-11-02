@@ -4,11 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/types/payment.types";
 import { format } from "date-fns";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 // Fetch payments data with date range filtering
 export function usePaymentsQuery(dateRange: DateRange) {
+  const { viewingTeamId } = useTeamView();
+  
   return useQuery({
-    queryKey: ["dashboard-payments", dateRange],
+    queryKey: ["dashboard-payments", dateRange, viewingTeamId],
     queryFn: async () => {
       // Format dates properly for database query (YYYY-MM-DD)
       const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
@@ -55,8 +58,10 @@ export function usePaymentsQuery(dateRange: DateRange) {
 
 // Fetch expenses data with date range filtering
 export function useExpensesQuery(dateRange: DateRange) {
+  const { viewingTeamId } = useTeamView();
+  
   return useQuery({
-    queryKey: ["dashboard-expenses", dateRange],
+    queryKey: ["dashboard-expenses", dateRange, viewingTeamId],
     queryFn: async () => {
       // Format dates properly for database query (YYYY-MM-DD)
       const fromDate = dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : null;
@@ -104,8 +109,10 @@ export function useExpensesQuery(dateRange: DateRange) {
 
 // Fetch attendants data
 export function useAttendantsQuery() {
+  const { viewingTeamId } = useTeamView();
+  
   return useQuery({
-    queryKey: ["dashboard-attendants"],
+    queryKey: ["dashboard-attendants", viewingTeamId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pessoas")

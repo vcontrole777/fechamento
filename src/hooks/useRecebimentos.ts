@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DateRange } from "@/components/common/date-filter/types";
 import { format } from "date-fns";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 export type Recebimento = {
   id: number;
@@ -35,8 +36,10 @@ export type Recebimento = {
 };
 
 export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
+  
   return useQuery({
-    queryKey: ["recebimentos", dateRange, tripeiroId],
+    queryKey: ["recebimentos", dateRange, tripeiroId, viewingTeamId],
     queryFn: async () => {
       console.log("🔍 Fetching recebimentos with dateRange:", dateRange, "tripeiroId:", tripeiroId);
       
@@ -54,15 +57,23 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
 
       console.log("🔑 User authenticated:", user.id);
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id_equipe")
-        .eq("id", user.id)
-        .single();
+      let teamId: number;
 
-      console.log("👤 Profile query result:", profile, "error:", profileError);
+      // If admin is viewing as another team, use that team ID
+      if (isViewingAsTeam && viewingTeamId) {
+        console.log("👁️ Admin viewing as team:", viewingTeamId);
+        teamId = viewingTeamId;
+      } else {
+        // Otherwise, get the user's own team
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("id_equipe")
+          .eq("id", user.id)
+          .single();
 
-      if (profileError || !profile?.id_equipe) {
+        console.log("👤 Profile query result:", profile, "error:", profileError);
+
+        if (profileError || !profile?.id_equipe) {
         console.error("❌ Unable to get user team information:", profileError);
         // Let's try to get recebimentos without team filter to debug
         console.log("🔧 Trying to fetch recebimentos without team filter for debugging...");
@@ -83,7 +94,10 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
         return debugData || [];
       }
 
-      console.log("👥 User's team ID:", profile.id_equipe);
+        teamId = profile.id_equipe;
+      }
+
+      console.log("👥 Using team ID:", teamId);
 
       let query = supabase
         .from("recebimentos")
@@ -93,7 +107,7 @@ export function useRecebimentos(dateRange: DateRange, tripeiroId?: number) {
           responsavel:pessoas!recebimentos_id_responsavel_fkey(nome),
           conta_bancaria:contas_bancarias(id, titular, banco, agencia, conta)
         `)
-        .eq("id_equipe", profile.id_equipe); // Filter by user's team
+        .eq("id_equipe", teamId); // Filter by team
 
       if (tripeiroId) {
         query = query.eq("id_tripeiro", tripeiroId);
