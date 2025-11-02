@@ -78,7 +78,7 @@ export function useTripeiros() {
 
   useEffect(() => {
     fetchTripeiros();
-  }, [viewingTeamId]);
+  }, [viewingTeamId, isViewingAsTeam]);
 
   const handleDeleteTripeiro = async (id: number) => {
     try {

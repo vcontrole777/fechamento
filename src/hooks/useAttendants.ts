@@ -78,7 +78,7 @@ export function useAttendants() {
 
   useEffect(() => {
     fetchAttendants();
-  }, [viewingTeamId]);
+  }, [viewingTeamId, isViewingAsTeam]);
 
   // Function to delete an attendant
   const deleteAttendant = async (id: number) => {

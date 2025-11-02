@@ -30,17 +30,32 @@ export function useSystemNotifications() {
         return;
       }
 
+      const now = new Date().toISOString();
+
       // Buscar notificações ativas
       const { data: notifs, error: notifsError } = await supabase
         .from('system_notifications')
         .select('*')
         .eq('active', true)
-        .lte('start_date', new Date().toISOString())
-        .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (notifsError) throw notifsError;
+
+      // Filtrar notificações que estão no período válido
+      const validNotifs = (notifs || []).filter(notif => {
+        const startDate = new Date(notif.start_date);
+        const endDate = notif.end_date ? new Date(notif.end_date) : null;
+        const currentDate = new Date(now);
+        
+        // Notificação deve ter começado
+        if (startDate > currentDate) return false;
+        
+        // Se tem data de fim, verificar se ainda não passou
+        if (endDate && endDate < currentDate) return false;
+        
+        return true;
+      });
 
       // Buscar notificações lidas pelo usuário
       const { data: reads, error: readsError } = await supabase
@@ -52,7 +67,7 @@ export function useSystemNotifications() {
 
       const readIds = new Set(reads?.map(r => r.notification_id) || []);
 
-      const enrichedNotifs = (notifs || []).map(notif => ({
+      const enrichedNotifs = validNotifs.map(notif => ({
         ...notif,
         type: notif.type as 'info' | 'warning' | 'success' | 'error',
         isRead: readIds.has(notif.id)
