@@ -237,6 +237,57 @@ export type Database = {
           },
         ]
       }
+      pagamentos_atendentes: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          criado_por: string | null
+          data_pagamento: string
+          id: string
+          id_atendente: number
+          id_equipe: number
+          metodo_pagamento: Database["public"]["Enums"]["metodo_pagamento_atendente"]
+          observacoes: string | null
+          periodo_fim: string
+          periodo_inicio: string
+          status: Database["public"]["Enums"]["status_pagamento_atendente"]
+          valor_comissao: number
+          valor_pago: number
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          data_pagamento: string
+          id?: string
+          id_atendente: number
+          id_equipe: number
+          metodo_pagamento: Database["public"]["Enums"]["metodo_pagamento_atendente"]
+          observacoes?: string | null
+          periodo_fim: string
+          periodo_inicio: string
+          status?: Database["public"]["Enums"]["status_pagamento_atendente"]
+          valor_comissao: number
+          valor_pago?: number
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          criado_por?: string | null
+          data_pagamento?: string
+          id?: string
+          id_atendente?: number
+          id_equipe?: number
+          metodo_pagamento?: Database["public"]["Enums"]["metodo_pagamento_atendente"]
+          observacoes?: string | null
+          periodo_fim?: string
+          periodo_inicio?: string
+          status?: Database["public"]["Enums"]["status_pagamento_atendente"]
+          valor_comissao?: number
+          valor_pago?: number
+        }
+        Relationships: []
+      }
       pessoas: {
         Row: {
           criado_em: string
@@ -499,7 +550,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      metodo_pagamento_atendente: "dinheiro" | "pix" | "transferencia" | "outro"
       status_pagamento: "concluido" | "pendente" | "bloqueado"
+      status_pagamento_atendente: "pendente" | "pago_parcial" | "pago_total"
       tipo_pagamento: "boleto" | "pix" | "link"
       tipo_pessoa: "atendente" | "tripeiro" | "responsavel"
       user_role: "admin" | "user"
@@ -631,7 +684,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      metodo_pagamento_atendente: ["dinheiro", "pix", "transferencia", "outro"],
       status_pagamento: ["concluido", "pendente", "bloqueado"],
+      status_pagamento_atendente: ["pendente", "pago_parcial", "pago_total"],
       tipo_pagamento: ["boleto", "pix", "link"],
       tipo_pessoa: ["atendente", "tripeiro", "responsavel"],
       user_role: ["admin", "user"],

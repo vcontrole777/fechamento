@@ -9,17 +9,28 @@ import {
   TableRow,
   TableFooter
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { AttendantSummary } from "@/hooks/useClosingData";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AttendantPaymentStatusBadge } from "./AttendantPaymentStatusBadge";
+import { DollarSign, History } from "lucide-react";
 
 interface AttendantCommissionsTableProps {
   attendantSummaries: AttendantSummary[];
   formatCurrency: (value: number) => string;
+  onRegisterPayment?: (attendantId: number) => void;
+  onViewHistory?: (attendantId: number) => void;
+  getPaymentStatus?: (attendantId: number, totalCommission: number) => 'pendente' | 'pago_parcial' | 'pago_total';
+  getTotalPaid?: (attendantId: number) => number;
 }
 
 export function AttendantCommissionsTable({ 
   attendantSummaries, 
-  formatCurrency 
+  formatCurrency,
+  onRegisterPayment,
+  onViewHistory,
+  getPaymentStatus,
+  getTotalPaid,
 }: AttendantCommissionsTableProps) {
   const isMobile = useIsMobile();
 
@@ -53,12 +64,20 @@ export function AttendantCommissionsTable({
             <TableHead className={isMobile ? "hidden" : ""}>Pagamentos</TableHead>
             <TableHead>Total</TableHead>
             <TableHead className="text-right">Comissão</TableHead>
+            {(onRegisterPayment || getPaymentStatus) && (
+              <TableHead className="text-center">Status</TableHead>
+            )}
+            {(onRegisterPayment || onViewHistory) && (
+              <TableHead className="text-right">Ações</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {attendantSummaries.map((attendant) => {
             // Calculate payment value after tripeiro's commission but before attendant's commission
             const paymentAfterTripeiro = attendant.totalCommission / attendant.porcentagemDecimal;
+            const paymentStatus = getPaymentStatus ? getPaymentStatus(attendant.id, attendant.totalCommission) : undefined;
+            const totalPaid = getTotalPaid ? getTotalPaid(attendant.id) : 0;
             
             return (
               <TableRow key={attendant.id}>
@@ -68,6 +87,43 @@ export function AttendantCommissionsTable({
                 <TableCell className="text-right font-medium">
                   {formatCurrency(attendant.totalCommission)}
                 </TableCell>
+                {(onRegisterPayment || getPaymentStatus) && paymentStatus && (
+                  <TableCell className="text-center">
+                    <AttendantPaymentStatusBadge 
+                      status={paymentStatus}
+                      totalPaid={totalPaid}
+                      totalCommission={attendant.totalCommission}
+                      formatCurrency={formatCurrency}
+                      showDetails
+                    />
+                  </TableCell>
+                )}
+                {(onRegisterPayment || onViewHistory) && (
+                  <TableCell className="text-right">
+                    <div className="flex gap-1 justify-end">
+                      {onRegisterPayment && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onRegisterPayment(attendant.id)}
+                        >
+                          <DollarSign className="w-4 h-4 mr-1" />
+                          Registrar
+                        </Button>
+                      )}
+                      {onViewHistory && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onViewHistory(attendant.id)}
+                        >
+                          <History className="w-4 h-4 mr-1" />
+                          Histórico
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             );
           })}
