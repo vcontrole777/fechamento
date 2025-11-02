@@ -17,6 +17,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth"; 
 import { toast } from "@/hooks/use-toast";
+import ThemeSelector from "@/components/ThemeSelector";
 
 interface SidebarProps {
   className?: string;
@@ -98,7 +99,10 @@ export function Sidebar({ className }: SidebarProps) {
         </ul>
       </nav>
 
-      <div className="p-4 border-t-2 border-primary">
+      <div className="p-4 border-t-2 border-primary space-y-2">
+        <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-end")}>
+          <ThemeSelector />
+        </div>
         <Button
           variant="ghost"
           className={cn(
