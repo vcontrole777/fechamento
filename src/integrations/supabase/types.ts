@@ -495,6 +495,10 @@ export type Database = {
         Args: { equipe_id: number }
         Returns: undefined
       }
+      deletar_equipe_completa_admin: {
+        Args: { equipe_id: number }
+        Returns: undefined
+      }
       get_user_equipe_id: { Args: never; Returns: number }
       has_role: {
         Args: {

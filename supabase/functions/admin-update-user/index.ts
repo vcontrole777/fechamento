@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
         
         // Se o usuário tem equipe, deletar todos os dados da equipe
         if (profileData?.id_equipe) {
-          const { error: deleteEquipeError } = await supabaseAdmin.rpc('deletar_equipe_completa', {
+          const { error: deleteEquipeError } = await supabaseAdmin.rpc('deletar_equipe_completa_admin', {
             equipe_id: profileData.id_equipe
           })
           
