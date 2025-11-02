@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import { Navbar } from "@/components/dashboard/Navbar";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TeamViewBanner } from "@/components/admin/TeamViewBanner";
+import { NotificationPopup } from "@/components/NotificationPopup";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export function DashboardLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      <NotificationPopup />
       <Sidebar 
         className={cn(
           "transition-all duration-300 fixed md:relative z-30",
