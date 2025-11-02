@@ -80,6 +80,31 @@ Deno.serve(async (req) => {
         break
 
       case 'delete':
+        // Buscar equipe do usuário antes de deletar
+        const { data: profileData } = await supabaseAdmin
+          .from('profiles')
+          .select('id_equipe')
+          .eq('id', userId)
+          .single()
+        
+        // Se o usuário tem equipe, deletar todos os dados da equipe
+        if (profileData?.id_equipe) {
+          const { error: deleteEquipeError } = await supabaseAdmin.rpc('deletar_equipe_completa', {
+            equipe_id: profileData.id_equipe
+          })
+          
+          if (deleteEquipeError) {
+            console.error('Error deleting team data:', deleteEquipeError)
+            return new Response(
+              JSON.stringify({ error: 'Erro ao deletar dados da equipe: ' + deleteEquipeError.message }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          auditDetails.deleted_equipe_id = profileData.id_equipe
+        }
+        
+        // Deletar o usuário (profiles, user_roles e notes serão deletados em CASCADE)
         result = await supabaseAdmin.auth.admin.deleteUser(userId)
         auditAction = 'user_deleted'
         break

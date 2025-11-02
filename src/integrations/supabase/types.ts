@@ -481,6 +481,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      deletar_equipe_completa: {
+        Args: { equipe_id: number }
+        Returns: undefined
+      }
       get_user_equipe_id: { Args: never; Returns: number }
       has_role: {
         Args: {
