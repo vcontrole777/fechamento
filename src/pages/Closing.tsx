@@ -20,6 +20,9 @@ import { TripeiroPaymentHistory } from "@/components/closing/TripeiroPaymentHist
 import { TripeiroPaymentFormData } from "@/components/closing/schemas/tripeiroPaymentSchema";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Closing() {
   const {
@@ -214,9 +217,14 @@ export default function Closing() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight glow-text">Fechamento</h1>
-        <div className="flex space-x-2">
+      {/* Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight glow-text">Fechamento Financeiro</h1>
+          <p className="text-muted-foreground mt-1">Gerencie recebimentos e pagamentos do período</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <DateFilter onFilterChange={handleDateFilterChange} />
           <GeneratePDFButton
             closingSummary={closingSummary}
             tripeiroSummaries={tripeiroSummaries}
@@ -237,43 +245,70 @@ export default function Closing() {
         </div>
       </div>
 
-      <div className="flex flex-col space-y-4">
-        <div className="flex justify-between items-center">
-          <DateFilter onFilterChange={handleDateFilterChange} />
-        </div>
-        
-        <ClosingSummary 
-          summary={closingSummary} 
-          formatCurrency={formatCurrency} 
-          isLoading={isLoading} 
-        />
-      </div>
+      {/* Resumo Consolidado */}
+      <Card className="border-2 shadow-lg">
+        <CardContent className="pt-6">
+          <ClosingSummary 
+            summary={closingSummary} 
+            formatCurrency={formatCurrency} 
+            isLoading={isLoading} 
+          />
+        </CardContent>
+      </Card>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Valores a Receber (Tripeiros)</h2>
-          <TripeiroReceivablesTable 
-            tripeiroSummaries={tripeiroSummaries} 
-            formatCurrency={formatCurrency}
-            onRegisterPayment={handleRegisterTripeiroPayment}
-            onViewHistory={handleViewTripeiroHistory}
-            getPaymentStatus={tripeiroPaymentsHook.getTripeiroPaymentStatus}
-            getTotalPaid={tripeiroPaymentsHook.getTotalPaidForTripeiro}
-          />
-        </div>
-        
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Comissões (Atendentes)</h2>
-          <AttendantCommissionsTable 
-            attendantSummaries={attendantSummaries} 
-            formatCurrency={formatCurrency}
-            onRegisterPayment={handleRegisterPayment}
-            onViewHistory={handleViewHistory}
-            getPaymentStatus={attendantPaymentsHook.getAttendantPaymentStatus}
-            getTotalPaid={attendantPaymentsHook.getTotalPaidForAttendant}
-          />
-        </div>
-      </div>
+      {/* Tabs para Recebimentos e Pagamentos */}
+      <Tabs defaultValue="recebimentos" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="recebimentos" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            <span>Valores a Receber</span>
+          </TabsTrigger>
+          <TabsTrigger value="pagamentos" className="flex items-center gap-2">
+            <TrendingDown className="h-4 w-4" />
+            <span>Comissões a Pagar</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="recebimentos" className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+              Recebimentos dos Tripeiros
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Gerencie os valores a receber dos tripeiros no período selecionado
+            </p>
+            <TripeiroReceivablesTable 
+              tripeiroSummaries={tripeiroSummaries} 
+              formatCurrency={formatCurrency}
+              onRegisterPayment={handleRegisterTripeiroPayment}
+              onViewHistory={handleViewTripeiroHistory}
+              getPaymentStatus={tripeiroPaymentsHook.getTripeiroPaymentStatus}
+              getTotalPaid={tripeiroPaymentsHook.getTotalPaidForTripeiro}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pagamentos" className="space-y-4">
+          <div>
+            <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              Comissões dos Atendentes
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Gerencie as comissões a pagar aos atendentes no período selecionado
+            </p>
+            <AttendantCommissionsTable 
+              attendantSummaries={attendantSummaries} 
+              formatCurrency={formatCurrency}
+              onRegisterPayment={handleRegisterPayment}
+              onViewHistory={handleViewHistory}
+              getPaymentStatus={attendantPaymentsHook.getAttendantPaymentStatus}
+              getTotalPaid={attendantPaymentsHook.getTotalPaidForAttendant}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Dialogs */}
       {selectedAttendantForPayment && (
