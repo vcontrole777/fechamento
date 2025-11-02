@@ -5,95 +5,95 @@
 
 @layer base {
   :root {
-    --background: 240 10% 5%;
-    --foreground: 160 100% 70%;
+    --background: 0 0% 0%;
+    --foreground: 120 100% 50%;
 
-    --card: 240 10% 8%;
-    --card-foreground: 160 100% 70%;
+    --card: 0 0% 7%;
+    --card-foreground: 120 100% 50%;
 
-    --popover: 240 10% 8%;
-    --popover-foreground: 160 100% 70%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 120 100% 50%;
 
-    --primary: 160 100% 50%;
-    --primary-foreground: 240 10% 5%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 280 100% 60%;
-    --secondary-foreground: 240 10% 5%;
+    --secondary: 120 100% 35%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 240 10% 15%;
-    --muted-foreground: 160 30% 50%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 120 100% 35%;
 
-    --accent: 320 100% 60%;
-    --accent-foreground: 240 10% 5%;
+    --accent: 120 100% 60%;
+    --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 100% 60%;
-    --destructive-foreground: 240 10% 5%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 160 100% 50%;
-    --input: 240 10% 12%;
-    --ring: 160 100% 50%;
+    --border: 120 100% 50%;
+    --input: 0 0% 10%;
+    --ring: 120 100% 50%;
 
-    --radius: 0.125rem;
+    --radius: 0.25rem;
 
-    --success: 160 100% 50%;
-    --success-foreground: 240 10% 5%;
+    --success: 120 100% 50%;
+    --success-foreground: 0 0% 0%;
 
-    --warning: 50 100% 50%;
-    --warning-foreground: 240 10% 5%;
+    --warning: 60 100% 50%;
+    --warning-foreground: 0 0% 0%;
 
-    --sidebar-background: 240 10% 5%;
-    --sidebar-foreground: 160 100% 70%;
-    --sidebar-muted: 240 10% 12%;
-    --sidebar-muted-foreground: 160 30% 50%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 120 100% 50%;
+    --sidebar-muted: 0 0% 10%;
+    --sidebar-muted-foreground: 120 100% 35%;
     
-    --glow-primary: 160 100% 50%;
-    --glow-secondary: 280 100% 60%;
-    --glow-accent: 320 100% 60%;
+    --glow-primary: 120 100% 50%;
+    --glow-secondary: 120 100% 35%;
+    --glow-accent: 120 100% 60%;
   }
 
   .dark {
-    --background: 240 10% 5%;
-    --foreground: 160 100% 70%;
+    --background: 0 0% 0%;
+    --foreground: 120 100% 50%;
 
-    --card: 240 10% 8%;
-    --card-foreground: 160 100% 70%;
+    --card: 0 0% 7%;
+    --card-foreground: 120 100% 50%;
 
-    --popover: 240 10% 8%;
-    --popover-foreground: 160 100% 70%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 120 100% 50%;
 
-    --primary: 160 100% 50%;
-    --primary-foreground: 240 10% 5%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 280 100% 60%;
-    --secondary-foreground: 240 10% 5%;
+    --secondary: 120 100% 35%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 240 10% 15%;
-    --muted-foreground: 160 30% 50%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 120 100% 35%;
 
-    --accent: 320 100% 60%;
-    --accent-foreground: 240 10% 5%;
+    --accent: 120 100% 60%;
+    --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 100% 60%;
-    --destructive-foreground: 240 10% 5%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 160 100% 50%;
-    --input: 240 10% 12%;
-    --ring: 160 100% 50%;
+    --border: 120 100% 50%;
+    --input: 0 0% 10%;
+    --ring: 120 100% 50%;
     
-    --success: 160 100% 50%;
-    --success-foreground: 240 10% 5%;
+    --success: 120 100% 50%;
+    --success-foreground: 0 0% 0%;
 
-    --warning: 50 100% 50%;
-    --warning-foreground: 240 10% 5%;
+    --warning: 60 100% 50%;
+    --warning-foreground: 0 0% 0%;
 
-    --sidebar-background: 240 10% 5%;
-    --sidebar-foreground: 160 100% 70%;
-    --sidebar-muted: 240 10% 12%;
-    --sidebar-muted-foreground: 160 30% 50%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 120 100% 50%;
+    --sidebar-muted: 0 0% 10%;
+    --sidebar-muted-foreground: 120 100% 35%;
     
-    --glow-primary: 160 100% 50%;
-    --glow-secondary: 280 100% 60%;
-    --glow-accent: 320 100% 60%;
+    --glow-primary: 120 100% 50%;
+    --glow-secondary: 120 100% 35%;
+    --glow-accent: 120 100% 60%;
   }
 }
 
