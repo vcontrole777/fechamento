@@ -24,37 +24,61 @@ export function RecentTransactions({
   title,
   className,
 }: RecentTransactionsProps) {
+  const displayTransactions = transactions.slice(0, 5);
+  const hasMore = transactions.length > 5;
+
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      completed: "bg-success/10 text-success border-success/20",
+      failed: "bg-destructive/10 text-destructive border-destructive/20",
+      pending: "bg-warning/10 text-warning border-warning/20",
+    };
+    const labels = {
+      completed: "Concluído",
+      failed: "Falhou",
+      pending: "Pendente",
+    };
+    return (
+      <span className={cn("text-xs px-2 py-0.5 rounded-full border", variants[status as keyof typeof variants])}>
+        {labels[status as keyof typeof labels]}
+      </span>
+    );
+  };
+
   return (
     <Card className={className}>
-      <CardHeader className="flex flex-row items-center space-y-0">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>{title}</CardTitle>
+        {hasMore && (
+          <span className="text-xs text-muted-foreground">
+            +{transactions.length - 5} mais
+          </span>
+        )}
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {transactions.map((transaction) => (
-            <div key={transaction.id} className="flex items-center">
+        <div className="space-y-4">
+          {displayTransactions.map((transaction) => (
+            <div 
+              key={transaction.id} 
+              className="flex items-center p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+            >
               <Avatar className="h-9 w-9">
                 <AvatarImage src={transaction.imageUrl} alt={transaction.name} />
                 <AvatarFallback>{transaction.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div className="ml-4 space-y-1">
-                <p className="text-sm font-medium leading-none">
+              <div className="ml-3 space-y-1 flex-1 min-w-0">
+                <p className="text-sm font-medium leading-none truncate">
                   {transaction.name}
                 </p>
-                <p className="text-sm text-muted-foreground">{transaction.type}</p>
+                <p className="text-xs text-muted-foreground">{transaction.type}</p>
               </div>
-              <div className="ml-auto text-right">
-                <p
-                  className={cn(
-                    "text-sm font-medium",
-                    transaction.status === "completed" && "text-success",
-                    transaction.status === "failed" && "text-destructive",
-                    transaction.status === "pending" && "text-warning"
-                  )}
-                >
+              <div className="ml-auto text-right space-y-1">
+                <p className="text-sm font-medium">
                   {transaction.amount}
                 </p>
-                <p className="text-xs text-muted-foreground">{transaction.date}</p>
+                <div className="flex items-center justify-end gap-2">
+                  {getStatusBadge(transaction.status)}
+                </div>
               </div>
             </div>
           ))}
