@@ -231,27 +231,43 @@ export function useClosingCalculations() {
         porcentagemIndicacao
       });
       
-      // Add to referrer's total
-      if (attendantsMap.has(idIndicador)) {
-        const referrerSummary = attendantsMap.get(idIndicador)!;
-        referrerSummary.totalReferralCommission += referralCommission;
+      // Add to referrer's total - CREATE entry if doesn't exist
+      if (!attendantsMap.has(idIndicador)) {
+        // Find referrer's name from existing payments or use placeholder
+        const referrerPayment = completedPayments.find(p => p.id_atendente === idIndicador);
+        const referrerName = referrerPayment?.atendente?.nome || `Atendente ${idIndicador}`;
+        const referrerPercentage = referrerPayment?.atendente?.porcentagem || 0;
         
-        // Track referral details
-        if (!referralMap.has(idIndicador)) {
-          referralMap.set(idIndicador, new Map());
-        }
-        const referrerDetails = referralMap.get(idIndicador)!;
-        const referredName = payment.atendente.nome;
+        console.log("Creating new entry for referrer:", { idIndicador, referrerName });
         
-        if (referrerDetails.has(referredName)) {
-          const existing = referrerDetails.get(referredName)!;
-          existing.commission += referralCommission;
-          existing.count += 1;
-        } else {
-          referrerDetails.set(referredName, { commission: referralCommission, count: 1 });
-        }
+        attendantsMap.set(idIndicador, {
+          id: idIndicador,
+          nome: referrerName,
+          totalCommission: 0,
+          totalPaymentAmount: 0,
+          paymentsCount: 0,
+          porcentagemDecimal: referrerPercentage / 100,
+          totalReferralCommission: 0,
+          referralDetails: []
+        });
+      }
+      
+      const referrerSummary = attendantsMap.get(idIndicador)!;
+      referrerSummary.totalReferralCommission += referralCommission;
+      
+      // Track referral details
+      if (!referralMap.has(idIndicador)) {
+        referralMap.set(idIndicador, new Map());
+      }
+      const referrerDetails = referralMap.get(idIndicador)!;
+      const referredName = payment.atendente.nome;
+      
+      if (referrerDetails.has(referredName)) {
+        const existing = referrerDetails.get(referredName)!;
+        existing.commission += referralCommission;
+        existing.count += 1;
       } else {
-        console.log("Referrer not found in attendantsMap:", idIndicador);
+        referrerDetails.set(referredName, { commission: referralCommission, count: 1 });
       }
     });
     
