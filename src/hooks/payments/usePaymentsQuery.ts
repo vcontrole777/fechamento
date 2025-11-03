@@ -99,15 +99,7 @@ export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) 
 
       console.log("Payments retrieved from database:", data);
       
-      // Process the data to use updated percentages from the pessoas table
-      const processedData = data.map(payment => ({
-        ...payment,
-        // Ensure we're using the current percentages from the pessoas table
-        porcentagem_atendente: payment.atendente?.porcentagem || payment.porcentagem_atendente,
-        porcentagem_tripeiro: payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro
-      }));
-
-      return processedData as Payment[];
+      return data as Payment[];
     },
   });
 }

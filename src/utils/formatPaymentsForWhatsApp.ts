@@ -111,8 +111,8 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
         
         if (isAttendant) {
           // Para atendentes, calculamos a comissão baseada no valor a receber do tripeiro
-          const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-          const attendantPercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
+          const tripeiroPercentage = payment.porcentagem_tripeiro;
+          const attendantPercentage = payment.porcentagem_atendente;
           
           message += `• R$ ${paymentValue.toFixed(2)}`; 
           
@@ -127,7 +127,7 @@ export function formatPaymentsForWhatsApp(payments: Payment[], groupBy: 'tripeir
           message += ` → Comissão ${attendantPercentage}%: ${formatCurrency(receivableAmount)}\n`;
         } else {
           // Para tripeiros, o valor a receber é o valor total menos a comissão
-          const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+          const tripeiroPercentage = payment.porcentagem_tripeiro;
           
           message += `• R$ ${paymentValue.toFixed(2)}`;
           

@@ -57,9 +57,9 @@ export function useClosingCalculations() {
     const commissions = completedPayments.reduce(
       (acc, payment) => {
         const totalPayment = Number(payment.valor);
-        // Use the most current percentages from the related entities
-        const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-        const atendentePercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
+        // Use the percentage that was saved at the time of payment creation
+        const tripeiroPercentage = payment.porcentagem_tripeiro;
+        const atendentePercentage = payment.porcentagem_atendente;
         
         const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
         const tripeiroReceivable = totalPayment - tripeiroCommission;
@@ -153,9 +153,9 @@ export function useClosingCalculations() {
       const attendantId = payment.id_atendente;
       const attendantName = payment.atendente.nome;
       const paymentAmount = Number(payment.valor);
-      // Use the most current percentages from the related entities
-      const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-      const attendantPercentage = payment.atendente.porcentagem || payment.porcentagem_atendente;
+      // Use the percentage that was saved at the time of payment creation
+      const tripeiroPercentage = payment.porcentagem_tripeiro;
+      const attendantPercentage = payment.porcentagem_atendente;
       const attendantPercentageDecimal = attendantPercentage / 100;
       
       // Calculate attendant commission (after tripeiro's commission is removed)
@@ -212,8 +212,8 @@ export function useClosingCalculations() {
       if (!idIndicador || porcentagemIndicacao === 0) return;
       
       const paymentAmount = Number(payment.valor);
-      const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
-      const attendantPercentage = payment.atendente.porcentagem || payment.porcentagem_atendente;
+      const tripeiroPercentage = payment.porcentagem_tripeiro;
+      const attendantPercentage = payment.porcentagem_atendente;
       
       // Calculate the referred attendant's TOTAL commission first (before deduction)
       const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
