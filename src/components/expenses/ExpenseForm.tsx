@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CurrencyFormField } from "@/components/ui/currency-input";
 import { expenseFormSchema, type ExpenseFormValues } from "./schemas/expenseFormSchema";
-import { useResponsaveis } from "./hooks/useResponsaveis";
 import { EXPENSE_CATEGORIES } from "./ExpenseFilters";
+import { ResponsavelCombobox } from "./ResponsavelCombobox";
 
 interface ExpenseFormProps {
   onSubmit: (values: ExpenseFormValues) => void;
@@ -23,8 +23,6 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: ExpenseFormProps) {
-  const { data: responsaveis = [] } = useResponsaveis();
-  
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
@@ -139,24 +137,13 @@ export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: E
           name="id_responsavel"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Responsável</FormLabel>
-               <Select 
-                onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
-                value={field.value ? field.value.toString() : ""}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um responsável (opcional)" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="bg-background z-50">
-                  {responsaveis.map((responsavel) => (
-                    <SelectItem key={responsavel.id} value={responsavel.id.toString()}>
-                      {responsavel.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Responsável (opcional)</FormLabel>
+              <FormControl>
+                <ResponsavelCombobox
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
