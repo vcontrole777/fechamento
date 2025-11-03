@@ -11,12 +11,13 @@ import { Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const EXPENSE_CATEGORIES = [
-  { value: 'alimentacao', label: 'Alimentação', color: 'bg-orange-500' },
-  { value: 'transporte', label: 'Transporte', color: 'bg-blue-500' },
-  { value: 'equipamento', label: 'Equipamento', color: 'bg-purple-500' },
-  { value: 'marketing', label: 'Marketing', color: 'bg-pink-500' },
-  { value: 'software', label: 'Software', color: 'bg-cyan-500' },
-  { value: 'manutencao', label: 'Manutenção', color: 'bg-yellow-500' },
+  { value: 'recarga', label: 'Recarga', color: 'bg-green-500' },
+  { value: 'proxy', label: 'Proxy', color: 'bg-blue-500' },
+  { value: 'servidor', label: 'Servidor', color: 'bg-purple-500' },
+  { value: 'tela', label: 'Tela', color: 'bg-cyan-500' },
+  { value: 'ferramentas', label: 'Ferramentas', color: 'bg-orange-500' },
+  { value: 'bonificacao', label: 'Bonificação', color: 'bg-pink-500' },
+  { value: 'trafego_pago', label: 'Tráfego Pago', color: 'bg-yellow-500' },
   { value: 'outros', label: 'Outros', color: 'bg-gray-500' },
 ];
 
