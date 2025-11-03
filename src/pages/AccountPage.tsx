@@ -4,11 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Shield, Settings, Database } from "lucide-react";
+import { User, Shield, Settings, Database, Monitor } from "lucide-react";
 import { ProfileSection } from "@/components/account/ProfileSection";
 import { SecuritySection } from "@/components/account/SecuritySection";
 import { PreferencesSection } from "@/components/account/PreferencesSection";
 import { DataSection } from "@/components/account/DataSection";
+import { DevicesSection } from "@/components/account/DevicesSection";
 
 export default function AccountPage() {
   const { toast } = useToast();
@@ -88,7 +89,7 @@ export default function AccountPage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="gap-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Perfil</span>
@@ -96,6 +97,10 @@ export default function AccountPage() {
           <TabsTrigger value="security" className="gap-2">
             <Shield className="h-4 w-4" />
             <span className="hidden sm:inline">Segurança</span>
+          </TabsTrigger>
+          <TabsTrigger value="devices" className="gap-2">
+            <Monitor className="h-4 w-4" />
+            <span className="hidden sm:inline">Dispositivos</span>
           </TabsTrigger>
           <TabsTrigger value="preferences" className="gap-2">
             <Settings className="h-4 w-4" />
@@ -119,6 +124,10 @@ export default function AccountPage() {
 
         <TabsContent value="security" className="space-y-6">
           <SecuritySection />
+        </TabsContent>
+
+        <TabsContent value="devices" className="space-y-6">
+          <DevicesSection />
         </TabsContent>
 
         <TabsContent value="preferences" className="space-y-6">
