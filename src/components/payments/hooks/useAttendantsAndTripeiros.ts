@@ -10,7 +10,7 @@ export function useAttendantsAndTripeiros() {
     queryFn: async (): Promise<Attendant[]> => {
       const { data, error } = await supabase
         .from("pessoas")
-        .select("id, nome, porcentagem")
+        .select("id, nome, porcentagem, id_indicador, porcentagem_indicacao")
         .eq("tipo", "atendente")
         .order("nome");
 

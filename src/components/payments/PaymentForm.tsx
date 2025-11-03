@@ -30,6 +30,8 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
   const [selectedTripeiroPercentage, setSelectedTripeiroPercentage] = useState<number>(0);
   const [useCustomTripeiroPercentage, setUseCustomTripeiroPercentage] = useState<boolean>(false);
   const [customTripeiroPercentage, setCustomTripeiroPercentage] = useState<number>(0);
+  const [referrerName, setReferrerName] = useState<string | undefined>(undefined);
+  const [referralPercentage, setReferralPercentage] = useState<number | undefined>(undefined);
 
   
 
@@ -78,7 +80,25 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
       const attendant = attendants.find(a => a.id.toString() === attendantId);
       if (attendant) {
         setSelectedAttendantPercentage(attendant.porcentagem);
+        
+        // Check if attendant has a referrer
+        if (attendant.id_indicador && attendant.porcentagem_indicacao) {
+          const referrer = attendants.find(a => a.id === attendant.id_indicador);
+          if (referrer) {
+            setReferrerName(referrer.nome);
+            setReferralPercentage(attendant.porcentagem_indicacao);
+          } else {
+            setReferrerName(undefined);
+            setReferralPercentage(undefined);
+          }
+        } else {
+          setReferrerName(undefined);
+          setReferralPercentage(undefined);
+        }
       }
+    } else {
+      setReferrerName(undefined);
+      setReferralPercentage(undefined);
     }
 
     if (tripeiroId) {
@@ -183,6 +203,8 @@ export function PaymentForm({ onSubmit, payment, isSubmitting = false }: Payment
           attendantPercentage={selectedAttendantPercentage}
           useCustomTripeiroPercentage={useCustomTripeiroPercentage}
           selectedTripeiroPercentage={selectedTripeiroPercentage}
+          referrerName={referrerName}
+          referralPercentage={referralPercentage}
         />
 
         <div className="flex justify-end">

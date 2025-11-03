@@ -3,6 +3,8 @@ export type Attendant = {
   id: number;
   nome: string;
   porcentagem: number;
+  id_indicador?: number | null;
+  porcentagem_indicacao?: number | null;
 };
 
 export type Tripeiro = {

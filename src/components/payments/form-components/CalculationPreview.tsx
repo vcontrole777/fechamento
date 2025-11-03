@@ -7,6 +7,8 @@ interface CalculationPreviewProps {
   attendantPercentage: number;
   useCustomTripeiroPercentage: boolean;
   selectedTripeiroPercentage: number;
+  referrerName?: string;
+  referralPercentage?: number;
 }
 
 export function CalculationPreview({
@@ -15,6 +17,8 @@ export function CalculationPreview({
   attendantPercentage,
   useCustomTripeiroPercentage,
   selectedTripeiroPercentage,
+  referrerName,
+  referralPercentage,
 }: CalculationPreviewProps) {
   const calculations = useMemo(() => {
     if (!totalValue) return null;
@@ -27,12 +31,19 @@ export function CalculationPreview({
     const tripeiroCommission = totalValue * (effectiveTripeiroPercentage / 100);
     const tripeiroReceivable = totalValue - tripeiroCommission;
     const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
-    const netValue = totalValue - tripeiroCommission - attendantCommission;
+    
+    // Calculate referral commission if applicable
+    const referralCommission = (referralPercentage && referralPercentage > 0)
+      ? attendantCommission * (referralPercentage / 100)
+      : 0;
+    
+    const netValue = totalValue - tripeiroCommission - attendantCommission - referralCommission;
 
     return {
       tripeiroCommission,
       tripeiroReceivable,
       attendantCommission,
+      referralCommission,
       netValue,
     };
   }, [totalValue, tripeiroPercentage, attendantPercentage, useCustomTripeiroPercentage, selectedTripeiroPercentage]);
@@ -59,6 +70,12 @@ export function CalculationPreview({
         <div>Comissão Atendente ({attendantPercentage}%):</div>
         <div>R$ {calculations.attendantCommission.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
       </div>
+      {referrerName && referralPercentage && referralPercentage > 0 && (
+        <div className="grid grid-cols-2 text-sm text-amber-600 dark:text-amber-400">
+          <div>Comissão de Indicação ({referrerName} - {referralPercentage}%):</div>
+          <div>R$ {calculations.referralCommission.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+        </div>
+      )}
       <div className="grid grid-cols-2 text-sm font-semibold">
         <div>Valor Líquido:</div>
         <div>R$ {calculations.netValue.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
