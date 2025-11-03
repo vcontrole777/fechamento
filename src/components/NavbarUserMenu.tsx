@@ -1,7 +1,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,13 +16,14 @@ import { toast } from "@/hooks/use-toast";
 export function NavbarUserMenu() {
   const { user, signOut } = useAuth();
   const [userName, setUserName] = useState<string>("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
         const { data, error } = await supabase
           .from("profiles")
-          .select("nome")
+          .select("nome, avatar_url")
           .eq("id", user.id)
           .single();
 
@@ -33,6 +34,9 @@ export function NavbarUserMenu() {
 
         if (data?.nome) {
           setUserName(data.nome);
+        }
+        if (data?.avatar_url) {
+          setAvatarUrl(data.avatar_url);
         }
       }
     };
@@ -71,6 +75,7 @@ export function NavbarUserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
+            {avatarUrl && <AvatarImage src={avatarUrl} alt={userName} />}
             <AvatarFallback>{getInitials(userName)}</AvatarFallback>
           </Avatar>
         </Button>
