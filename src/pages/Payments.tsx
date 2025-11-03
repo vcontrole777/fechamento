@@ -13,7 +13,7 @@ import { PaymentFiltersComponent } from "@/components/payments/PaymentFilters";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { format } from "date-fns";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
-import { CopyToWhatsAppButton } from "@/components/payments/CopyToWhatsAppButton";
+import { PaymentsExportMenu } from "@/components/payments/PaymentsExportMenu";
 
 export default function Payments() {
   const {
@@ -81,10 +81,12 @@ export default function Payments() {
             <PlusCircle className="mr-2 h-4 w-4" />
             Novo Pagamento
           </Button>
-          <CopyToWhatsAppButton 
+          <PaymentsExportMenu 
             payments={payments} 
-            isVisible={!isLoading && payments.length > 0}
             filters={filters}
+            dateRange={dateRange}
+            isLoading={isLoading}
+            formatCurrency={formatCurrency}
           />
         </div>
       </div>
