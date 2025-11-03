@@ -45,9 +45,9 @@ export function AttendantCommissionsTable({
   }
 
   // Calculate total commission for all attendants
-  const totalCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
-  const totalOwnCommission = attendantSummaries.reduce((acc, attendant) => acc + (attendant.totalCommission - attendant.totalReferralCommission), 0);
+  const totalOwnCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
   const totalReferralCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalReferralCommission, 0);
+  const totalCommission = totalOwnCommission + totalReferralCommission;
   const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
   
   // Calculate the total original payment amount
@@ -75,9 +75,9 @@ export function AttendantCommissionsTable({
         </TableHeader>
         <TableBody>
           {attendantSummaries.map((attendant) => {
-            const paymentStatus = getPaymentStatus ? getPaymentStatus(attendant.id, attendant.totalCommission) : undefined;
+            const paymentStatus = getPaymentStatus ? getPaymentStatus(attendant.id, attendant.totalCommission + attendant.totalReferralCommission) : undefined;
             const totalPaid = getTotalPaid ? getTotalPaid(attendant.id) : 0;
-            const ownCommission = attendant.totalCommission - attendant.totalReferralCommission;
+            const totalToReceive = attendant.totalCommission + attendant.totalReferralCommission;
             
             return (
               <TableRow key={attendant.id}>
@@ -85,7 +85,7 @@ export function AttendantCommissionsTable({
                 <TableCell className={isMobile ? "hidden" : ""}>{attendant.paymentsCount}</TableCell>
                 <TableCell>{formatCurrency(attendant.totalPaymentAmount)}</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(ownCommission)}
+                  {formatCurrency(attendant.totalCommission)}
                 </TableCell>
                 <TableCell className="text-right">
                   {attendant.totalReferralCommission > 0 ? (
@@ -97,14 +97,14 @@ export function AttendantCommissionsTable({
                   )}
                 </TableCell>
                 <TableCell className="text-right font-medium">
-                  {formatCurrency(attendant.totalCommission)}
+                  {formatCurrency(totalToReceive)}
                 </TableCell>
                 {(onRegisterPayment || getPaymentStatus) && paymentStatus && (
                   <TableCell className="text-center">
                     <AttendantPaymentStatusBadge 
                       status={paymentStatus}
                       totalPaid={totalPaid}
-                      totalCommission={attendant.totalCommission}
+                      totalCommission={totalToReceive}
                       formatCurrency={formatCurrency}
                       showDetails
                     />

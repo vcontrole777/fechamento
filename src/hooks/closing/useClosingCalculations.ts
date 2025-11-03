@@ -158,7 +158,13 @@ export function useClosingCalculations() {
       // Calculate attendant commission (after tripeiro's commission is removed)
       const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
       const tripeiroReceivable = paymentAmount - tripeiroCommission;
-      const attendantCommission = tripeiroReceivable * attendantPercentageDecimal;
+      const attendantCommissionTotal = tripeiroReceivable * attendantPercentageDecimal;
+      
+      // If attendant was referred, deduct referral commission from their total
+      const idIndicador = (payment.atendente as any).id_indicador;
+      const porcentagemIndicacao = (payment.atendente as any).porcentagem_indicacao || 0;
+      const referralCommission = porcentagemIndicacao > 0 ? attendantCommissionTotal * (porcentagemIndicacao / 100) : 0;
+      const attendantCommission = attendantCommissionTotal - referralCommission;
       
       if (attendantsMap.has(attendantId)) {
         const existingSummary = attendantsMap.get(attendantId)!;
@@ -203,17 +209,18 @@ export function useClosingCalculations() {
       const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
       const attendantPercentage = payment.atendente.porcentagem || payment.porcentagem_atendente;
       
-      // Calculate the referred attendant's commission first
+      // Calculate the referred attendant's TOTAL commission first (before deduction)
       const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
       const tripeiroReceivable = paymentAmount - tripeiroCommission;
-      const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
+      const attendantCommissionTotal = tripeiroReceivable * (attendantPercentage / 100);
       
-      // Calculate referral commission
-      const referralCommission = attendantCommission * (porcentagemIndicacao / 100);
+      // Calculate referral commission (what goes to the referrer)
+      const referralCommission = attendantCommissionTotal * (porcentagemIndicacao / 100);
       
       console.log("Calculating referral commission:", {
         paymentAmount,
-        attendantCommission,
+        tripeiroReceivable,
+        attendantCommissionTotal,
         referralCommission,
         porcentagemIndicacao
       });
@@ -237,6 +244,8 @@ export function useClosingCalculations() {
         } else {
           referrerDetails.set(referredName, { commission: referralCommission, count: 1 });
         }
+      } else {
+        console.log("Referrer not found in attendantsMap:", idIndicador);
       }
     });
     
