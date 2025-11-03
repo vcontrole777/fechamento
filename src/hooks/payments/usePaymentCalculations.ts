@@ -8,6 +8,7 @@ export function usePaymentCalculations() {
         totalPayments: 0,
         totalAttendantCommission: 0,
         totalTripeiroReceivable: 0,
+        totalReferralCommission: 0,
         netTotal: 0
       };
     }
@@ -25,18 +26,25 @@ export function usePaymentCalculations() {
       const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
       const tripeiroReceivable = totalPayment - tripeiroCommission;
       const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
-      const netTotal = totalPayment - tripeiroCommission - attendantCommission;
+      
+      // Calculate referral commission if attendant was referred
+      const referralPercentage = (payment.atendente as any)?.porcentagem_indicacao || 0;
+      const referralCommission = attendantCommission * (referralPercentage / 100);
+      
+      const netTotal = totalPayment - tripeiroCommission - attendantCommission - referralCommission;
 
       return {
         totalPayments: acc.totalPayments + totalPayment,
         totalAttendantCommission: acc.totalAttendantCommission + attendantCommission,
         totalTripeiroReceivable: acc.totalTripeiroReceivable + tripeiroReceivable,
+        totalReferralCommission: acc.totalReferralCommission + referralCommission,
         netTotal: acc.netTotal + netTotal
       };
     }, {
       totalPayments: 0,
       totalAttendantCommission: 0,
       totalTripeiroReceivable: 0,
+      totalReferralCommission: 0,
       netTotal: 0
     });
   };

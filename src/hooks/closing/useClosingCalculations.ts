@@ -16,6 +16,12 @@ export type AttendantSummary = {
   totalPaymentAmount: number; // Total original payment amount
   paymentsCount: number;
   porcentagemDecimal: number; // Add percentage as decimal
+  totalReferralCommission: number; // Commission earned from referrals
+  referralDetails?: Array<{ // Details of referred attendants
+    nome: string;
+    commission: number;
+    paymentsCount: number;
+  }>;
 };
 
 export type ClosingSummary = {
@@ -23,6 +29,7 @@ export type ClosingSummary = {
   totalExpenses: number;
   totalAttendantCommission: number;
   totalTripeiroCommission: number;
+  totalReferralCommission: number;
   netProfit: number;
   paymentsCount: number;
   expensesCount: number;
@@ -55,24 +62,31 @@ export function useClosingCalculations() {
         const atendentePercentage = payment.atendente?.porcentagem || payment.porcentagem_atendente;
         
         const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
-        const atendenteCommission = (totalPayment - tripeiroCommission) * (atendentePercentage / 100);
+        const tripeiroReceivable = totalPayment - tripeiroCommission;
+        const atendenteCommission = tripeiroReceivable * (atendentePercentage / 100);
+        
+        // Calculate referral commission if attendant was referred
+        const referralPercentage = (payment.atendente as any)?.porcentagem_indicacao || 0;
+        const referralCommission = atendenteCommission * (referralPercentage / 100);
         
         return {
           tripeiro: acc.tripeiro + tripeiroCommission,
-          atendente: acc.atendente + atendenteCommission
+          atendente: acc.atendente + atendenteCommission,
+          referral: acc.referral + referralCommission
         };
       },
-      { tripeiro: 0, atendente: 0 }
+      { tripeiro: 0, atendente: 0, referral: 0 }
     );
     
     // Calculate net profit
-    const netProfit = totalRevenue - commissions.tripeiro - commissions.atendente - totalExpenses;
+    const netProfit = totalRevenue - commissions.tripeiro - commissions.atendente - commissions.referral - totalExpenses;
     
     return {
       totalRevenue,
       totalExpenses,
       totalAttendantCommission: commissions.atendente,
       totalTripeiroCommission: commissions.tripeiro,
+      totalReferralCommission: commissions.referral,
       netProfit,
       paymentsCount: completedPayments.length,
       expensesCount: expenses.length
@@ -129,6 +143,7 @@ export function useClosingCalculations() {
     // Group payments by attendant
     const attendantsMap = new Map<number, AttendantSummary>();
     
+    // First pass: calculate own commissions
     completedPayments.forEach(payment => {
       if (!payment.atendente || !payment.id_atendente) return;
       
@@ -159,14 +174,73 @@ export function useClosingCalculations() {
           totalCommission: attendantCommission,
           totalPaymentAmount: paymentAmount,
           paymentsCount: 1,
-          porcentagemDecimal: attendantPercentageDecimal
+          porcentagemDecimal: attendantPercentageDecimal,
+          totalReferralCommission: 0,
+          referralDetails: []
         });
       }
     });
     
-    // Convert map to array and sort by total commission (highest first)
+    // Second pass: calculate referral commissions
+    const referralMap = new Map<number, Map<string, { commission: number; count: number }>>();
+    
+    completedPayments.forEach(payment => {
+      if (!payment.atendente || !payment.id_atendente) return;
+      
+      const idIndicador = (payment.atendente as any).id_indicador;
+      const porcentagemIndicacao = (payment.atendente as any).porcentagem_indicacao || 0;
+      
+      if (!idIndicador || porcentagemIndicacao === 0) return;
+      
+      const paymentAmount = Number(payment.valor);
+      const tripeiroPercentage = payment.tripeiro?.porcentagem || payment.porcentagem_tripeiro;
+      const attendantPercentage = payment.atendente.porcentagem || payment.porcentagem_atendente;
+      
+      // Calculate the referred attendant's commission first
+      const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
+      const tripeiroReceivable = paymentAmount - tripeiroCommission;
+      const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
+      
+      // Calculate referral commission
+      const referralCommission = attendantCommission * (porcentagemIndicacao / 100);
+      
+      // Add to referrer's total
+      if (attendantsMap.has(idIndicador)) {
+        const referrerSummary = attendantsMap.get(idIndicador)!;
+        referrerSummary.totalReferralCommission += referralCommission;
+        
+        // Track referral details
+        if (!referralMap.has(idIndicador)) {
+          referralMap.set(idIndicador, new Map());
+        }
+        const referrerDetails = referralMap.get(idIndicador)!;
+        const referredName = payment.atendente.nome;
+        
+        if (referrerDetails.has(referredName)) {
+          const existing = referrerDetails.get(referredName)!;
+          existing.commission += referralCommission;
+          existing.count += 1;
+        } else {
+          referrerDetails.set(referredName, { commission: referralCommission, count: 1 });
+        }
+      }
+    });
+    
+    // Add referral details to summaries
+    referralMap.forEach((details, attendantId) => {
+      const summary = attendantsMap.get(attendantId);
+      if (summary) {
+        summary.referralDetails = Array.from(details.entries()).map(([nome, data]) => ({
+          nome,
+          commission: data.commission,
+          paymentsCount: data.count
+        }));
+      }
+    });
+    
+    // Convert map to array and sort by total commission (own + referral, highest first)
     return Array.from(attendantsMap.values())
-      .sort((a, b) => b.totalCommission - a.totalCommission);
+      .sort((a, b) => (b.totalCommission + b.totalReferralCommission) - (a.totalCommission + a.totalReferralCommission));
   };
 
   return {

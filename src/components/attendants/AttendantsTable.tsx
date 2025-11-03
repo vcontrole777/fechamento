@@ -12,6 +12,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { PersonAvatar } from "@/components/common/PersonAvatar";
 import { Attendant } from "@/hooks/useAttendants";
+import { useState as useStateReact, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 type SortField = 'nome' | 'porcentagem' | 'criado_em';
 type SortOrder = 'asc' | 'desc';
@@ -29,6 +31,36 @@ export default function AttendantsTable({
 }: AttendantsTableProps) {
   const [sortField, setSortField] = useState<SortField>('nome');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [indicadoresMap, setIndicadoresMap] = useState<Record<number, string>>({});
+
+  // Fetch all indicadores names
+  useEffect(() => {
+    const fetchIndicadores = async () => {
+      const indicadorIds = attendants
+        .map(a => a.id_indicador)
+        .filter((id): id is number => id !== null && id !== undefined);
+      
+      if (indicadorIds.length === 0) return;
+
+      const { data, error } = await supabase
+        .from("pessoas")
+        .select("id, nome")
+        .in("id", indicadorIds);
+
+      if (error) {
+        console.error("Erro ao carregar indicadores:", error);
+        return;
+      }
+
+      const map: Record<number, string> = {};
+      data?.forEach(p => {
+        map[p.id] = p.nome;
+      });
+      setIndicadoresMap(map);
+    };
+
+    fetchIndicadores();
+  }, [attendants]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -81,6 +113,7 @@ export default function AttendantsTable({
           <TableHead>
             <SortButton field="porcentagem">Comissão</SortButton>
           </TableHead>
+          <TableHead>Indicado por</TableHead>
           <TableHead>
             <SortButton field="criado_em">Cadastro</SortButton>
           </TableHead>
@@ -100,6 +133,18 @@ export default function AttendantsTable({
               <Badge variant="secondary" className="font-medium">
                 {attendant.porcentagem || 0}%
               </Badge>
+            </TableCell>
+            <TableCell className="text-muted-foreground">
+              {attendant.id_indicador ? (
+                <div className="flex flex-col gap-1">
+                  <span>{indicadoresMap[attendant.id_indicador] || "..."}</span>
+                  <Badge variant="outline" className="w-fit text-xs">
+                    {attendant.porcentagem_indicacao || 0}%
+                  </Badge>
+                </div>
+              ) : (
+                <span className="text-muted-foreground">-</span>
+              )}
             </TableCell>
             <TableCell className="text-muted-foreground">
               {new Date(attendant.criado_em).toLocaleDateString("pt-BR")}

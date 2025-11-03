@@ -329,27 +329,33 @@ export type Database = {
           criado_em: string
           id: number
           id_equipe: number
+          id_indicador: number | null
           id_usuario: string | null
           nome: string
           porcentagem: number | null
+          porcentagem_indicacao: number | null
           tipo: Database["public"]["Enums"]["tipo_pessoa"]
         }
         Insert: {
           criado_em?: string
           id?: number
           id_equipe: number
+          id_indicador?: number | null
           id_usuario?: string | null
           nome: string
           porcentagem?: number | null
+          porcentagem_indicacao?: number | null
           tipo: Database["public"]["Enums"]["tipo_pessoa"]
         }
         Update: {
           criado_em?: string
           id?: number
           id_equipe?: number
+          id_indicador?: number | null
           id_usuario?: string | null
           nome?: string
           porcentagem?: number | null
+          porcentagem_indicacao?: number | null
           tipo?: Database["public"]["Enums"]["tipo_pessoa"]
         }
         Relationships: [
@@ -358,6 +364,13 @@ export type Database = {
             columns: ["id_equipe"]
             isOneToOne: false
             referencedRelation: "equipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pessoas_id_indicador_fkey"
+            columns: ["id_indicador"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
             referencedColumns: ["id"]
           },
         ]

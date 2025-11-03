@@ -10,6 +10,8 @@ export interface Attendant {
   id_equipe: number;
   criado_em: string;
   porcentagem: number;
+  id_indicador?: number | null;
+  porcentagem_indicacao?: number;
 }
 
 export function useAttendants() {

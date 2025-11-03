@@ -28,7 +28,7 @@ export function usePayments(initialDateRange?: DateRange) {
   } = usePaymentsQuery(filters, dateRange);
 
   const { calculateTotals } = usePaymentCalculations();
-  const { totalPayments, totalAttendantCommission, totalTripeiroReceivable } = calculateTotals(payments);
+  const { totalPayments, totalAttendantCommission, totalTripeiroReceivable, totalReferralCommission } = calculateTotals(payments);
 
   // Dialog state management
   const {
@@ -75,6 +75,7 @@ export function usePayments(initialDateRange?: DateRange) {
     totalPayments,
     totalAttendantCommission,
     totalTripeiroReceivable,
+    totalReferralCommission,
     // Dialog state
     isAddingPayment,
     isEditingPayment,

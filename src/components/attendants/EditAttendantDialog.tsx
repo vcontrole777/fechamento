@@ -25,10 +25,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTeamView } from "@/contexts/TeamViewContext";
 
 const formSchema = z.object({
   nome: z.string().min(1, "O nome é obrigatório"),
   porcentagem: z.number().min(0, "Porcentagem mínima é 0%").max(100, "Porcentagem máxima é 100%"),
+  id_indicador: z.number().nullable().optional(),
+  porcentagem_indicacao: z.number().min(0, "Porcentagem mínima é 0%").max(100, "Porcentagem máxima é 100%").default(0),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -39,6 +43,8 @@ interface Attendant {
   porcentagem: number;
   id_equipe: number;
   criado_em: string;
+  id_indicador?: number | null;
+  porcentagem_indicacao?: number;
 }
 
 interface EditAttendantDialogProps {
@@ -57,14 +63,54 @@ export default function EditAttendantDialog({
   const { toast } = useToast();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attendants, setAttendants] = useState<Array<{ id: number; nome: string }>>([]);
+  const { viewingTeamId, isViewingAsTeam } = useTeamView();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nome: attendant?.nome || "",
       porcentagem: attendant?.porcentagem || 0,
+      id_indicador: attendant?.id_indicador || null,
+      porcentagem_indicacao: attendant?.porcentagem_indicacao || 0,
     },
   });
+
+  // Fetch attendants for the indicator dropdown
+  useEffect(() => {
+    const fetchAttendants = async () => {
+      if (!user || !attendant) return;
+      
+      try {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("id_equipe")
+          .eq("id", user.id)
+          .single();
+
+        if (!profileData?.id_equipe) return;
+
+        const teamId = isViewingAsTeam && viewingTeamId ? viewingTeamId : profileData.id_equipe;
+
+        const { data, error } = await supabase
+          .from("pessoas")
+          .select("id, nome")
+          .eq("tipo", "atendente")
+          .eq("id_equipe", teamId)
+          .neq("id", attendant.id) // Exclude current attendant
+          .order("nome");
+
+        if (error) throw error;
+        setAttendants(data || []);
+      } catch (error) {
+        console.error("Erro ao carregar atendentes:", error);
+      }
+    };
+
+    if (open) {
+      fetchAttendants();
+    }
+  }, [open, user, attendant, isViewingAsTeam, viewingTeamId]);
 
   // Update form values when attendant changes
   useEffect(() => {
@@ -72,6 +118,8 @@ export default function EditAttendantDialog({
       form.reset({
         nome: attendant.nome,
         porcentagem: attendant.porcentagem || 0,
+        id_indicador: attendant.id_indicador || null,
+        porcentagem_indicacao: attendant.porcentagem_indicacao || 0,
       });
     }
   }, [attendant, form]);
@@ -86,6 +134,8 @@ export default function EditAttendantDialog({
         .update({
           nome: data.nome,
           porcentagem: data.porcentagem,
+          id_indicador: data.id_indicador || null,
+          porcentagem_indicacao: data.porcentagem_indicacao || 0,
         })
         .eq("id", attendant.id);
 
@@ -156,6 +206,71 @@ export default function EditAttendantDialog({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="id_indicador"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Indicado por (opcional)</FormLabel>
+                  <Select
+                    value={field.value?.toString() || "none"}
+                    onValueChange={(value) => {
+                      if (value === "none") {
+                        field.onChange(null);
+                        form.setValue("porcentagem_indicacao", 0);
+                      } else {
+                        field.onChange(parseInt(value));
+                      }
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um atendente" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhum</SelectItem>
+                      {attendants.map((att) => (
+                        <SelectItem key={att.id} value={att.id.toString()}>
+                          {att.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {form.watch("id_indicador") && (
+              <FormField
+                control={form.control}
+                name="porcentagem_indicacao"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Porcentagem de indicação: {field.value}%</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Slider
+                          min={0}
+                          max={50}
+                          step={0.5}
+                          value={[field.value]}
+                          onValueChange={(value) => field.onChange(value[0])}
+                          className="flex-grow"
+                        />
+                        <span className="w-12 text-center">{field.value}%</span>
+                      </div>
+                    </FormControl>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      O indicador receberá esta porcentagem sobre a comissão do atendente
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             
             <DialogFooter>
               <Button
