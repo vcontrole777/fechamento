@@ -62,6 +62,7 @@ export default function EditExpenseDialog({
         valor: expense.valor,
         data: parsedDate,
         id_responsavel: expense.id_responsavel,
+        categoria: expense.categoria,
       };
     } catch (error) {
       console.error("Error parsing expense date for form:", error);
@@ -71,6 +72,7 @@ export default function EditExpenseDialog({
         valor: expense.valor,
         data: new Date(),
         id_responsavel: expense.id_responsavel,
+        categoria: expense.categoria,
       };
     }
   };
@@ -92,6 +94,7 @@ export default function EditExpenseDialog({
           valor: values.valor,
           data: formattedDate,
           id_responsavel: values.id_responsavel || null,
+          categoria: values.categoria || null,
         })
         .eq("id", expense.id);
 

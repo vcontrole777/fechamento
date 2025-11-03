@@ -46,6 +46,7 @@ export function useAddExpense() {
       valor: values.valor,
       data: formattedDate,
       id_responsavel: values.id_responsavel || null,
+      categoria: values.categoria || null,
       id_equipe: id_equipe,
     });
 
