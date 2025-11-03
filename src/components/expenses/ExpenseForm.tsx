@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CurrencyFormField } from "@/components/ui/currency-input";
 import { expenseFormSchema, type ExpenseFormValues } from "./schemas/expenseFormSchema";
 import { useResponsaveis } from "./hooks/useResponsaveis";
+import { EXPENSE_CATEGORIES } from "./ExpenseFilters";
 
 interface ExpenseFormProps {
   onSubmit: (values: ExpenseFormValues) => void;
@@ -104,6 +105,37 @@ export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: E
 
         <FormField
           control={form.control}
+          name="categoria"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                value={field.value || ""}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma categoria (opcional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-background z-50">
+                  {EXPENSE_CATEGORIES.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      <div className="flex items-center gap-2">
+                        <div className={`h-3 w-3 rounded-full ${category.color}`} />
+                        {category.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="id_responsavel"
           render={({ field }) => (
             <FormItem>
@@ -117,7 +149,7 @@ export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: E
                     <SelectValue placeholder="Selecione um responsável (opcional)" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-background z-50">
                   {responsaveis.map((responsavel) => (
                     <SelectItem key={responsavel.id} value={responsavel.id.toString()}>
                       {responsavel.nome}

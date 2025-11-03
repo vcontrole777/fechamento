@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Plus } from "lucide-react";
+import React, { useEffect, useState, useMemo } from "react";
+import { Plus, DollarSign, TrendingDown, Calendar, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExpenses } from "@/hooks/useExpenses";
@@ -11,6 +11,11 @@ import DeleteExpenseDialog from "@/components/expenses/DeleteExpenseDialog";
 import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
 import { format } from "date-fns";
 import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
+import { StatsCard } from "@/components/common/StatsCard";
+import { SearchBar } from "@/components/common/SearchBar";
+import { ExpenseFilters } from "@/components/expenses/ExpenseFilters";
+import { useResponsaveis } from "@/components/expenses/hooks/useResponsaveis";
+import { useExpenseStats } from "@/hooks/expenses/useExpenseStats";
 
 export default function Expenses() {
   const {
@@ -32,8 +37,13 @@ export default function Expenses() {
     closeDeleteExpenseDialog,
   } = useExpenses();
 
-  // Get shared date filter update function
+  const { data: responsaveis = [] } = useResponsaveis();
+  const { data: stats } = useExpenseStats(dateRange);
   const { updateSharedDateFilter } = useSharedDateFilter();
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedResponsaveis, setSelectedResponsaveis] = useState<number[]>([]);
 
   // Force refetch when component mounts
   useEffect(() => {
@@ -49,69 +59,120 @@ export default function Expenses() {
   };
 
   const handleDateFilterChange = (newDateRange, option: DateFilterOption) => {
-    console.log("Date filter changed on Expenses page:", {
-      from: newDateRange.from ? format(newDateRange.from, 'yyyy-MM-dd') : null,
-      to: newDateRange.to ? format(newDateRange.to, 'yyyy-MM-dd') : null,
-      option
-    });
-    
-    // Update both our local state and the shared state
     updateDateRange(newDateRange);
     updateSharedDateFilter(newDateRange, option);
   };
 
+  const filteredExpenses = useMemo(() => {
+    if (!expenses) return [];
+    
+    return expenses.filter(expense => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        if (!expense.descricao.toLowerCase().includes(query)) {
+          return false;
+        }
+      }
+
+      // Category filter
+      if (selectedCategories.length > 0) {
+        if (!expense.categoria || !selectedCategories.includes(expense.categoria)) {
+          return false;
+        }
+      }
+
+      // Responsavel filter
+      if (selectedResponsaveis.length > 0) {
+        if (!expense.id_responsavel || !selectedResponsaveis.includes(expense.id_responsavel)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [expenses, searchQuery, selectedCategories, selectedResponsaveis]);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold glow-text">Despesas</h1>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-1">Despesas</h1>
+          <p className="text-muted-foreground">Gerencie todas as despesas da equipe</p>
+        </div>
         <Button onClick={openAddExpenseDialog} className="glow-border">
           <Plus className="h-4 w-4 mr-2" />
           Nova Despesa
         </Button>
       </div>
 
-      <div className="flex flex-col space-y-4">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-          <DateFilter onFilterChange={handleDateFilterChange} />
-        </div>
-        
-        <div className="w-full flex justify-center">
-          <div className="grid gap-4 grid-cols-1 max-w-md">
-            <Card className="w-full glow-card border-2 border-primary">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total de Despesas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(totalExpenses)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Soma de todas as despesas no período
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Total de Despesas"
+          value={formatCurrency(stats?.totalExpenses || 0)}
+          icon={DollarSign}
+          description="No período selecionado"
+        />
+        <StatsCard
+          title="Despesas do Mês"
+          value={formatCurrency(stats?.totalMonthExpenses || 0)}
+          icon={Calendar}
+          description="Mês atual"
+        />
+        <StatsCard
+          title="Quantidade"
+          value={stats?.expenseCount || 0}
+          icon={BarChart3}
+          description={`${filteredExpenses.length} após filtros`}
+        />
+        <StatsCard
+          title="Maior Despesa"
+          value={formatCurrency(stats?.highestExpense || 0)}
+          icon={TrendingDown}
+          description="Valor máximo registrado"
+        />
       </div>
 
+      {/* Main Card */}
       <Card className="glow-card border-2 border-primary">
         <CardHeader>
-          <CardTitle>Todas as Despesas</CardTitle>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <CardTitle>Todas as Despesas</CardTitle>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <DateFilter onFilterChange={handleDateFilterChange} />
+              <SearchBar 
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar por descrição..."
+              />
+              <ExpenseFilters
+                selectedCategories={selectedCategories}
+                onCategoriesChange={setSelectedCategories}
+                selectedResponsaveis={selectedResponsaveis}
+                onResponsaveisChange={setSelectedResponsaveis}
+                responsaveis={responsaveis}
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
-          ) : expenses && expenses.length > 0 ? (
+          ) : filteredExpenses.length > 0 ? (
             <ExpensesTable
-              expenses={expenses}
+              expenses={filteredExpenses}
               onEdit={openEditExpenseDialog}
               onDelete={openDeleteExpenseDialog}
               formatCurrency={formatCurrency}
             />
+          ) : searchQuery || selectedCategories.length > 0 || selectedResponsaveis.length > 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma despesa encontrada com os filtros aplicados
+            </div>
           ) : (
             <EmptyExpensesState />
           )}
