@@ -14,6 +14,7 @@ export type Expense = {
   criado_em: string;
   id_equipe: number;
   id_responsavel: number | null;
+  categoria: string | null;
   responsavel?: {
     nome: string;
   };

@@ -12,6 +12,7 @@ export const expenseFormSchema = z.object({
     required_error: "A data é obrigatória.",
   }),
   id_responsavel: z.number().optional(),
+  categoria: z.string().optional(),
 });
 
 export type ExpenseFormValues = z.infer<typeof expenseFormSchema>;

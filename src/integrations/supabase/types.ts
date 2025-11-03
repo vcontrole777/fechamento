@@ -43,6 +43,7 @@ export type Database = {
       }
       despesas: {
         Row: {
+          categoria: string | null
           criado_em: string
           data: string
           descricao: string
@@ -52,6 +53,7 @@ export type Database = {
           valor: number
         }
         Insert: {
+          categoria?: string | null
           criado_em?: string
           data: string
           descricao: string
@@ -61,6 +63,7 @@ export type Database = {
           valor: number
         }
         Update: {
+          categoria?: string | null
           criado_em?: string
           data?: string
           descricao?: string

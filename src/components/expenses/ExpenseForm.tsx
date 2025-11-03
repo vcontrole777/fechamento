@@ -111,7 +111,7 @@ export function ExpenseForm({ onSubmit, isSubmitting = false, defaultValues }: E
               <FormLabel>Categoria</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                value={field.value || ""}
+                value={field.value || undefined}
               >
                 <FormControl>
                   <SelectTrigger>
