@@ -104,13 +104,19 @@ export function useDashboardEnhanced() {
     });
 
     const weekTotal = dailyRevenue.reduce((sum, d) => sum + d.value, 0);
-    const sortedDays = [...dailyRevenue].sort((a, b) => b.value - a.value);
+    
+    // Filter days with revenue > 0 for best/worst calculation
+    const daysWithRevenue = dailyRevenue.filter(d => d.value > 0);
+    const sortedDays = [...daysWithRevenue].sort((a, b) => b.value - a.value);
 
+    // Default values if no revenue days
+    const defaultDay = { day: 'Sem dados', value: 0 };
+    
     return {
       weekTotal,
-      weekGrowth: 15, // TODO: Calculate from previous week
-      bestDay: sortedDays[0] || { day: 'N/A', value: 0 },
-      worstDay: sortedDays[sortedDays.length - 1] || { day: 'N/A', value: 0 },
+      weekGrowth: 0, // TODO: Calculate from previous week
+      bestDay: sortedDays.length > 0 ? sortedDays[0] : defaultDay,
+      worstDay: sortedDays.length > 0 ? sortedDays[sortedDays.length - 1] : defaultDay,
     };
   }, [dashboardData.recentPayments]);
 
