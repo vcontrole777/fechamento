@@ -4,6 +4,9 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Dialog, 
   DialogContent, 
@@ -15,7 +18,14 @@ import {
 interface NoteFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddNote: (title: string, content: string, isReminder: boolean, reminderDate: string) => Promise<void>;
+  onAddNote: (
+    title: string, 
+    content: string, 
+    isReminder: boolean, 
+    reminderDate: string,
+    notifyEnabled: boolean,
+    notifyDaysBefore: number
+  ) => Promise<void>;
 }
 
 export function NoteForm({ open, onOpenChange, onAddNote }: NoteFormProps) {
@@ -23,16 +33,20 @@ export function NoteForm({ open, onOpenChange, onAddNote }: NoteFormProps) {
   const [content, setContent] = useState("");
   const [isReminder, setIsReminder] = useState(false);
   const [reminderDate, setReminderDate] = useState("");
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
+  const [notifyDaysBefore, setNotifyDaysBefore] = useState(1);
 
   const resetForm = () => {
     setTitle("");
     setContent("");
     setIsReminder(false);
     setReminderDate("");
+    setNotifyEnabled(false);
+    setNotifyDaysBefore(1);
   };
 
   const handleSubmit = async () => {
-    await onAddNote(title, content, isReminder, reminderDate);
+    await onAddNote(title, content, isReminder, reminderDate, notifyEnabled, notifyDaysBefore);
     resetForm();
   };
 
@@ -97,18 +111,61 @@ export function NoteForm({ open, onOpenChange, onAddNote }: NoteFormProps) {
             />
           </div>
           {isReminder && (
-            <div className="grid gap-2">
-              <label htmlFor="date" className="text-sm font-medium">
-                Data do lembrete
-              </label>
-              <Input
-                id="date"
-                type="date"
-                value={reminderDate}
-                min={format(new Date(), "yyyy-MM-dd")}
-                onChange={(e) => setReminderDate(e.target.value)}
-              />
-            </div>
+            <>
+              <div className="grid gap-2">
+                <label htmlFor="date" className="text-sm font-medium">
+                  Data do lembrete
+                </label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={reminderDate}
+                  min={format(new Date(), "yyyy-MM-dd")}
+                  onChange={(e) => setReminderDate(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-4 rounded-lg border p-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="notify" className="text-sm font-medium">
+                      Ativar notificações
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Receba lembretes antes da data
+                    </p>
+                  </div>
+                  <Switch
+                    id="notify"
+                    checked={notifyEnabled}
+                    onCheckedChange={setNotifyEnabled}
+                  />
+                </div>
+                
+                {notifyEnabled && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="days" className="text-sm font-medium">
+                      Notificar com antecedência
+                    </Label>
+                    <Select
+                      value={notifyDaysBefore.toString()}
+                      onValueChange={(value) => setNotifyDaysBefore(parseInt(value))}
+                    >
+                      <SelectTrigger id="days">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">No dia</SelectItem>
+                        <SelectItem value="1">1 dia antes</SelectItem>
+                        <SelectItem value="3">3 dias antes</SelectItem>
+                        <SelectItem value="7">7 dias antes</SelectItem>
+                        <SelectItem value="14">14 dias antes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
         <DialogFooter>

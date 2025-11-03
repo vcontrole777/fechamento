@@ -16,7 +16,9 @@ export function useNotes() {
     title: string, 
     content: string, 
     isReminder: boolean, 
-    reminderDate: string
+    reminderDate: string,
+    notifyEnabled: boolean = false,
+    notifyDaysBefore: number = 1
   ) => {
     if (!user) {
       toast({
@@ -52,6 +54,8 @@ export function useNotes() {
       is_reminder: isReminder,
       completed: false,
       user_id: user.id,
+      notify_enabled: isReminder ? notifyEnabled : false,
+      notify_days_before: isReminder ? notifyDaysBefore : 1,
     };
 
     try {

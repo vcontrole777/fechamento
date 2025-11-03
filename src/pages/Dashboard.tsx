@@ -5,6 +5,7 @@ import { StatCardEnhanced } from "@/components/dashboard/StatCardEnhanced";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { TopAttendants } from "@/components/dashboard/TopAttendants";
 import { NotesAndReminders } from "@/components/dashboard/NotesAndReminders";
+import { UpcomingReminders } from "@/components/dashboard/UpcomingReminders";
 import { RevenueExpenseChart } from "@/components/dashboard/RevenueExpenseChart";
 import { DistributionPieChart } from "@/components/dashboard/DistributionPieChart";
 import { AttendantsBarChart } from "@/components/dashboard/AttendantsBarChart";
@@ -141,9 +142,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Notes and Reminders */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1">
-        <NotesAndReminders onOpenDialog={handleOpenNoteDialog} />
+      {/* Notes and Reminders + Upcoming Reminders */}
+      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <NotesAndReminders onOpenDialog={handleOpenNoteDialog} />
+        </div>
+        <UpcomingReminders />
       </div>
 
       {/* Bottom Section - Top Attendants and Recent Transactions */}

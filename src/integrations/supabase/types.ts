@@ -115,6 +115,9 @@ export type Database = {
           date: string
           id: string
           is_reminder: boolean
+          last_notification_sent: string | null
+          notify_days_before: number | null
+          notify_enabled: boolean | null
           title: string
           updated_at: string
           user_id: string
@@ -126,6 +129,9 @@ export type Database = {
           date: string
           id?: string
           is_reminder?: boolean
+          last_notification_sent?: string | null
+          notify_days_before?: number | null
+          notify_enabled?: boolean | null
           title: string
           updated_at?: string
           user_id: string
@@ -137,6 +143,9 @@ export type Database = {
           date?: string
           id?: string
           is_reminder?: boolean
+          last_notification_sent?: string | null
+          notify_days_before?: number | null
+          notify_enabled?: boolean | null
           title?: string
           updated_at?: string
           user_id?: string
