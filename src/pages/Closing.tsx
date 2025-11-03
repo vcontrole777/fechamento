@@ -98,22 +98,37 @@ export default function Closing() {
     console.log('=== handleSubmitPayment chamado ===');
     console.log('Data recebida:', data);
     console.log('selectedAttendantForPayment:', selectedAttendantForPayment);
-    console.log('dateRange:', dateRange);
+    console.log('dateRange:', {
+      from: dateRange.from,
+      to: dateRange.to,
+      fromType: typeof dateRange.from,
+      toType: typeof dateRange.to,
+      fromIsDate: dateRange.from instanceof Date,
+      toIsDate: dateRange.to instanceof Date,
+    });
     
     if (!selectedAttendantForPayment) {
       console.error('Nenhum atendente selecionado');
-      return;
-    }
-
-    if (!dateRange.from || !dateRange.to) {
-      console.error('Intervalo de datas inválido');
       toast({
         title: "Erro",
-        description: "Intervalo de datas inválido",
+        description: "Nenhum atendente selecionado",
         variant: "destructive"
       });
       return;
     }
+
+    if (!dateRange.from) {
+      console.error('Data inicial não definida');
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um período antes de registrar pagamentos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Se to não estiver definido, usar o mesmo valor de from
+    const periodoFim = dateRange.to || dateRange.from;
 
     // Get user's team ID from profile
     const { data: profileData, error: profileError } = await supabase
@@ -142,7 +157,7 @@ export default function Closing() {
       valor_pago: data.valor_pago,
       data_pagamento: data.data_pagamento,
       periodo_inicio: dateRange.from,
-      periodo_fim: dateRange.to,
+      periodo_fim: periodoFim,
       metodo_pagamento: data.metodo_pagamento,
       observacoes: data.observacoes,
     };
