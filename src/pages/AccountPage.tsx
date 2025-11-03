@@ -20,6 +20,7 @@ export default function AccountPage() {
   const [teamId, setTeamId] = useState('');
   const [teamName, setTeamName] = useState('');
   const [role, setRole] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -31,7 +32,7 @@ export default function AccountPage() {
       try {
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('nome, id_equipe, role')
+          .select('nome, id_equipe, role, avatar_url')
           .eq('id', user.id)
           .single();
 
@@ -42,6 +43,7 @@ export default function AccountPage() {
           setEmail(user.email || '');
           setTeamId(profile.id_equipe?.toString() || '');
           setRole(profile.role || 'user');
+          setAvatarUrl(profile.avatar_url || null);
 
           if (profile.id_equipe) {
             const { data: team } = await supabase
@@ -68,6 +70,22 @@ export default function AccountPage() {
 
     fetchProfileData();
   }, [user, toast]);
+
+  const handleAvatarUpdate = () => {
+    // Refetch profile data to update avatar
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            setAvatarUrl(data.avatar_url || null);
+          }
+        });
+    }
+  };
 
   if (loading) {
     return (
@@ -119,6 +137,8 @@ export default function AccountPage() {
             teamId={teamId}
             teamName={teamName}
             role={role}
+            avatarUrl={avatarUrl}
+            onAvatarUpdate={handleAvatarUpdate}
           />
         </TabsContent>
 

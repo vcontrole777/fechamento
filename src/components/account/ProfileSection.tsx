@@ -1,8 +1,11 @@
+import { useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Upload, User as UserIcon } from "lucide-react";
+import { Upload, User as UserIcon, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 
 interface ProfileSectionProps {
   name: string;
@@ -10,9 +13,60 @@ interface ProfileSectionProps {
   teamId: string;
   teamName: string;
   role: string;
+  avatarUrl?: string | null;
+  onAvatarUpdate: () => void;
 }
 
-export function ProfileSection({ name, email, teamId, teamName, role }: ProfileSectionProps) {
+export function ProfileSection({ name, email, teamId, teamName, role, avatarUrl, onAvatarUpdate }: ProfileSectionProps) {
+  const { user } = useAuth();
+  const { uploadAvatar, deleteAvatar, isUploading } = useAvatarUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    const publicUrl = await uploadAvatar(file, user.id);
+    if (publicUrl) {
+      onAvatarUpdate();
+    }
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!user) return;
+    const success = await deleteAvatar(user.id);
+    if (success) {
+      onAvatarUpdate();
+    }
+  };
+
+  const handlePaste = async (event: React.ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+    if (!items || !user) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          event.preventDefault();
+          const publicUrl = await uploadAvatar(file, user.id);
+          if (publicUrl) {
+            onAvatarUpdate();
+          }
+        }
+      }
+    }
+  };
+
   const getInitials = (fullName: string) => {
     if (!fullName) return "U";
     const parts = fullName.trim().split(' ');
@@ -53,21 +107,54 @@ export function ProfileSection({ name, email, teamId, teamName, role }: ProfileS
       <CardContent className="space-y-6">
         <div className="flex items-start gap-6">
           {/* Avatar */}
-          <div className="relative">
-            <Avatar className="h-24 w-24">
+          <div 
+            className="relative" 
+            onPaste={handlePaste}
+            tabIndex={0}
+            title="Cole uma imagem do clipboard aqui (Ctrl+V)"
+          >
+            <Avatar className="h-24 w-24 cursor-pointer" onClick={handleUploadClick}>
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={name} />
+              ) : null}
               <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
                 {getInitials(name)}
               </AvatarFallback>
             </Avatar>
-            <Button
-              size="icon"
-              variant="secondary"
-              className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-lg"
-              title="Alterar foto (em breve)"
-              disabled
-            >
-              <Upload className="h-4 w-4" />
-            </Button>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            
+            <div className="absolute -bottom-2 -right-2 flex gap-1">
+              <Button
+                size="icon"
+                variant="secondary"
+                className="h-8 w-8 rounded-full shadow-lg"
+                onClick={handleUploadClick}
+                disabled={isUploading}
+                title="Alterar foto"
+              >
+                <Upload className="h-4 w-4" />
+              </Button>
+              
+              {avatarUrl && (
+                <Button
+                  size="icon"
+                  variant="destructive"
+                  className="h-8 w-8 rounded-full shadow-lg"
+                  onClick={handleDeleteAvatar}
+                  disabled={isUploading}
+                  title="Remover foto"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* User Info */}
