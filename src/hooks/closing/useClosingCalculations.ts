@@ -190,6 +190,13 @@ export function useClosingCalculations() {
       const idIndicador = (payment.atendente as any).id_indicador;
       const porcentagemIndicacao = (payment.atendente as any).porcentagem_indicacao || 0;
       
+      console.log("Checking referral for payment:", {
+        attendantName: payment.atendente.nome,
+        idIndicador,
+        porcentagemIndicacao,
+        attendant: payment.atendente
+      });
+      
       if (!idIndicador || porcentagemIndicacao === 0) return;
       
       const paymentAmount = Number(payment.valor);
@@ -203,6 +210,13 @@ export function useClosingCalculations() {
       
       // Calculate referral commission
       const referralCommission = attendantCommission * (porcentagemIndicacao / 100);
+      
+      console.log("Calculating referral commission:", {
+        paymentAmount,
+        attendantCommission,
+        referralCommission,
+        porcentagemIndicacao
+      });
       
       // Add to referrer's total
       if (attendantsMap.has(idIndicador)) {

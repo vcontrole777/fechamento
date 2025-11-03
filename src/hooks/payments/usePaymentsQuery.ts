@@ -44,7 +44,7 @@ export function usePaymentsQuery(filters: PaymentFilters, dateRange: DateRange) 
         .from("pagamentos")
         .select(`
           *,
-          atendente:pessoas!pagamentos_id_atendente_fkey(id, nome, porcentagem),
+          atendente:pessoas!pagamentos_id_atendente_fkey(id, nome, porcentagem, id_indicador, porcentagem_indicacao),
           tripeiro:pessoas!pagamentos_id_tripeiro_fkey(id, nome, porcentagem)
         `);
 
