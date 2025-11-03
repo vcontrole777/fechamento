@@ -46,6 +46,8 @@ export function AttendantCommissionsTable({
 
   // Calculate total commission for all attendants
   const totalCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalCommission, 0);
+  const totalOwnCommission = attendantSummaries.reduce((acc, attendant) => acc + (attendant.totalCommission - attendant.totalReferralCommission), 0);
+  const totalReferralCommission = attendantSummaries.reduce((acc, attendant) => acc + attendant.totalReferralCommission, 0);
   const totalPayments = attendantSummaries.reduce((acc, attendant) => acc + attendant.paymentsCount, 0);
   
   // Calculate the total original payment amount
@@ -60,7 +62,9 @@ export function AttendantCommissionsTable({
             <TableHead>Atendente</TableHead>
             <TableHead className={isMobile ? "hidden" : ""}>Pagamentos</TableHead>
             <TableHead>Total</TableHead>
-            <TableHead className="text-right">Comissão</TableHead>
+            <TableHead className="text-right">Comissão Própria</TableHead>
+            <TableHead className="text-right">Comissão Indicação</TableHead>
+            <TableHead className="text-right">Total Comissão</TableHead>
             {(onRegisterPayment || getPaymentStatus) && (
               <TableHead className="text-center">Status</TableHead>
             )}
@@ -73,12 +77,25 @@ export function AttendantCommissionsTable({
           {attendantSummaries.map((attendant) => {
             const paymentStatus = getPaymentStatus ? getPaymentStatus(attendant.id, attendant.totalCommission) : undefined;
             const totalPaid = getTotalPaid ? getTotalPaid(attendant.id) : 0;
+            const ownCommission = attendant.totalCommission - attendant.totalReferralCommission;
             
             return (
               <TableRow key={attendant.id}>
                 <TableCell className="font-medium">{attendant.nome}</TableCell>
                 <TableCell className={isMobile ? "hidden" : ""}>{attendant.paymentsCount}</TableCell>
                 <TableCell>{formatCurrency(attendant.totalPaymentAmount)}</TableCell>
+                <TableCell className="text-right">
+                  {formatCurrency(ownCommission)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {attendant.totalReferralCommission > 0 ? (
+                    <span className="text-amber-600 dark:text-amber-400">
+                      {formatCurrency(attendant.totalReferralCommission)}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
                 <TableCell className="text-right font-medium">
                   {formatCurrency(attendant.totalCommission)}
                 </TableCell>
@@ -128,6 +145,12 @@ export function AttendantCommissionsTable({
             <TableCell className="font-bold">Total</TableCell>
             <TableCell className={`font-bold ${isMobile ? "hidden" : ""}`}>{totalPayments}</TableCell>
             <TableCell className="font-bold">{formatCurrency(totalPaymentAmount)}</TableCell>
+            <TableCell className="text-right font-bold">
+              {formatCurrency(totalOwnCommission)}
+            </TableCell>
+            <TableCell className="text-right font-bold">
+              {formatCurrency(totalReferralCommission)}
+            </TableCell>
             <TableCell className="text-right font-bold">
               {formatCurrency(totalCommission)}
             </TableCell>
