@@ -54,7 +54,7 @@ export function ResponsavelCombobox({ value, onChange }: ResponsavelComboboxProp
         .from("pessoas")
         .insert({
           nome: searchValue.trim(),
-          tipo: "atendente",
+          tipo: "responsavel",
           id_equipe: profileData.id_equipe,
         })
         .select()
