@@ -158,13 +158,7 @@ export function useClosingCalculations() {
       // Calculate attendant commission (after tripeiro's commission is removed)
       const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
       const tripeiroReceivable = paymentAmount - tripeiroCommission;
-      const attendantCommissionTotal = tripeiroReceivable * attendantPercentageDecimal;
-      
-      // If attendant was referred, deduct referral commission from their total
-      const idIndicador = (payment.atendente as any).id_indicador;
-      const porcentagemIndicacao = (payment.atendente as any).porcentagem_indicacao || 0;
-      const referralCommission = porcentagemIndicacao > 0 ? attendantCommissionTotal * (porcentagemIndicacao / 100) : 0;
-      const attendantCommission = attendantCommissionTotal - referralCommission;
+      const attendantCommission = tripeiroReceivable * attendantPercentageDecimal;
       
       if (attendantsMap.has(attendantId)) {
         const existingSummary = attendantsMap.get(attendantId)!;
