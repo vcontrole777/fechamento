@@ -3,6 +3,7 @@ import { startOfDay, endOfDay, format } from "date-fns";
 import { useClosingQueries } from "./closing/useClosingQueries";
 import { useClosingCalculations } from "./closing/useClosingCalculations";
 import { useSharedDateFilter } from "./useSharedDateFilter";
+import { useAttendantsAndTripeiros } from "@/components/payments/hooks/useAttendantsAndTripeiros";
 import { Expense } from "./expenses/useExpensesQuery";
 import { DateRange } from "@/components/common/date-filter/types";
 
@@ -21,6 +22,9 @@ export function useClosingData() {
   // Fetch data using our custom queries hook
   const { payments, expenses, isLoading } = useClosingQueries(dateRange);
   
+  // Fetch attendants list for referrer names
+  const { attendants, isLoading: isLoadingAttendants } = useAttendantsAndTripeiros();
+  
   // Get calculation utilities
   const {
     calculateClosingSummary,
@@ -31,7 +35,7 @@ export function useClosingData() {
   // Calculate all the summary data
   const closingSummary = calculateClosingSummary(payments, expenses);
   const tripeiroSummaries = calculateTripeiroSummaries(payments);
-  const attendantSummaries = calculateAttendantSummaries(payments);
+  const attendantSummaries = calculateAttendantSummaries(payments, attendants);
 
   const updateDateRange = (range: DateRange) => {
     const newRange: DateRange = {
@@ -48,7 +52,7 @@ export function useClosingData() {
   };
 
   return {
-    isLoading,
+    isLoading: isLoading || isLoadingAttendants,
     closingSummary,
     tripeiroSummaries,
     attendantSummaries,

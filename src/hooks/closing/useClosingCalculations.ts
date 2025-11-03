@@ -139,7 +139,7 @@ export function useClosingCalculations() {
   };
 
   // Calculate attendant commissions
-  const calculateAttendantSummaries = (payments: Payment[]): AttendantSummary[] => {
+  const calculateAttendantSummaries = (payments: Payment[], attendants: any[] = []): AttendantSummary[] => {
     // Only consider completed payments
     const completedPayments = payments.filter(payment => payment.status === "concluido");
     
@@ -233,10 +233,23 @@ export function useClosingCalculations() {
       
       // Add to referrer's total - CREATE entry if doesn't exist
       if (!attendantsMap.has(idIndicador)) {
-        // Find referrer's name from existing payments or use placeholder
-        const referrerPayment = completedPayments.find(p => p.id_atendente === idIndicador);
-        const referrerName = referrerPayment?.atendente?.nome || `Atendente ${idIndicador}`;
-        const referrerPercentage = referrerPayment?.atendente?.porcentagem || 0;
+        // Find referrer's name from attendants list or existing payments
+        let referrerName = `Atendente ${idIndicador}`;
+        let referrerPercentage = 0;
+        
+        // Try to find in attendants list first
+        const referrer = attendants.find((a: any) => a.id === idIndicador);
+        if (referrer) {
+          referrerName = referrer.nome;
+          referrerPercentage = referrer.porcentagem || 0;
+        } else {
+          // Fallback: find in existing payments
+          const referrerPayment = completedPayments.find(p => p.id_atendente === idIndicador);
+          if (referrerPayment?.atendente) {
+            referrerName = referrerPayment.atendente.nome;
+            referrerPercentage = referrerPayment.atendente.porcentagem || 0;
+          }
+        }
         
         console.log("Creating new entry for referrer:", { idIndicador, referrerName });
         
