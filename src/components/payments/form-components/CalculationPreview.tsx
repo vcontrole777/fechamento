@@ -30,15 +30,17 @@ export function CalculationPreview({
 
     const tripeiroCommission = totalValue * (effectiveTripeiroPercentage / 100);
     const tripeiroReceivable = totalValue - tripeiroCommission;
-    const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
+    const attendantCommissionTotal = tripeiroReceivable * (attendantPercentage / 100);
     
     // Calculate referral commission if applicable
     const referralCommission = (referralPercentage && referralPercentage > 0)
-      ? attendantCommission * (referralPercentage / 100)
+      ? attendantCommissionTotal * (referralPercentage / 100)
       : 0;
     
-    // Net value doesn't deduct referral commission separately as it's already part of attendant commission
-    const netValue = totalValue - tripeiroCommission - attendantCommission;
+    // Attendant receives commission MINUS referral
+    const attendantCommission = attendantCommissionTotal - referralCommission;
+    
+    const netValue = totalValue - tripeiroCommission - attendantCommission - referralCommission;
 
     return {
       tripeiroCommission,
@@ -68,7 +70,7 @@ export function CalculationPreview({
         <div>R$ {calculations.tripeiroReceivable.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
       </div>
       <div className="grid grid-cols-2 text-sm">
-        <div>Comissão Atendente ({attendantPercentage}%):</div>
+        <div>Comissão Atendente Líquida ({attendantPercentage}%):</div>
         <div>R$ {calculations.attendantCommission.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
       </div>
       {referrerName && referralPercentage && referralPercentage > 0 && (

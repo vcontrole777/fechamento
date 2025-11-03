@@ -25,14 +25,16 @@ export function usePaymentCalculations() {
       
       const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
       const tripeiroReceivable = totalPayment - tripeiroCommission;
-      const attendantCommission = tripeiroReceivable * (attendantPercentage / 100);
+      const attendantCommissionTotal = tripeiroReceivable * (attendantPercentage / 100);
       
       // Calculate referral commission if attendant was referred
       const referralPercentage = (payment.atendente as any)?.porcentagem_indicacao || 0;
-      const referralCommission = attendantCommission * (referralPercentage / 100);
+      const referralCommission = attendantCommissionTotal * (referralPercentage / 100);
       
-      // Net total doesn't deduct referral commission separately as it's already part of attendant commission
-      const netTotal = totalPayment - tripeiroCommission - attendantCommission;
+      // Attendant receives commission MINUS referral
+      const attendantCommission = attendantCommissionTotal - referralCommission;
+      
+      const netTotal = totalPayment - tripeiroCommission - attendantCommission - referralCommission;
 
       return {
         totalPayments: acc.totalPayments + totalPayment,

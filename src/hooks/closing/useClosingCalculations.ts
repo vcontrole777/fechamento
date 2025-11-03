@@ -63,11 +63,14 @@ export function useClosingCalculations() {
         
         const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
         const tripeiroReceivable = totalPayment - tripeiroCommission;
-        const atendenteCommission = tripeiroReceivable * (atendentePercentage / 100);
+        const atendenteCommissionTotal = tripeiroReceivable * (atendentePercentage / 100);
         
         // Calculate referral commission if attendant was referred
         const referralPercentage = (payment.atendente as any)?.porcentagem_indicacao || 0;
-        const referralCommission = atendenteCommission * (referralPercentage / 100);
+        const referralCommission = atendenteCommissionTotal * (referralPercentage / 100);
+        
+        // Attendant receives commission MINUS referral
+        const atendenteCommission = atendenteCommissionTotal - referralCommission;
         
         return {
           tripeiro: acc.tripeiro + tripeiroCommission,
@@ -78,8 +81,8 @@ export function useClosingCalculations() {
       { tripeiro: 0, atendente: 0, referral: 0 }
     );
     
-    // Calculate net profit (referral commission is part of attendant commission, not separate)
-    const netProfit = totalRevenue - commissions.tripeiro - commissions.atendente - totalExpenses;
+    // Calculate net profit
+    const netProfit = totalRevenue - commissions.tripeiro - commissions.atendente - commissions.referral - totalExpenses;
     
     return {
       totalRevenue,
@@ -158,7 +161,16 @@ export function useClosingCalculations() {
       // Calculate attendant commission (after tripeiro's commission is removed)
       const tripeiroCommission = paymentAmount * (tripeiroPercentage / 100);
       const tripeiroReceivable = paymentAmount - tripeiroCommission;
-      const attendantCommission = tripeiroReceivable * attendantPercentageDecimal;
+      const attendantCommissionTotal = tripeiroReceivable * attendantPercentageDecimal;
+      
+      // Check if this attendant was referred
+      const porcentagemIndicacao = (payment.atendente as any)?.porcentagem_indicacao || 0;
+      const referralCommission = porcentagemIndicacao > 0 
+        ? attendantCommissionTotal * (porcentagemIndicacao / 100) 
+        : 0;
+      
+      // Attendant receives commission MINUS referral
+      const attendantCommission = attendantCommissionTotal - referralCommission;
       
       if (attendantsMap.has(attendantId)) {
         const existingSummary = attendantsMap.get(attendantId)!;
