@@ -31,7 +31,8 @@ export function usePaymentCalculations() {
       const referralPercentage = (payment.atendente as any)?.porcentagem_indicacao || 0;
       const referralCommission = attendantCommission * (referralPercentage / 100);
       
-      const netTotal = totalPayment - tripeiroCommission - attendantCommission - referralCommission;
+      // Net total doesn't deduct referral commission separately as it's already part of attendant commission
+      const netTotal = totalPayment - tripeiroCommission - attendantCommission;
 
       return {
         totalPayments: acc.totalPayments + totalPayment,

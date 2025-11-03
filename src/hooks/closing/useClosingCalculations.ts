@@ -78,8 +78,8 @@ export function useClosingCalculations() {
       { tripeiro: 0, atendente: 0, referral: 0 }
     );
     
-    // Calculate net profit
-    const netProfit = totalRevenue - commissions.tripeiro - commissions.atendente - commissions.referral - totalExpenses;
+    // Calculate net profit (referral commission is part of attendant commission, not separate)
+    const netProfit = totalRevenue - commissions.tripeiro - commissions.atendente - totalExpenses;
     
     return {
       totalRevenue,

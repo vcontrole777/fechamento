@@ -37,7 +37,8 @@ export function CalculationPreview({
       ? attendantCommission * (referralPercentage / 100)
       : 0;
     
-    const netValue = totalValue - tripeiroCommission - attendantCommission - referralCommission;
+    // Net value doesn't deduct referral commission separately as it's already part of attendant commission
+    const netValue = totalValue - tripeiroCommission - attendantCommission;
 
     return {
       tripeiroCommission,
