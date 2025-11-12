@@ -23,16 +23,28 @@ export function usePaymentCalculations() {
       const tripeiroPercentage = payment.porcentagem_tripeiro;
       const attendantPercentage = payment.porcentagem_atendente;
       
+      // Step 1: Tripeiro commission
       const tripeiroCommission = totalPayment * (tripeiroPercentage / 100);
       const tripeiroReceivable = totalPayment - tripeiroCommission;
-      const attendantCommissionTotal = tripeiroReceivable * (attendantPercentage / 100);
       
-      // Calculate referral commission if attendant was referred
+      // Step 2: Calculate attendant pool
+      const attendantPool = tripeiroReceivable * (attendantPercentage / 100);
+      
+      // Step 3: Check if attendant has referrer (indicador)
       const referralPercentage = (payment.atendente as any)?.porcentagem_indicacao || 0;
-      const referralCommission = attendantCommissionTotal * (referralPercentage / 100);
       
-      // Attendant receives commission MINUS referral
-      const attendantCommission = attendantCommissionTotal - referralCommission;
+      let attendantCommission: number;
+      let referralCommission: number;
+      
+      if (referralPercentage > 0) {
+        // WITH INDICADOR: Split the pool
+        referralCommission = attendantPool * (referralPercentage / 100);
+        attendantCommission = attendantPool - referralCommission;
+      } else {
+        // WITHOUT INDICADOR: Attendant gets the full pool
+        attendantCommission = attendantPool;
+        referralCommission = 0;
+      }
       
       const netTotal = totalPayment - tripeiroCommission - attendantCommission - referralCommission;
 

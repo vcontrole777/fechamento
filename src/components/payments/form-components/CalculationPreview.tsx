@@ -28,17 +28,26 @@ export function CalculationPreview({
       ? tripeiroPercentage 
       : selectedTripeiroPercentage;
 
+    // Step 1: Tripeiro commission
     const tripeiroCommission = totalValue * (effectiveTripeiroPercentage / 100);
     const tripeiroReceivable = totalValue - tripeiroCommission;
-    const attendantCommissionTotal = tripeiroReceivable * (attendantPercentage / 100);
     
-    // Calculate referral commission if applicable
-    const referralCommission = (referralPercentage && referralPercentage > 0)
-      ? attendantCommissionTotal * (referralPercentage / 100)
-      : 0;
+    // Step 2: Calculate attendant pool
+    const attendantPool = tripeiroReceivable * (attendantPercentage / 100);
     
-    // Attendant receives commission MINUS referral
-    const attendantCommission = attendantCommissionTotal - referralCommission;
+    // Step 3: Check if attendant has referrer (indicador)
+    let attendantCommission: number;
+    let referralCommission: number;
+    
+    if (referralPercentage && referralPercentage > 0) {
+      // WITH INDICADOR: Split the pool
+      referralCommission = attendantPool * (referralPercentage / 100);
+      attendantCommission = attendantPool - referralCommission;
+    } else {
+      // WITHOUT INDICADOR: Attendant gets the full pool
+      attendantCommission = attendantPool;
+      referralCommission = 0;
+    }
     
     const netValue = totalValue - tripeiroCommission - attendantCommission - referralCommission;
 
