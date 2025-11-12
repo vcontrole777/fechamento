@@ -59,13 +59,13 @@ export function ClosingSummary({ summary, formatCurrency, isLoading }: ClosingSu
         </CardContent>
       </Card>
 
-      <Card className="bg-amber-50 dark:bg-amber-950/20">
+      <Card className="bg-warning/10 border-warning/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Comissão Indicação</CardTitle>
-          <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <Users className="h-4 w-4 text-warning" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(summary.totalReferralCommission)}</div>
+          <div className="text-2xl font-bold text-warning">{formatCurrency(summary.totalReferralCommission)}</div>
           <p className="text-xs text-muted-foreground">
             {(summary.totalReferralCommission / summary.totalRevenue * 100).toFixed(1)}% do faturamento
           </p>
@@ -98,13 +98,13 @@ export function ClosingSummary({ summary, formatCurrency, isLoading }: ClosingSu
         </CardContent>
       </Card>
 
-      <Card className={summary.netProfit >= 0 ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"}>
+      <Card className={summary.netProfit >= 0 ? "bg-success/10 border-success/20" : "bg-destructive/10 border-destructive/20"}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Lucro Líquido</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <TrendingUp className={`h-4 w-4 ${summary.netProfit >= 0 ? "text-success" : "text-destructive"}`} />
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${summary.netProfit >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+          <div className={`text-2xl font-bold ${summary.netProfit >= 0 ? "text-success" : "text-destructive"}`}>
             {formatCurrency(summary.netProfit)}
           </div>
           <p className="text-xs text-muted-foreground">
