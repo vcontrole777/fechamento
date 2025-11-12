@@ -39,6 +39,15 @@ interface AttendantPaymentHistoryProps {
   onDeletePayment: (paymentId: string) => void;
 }
 
+const parseLocalDate = (value: string | Date) => {
+  if (value instanceof Date) return value;
+  if (typeof value === 'string' && value.length === 10 && value.includes('-') && !value.includes('T')) {
+    const [y, m, d] = value.split('-').map(Number);
+    return new Date(y || 0, (m || 1) - 1, d || 1, 12, 0, 0, 0);
+  }
+  return new Date(value);
+};
+
 export function AttendantPaymentHistory({
   open,
   onOpenChange,
@@ -113,10 +122,10 @@ export function AttendantPaymentHistory({
                       {payments.map((payment) => (
                         <TableRow key={payment.id}>
                           <TableCell>
-                            {format(new Date(payment.data_pagamento), 'dd/MM/yyyy')}
+                            {format(parseLocalDate(payment.data_pagamento), 'dd/MM/yyyy')}
                           </TableCell>
                           <TableCell className="text-xs">
-                            {format(new Date(payment.periodo_inicio), 'dd/MM/yy')} - {format(new Date(payment.periodo_fim), 'dd/MM/yy')}
+                            {format(parseLocalDate(payment.periodo_inicio), 'dd/MM/yy')} - {format(parseLocalDate(payment.periodo_fim), 'dd/MM/yy')}
                           </TableCell>
                           <TableCell className="font-medium">
                             {formatCurrency(Number(payment.valor_pago))}
@@ -150,7 +159,7 @@ export function AttendantPaymentHistory({
                     {payments.filter(p => p.observacoes).map(payment => (
                       <div key={payment.id} className="text-xs p-2 bg-muted rounded">
                         <div className="font-medium">
-                          {format(new Date(payment.data_pagamento), 'dd/MM/yyyy')}
+                          {format(parseLocalDate(payment.data_pagamento), 'dd/MM/yyyy')}
                         </div>
                         <div className="text-muted-foreground">{payment.observacoes}</div>
                       </div>
