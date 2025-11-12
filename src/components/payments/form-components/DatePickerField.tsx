@@ -79,7 +79,11 @@ export function DatePickerField({ control }: DatePickerFieldProps) {
                   }
                 }}
                 locale={ptBR}
-                disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                disabled={(date) => {
+                  const today = new Date();
+                  today.setHours(23, 59, 59, 999);
+                  return date > today || date < new Date("1900-01-01");
+                }}
                 initialFocus
                 className="pointer-events-auto"
               />
