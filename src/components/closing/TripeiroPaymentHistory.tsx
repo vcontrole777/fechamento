@@ -18,6 +18,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+const parseLocalDate = (value: string | Date) => {
+  if (value instanceof Date) return value;
+  // If it's a date-only string (YYYY-MM-DD), parse in local time to avoid UTC shift
+  if (typeof value === 'string' && value.length === 10 && value.includes('-') && !value.includes('T')) {
+    const [y, m, d] = value.split('-').map(Number);
+    return new Date(y || 0, (m || 1) - 1, d || 1, 12, 0, 0, 0);
+  }
+  return new Date(value);
+};
+
 interface TripeiroPaymentHistoryProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -100,7 +110,7 @@ export function TripeiroPaymentHistory({
                     {payments.map((payment) => (
                       <TableRow key={payment.id}>
                         <TableCell>
-                          {format(new Date(payment.data_pagamento), "dd/MM/yyyy", { locale: ptBR })}
+                          {format(parseLocalDate(payment.data_pagamento), "dd/MM/yyyy", { locale: ptBR })}
                         </TableCell>
                         <TableCell className="font-medium">
                           {formatCurrency(Number(payment.valor_pago))}
