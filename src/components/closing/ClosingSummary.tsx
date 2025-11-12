@@ -61,12 +61,12 @@ export function ClosingSummary({ summary, formatCurrency, isLoading }: ClosingSu
 
       <Card className="bg-warning/10 border-warning/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Comissão Indicação</CardTitle>
+          <CardTitle className="text-sm font-medium text-foreground">Comissão Indicação</CardTitle>
           <Users className="h-4 w-4 text-warning" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-warning">{formatCurrency(summary.totalReferralCommission)}</div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-foreground/70">
             {(summary.totalReferralCommission / summary.totalRevenue * 100).toFixed(1)}% do faturamento
           </p>
         </CardContent>
@@ -100,14 +100,14 @@ export function ClosingSummary({ summary, formatCurrency, isLoading }: ClosingSu
 
       <Card className={summary.netProfit >= 0 ? "bg-success/10 border-success/20" : "bg-destructive/10 border-destructive/20"}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Lucro Líquido</CardTitle>
+          <CardTitle className="text-sm font-medium text-foreground">Lucro Líquido</CardTitle>
           <TrendingUp className={`h-4 w-4 ${summary.netProfit >= 0 ? "text-success" : "text-destructive"}`} />
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${summary.netProfit >= 0 ? "text-success" : "text-destructive"}`}>
             {formatCurrency(summary.netProfit)}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-foreground/70">
             {(summary.netProfit / summary.totalRevenue * 100).toFixed(1)}% do faturamento
           </p>
         </CardContent>
