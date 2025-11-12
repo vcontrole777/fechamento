@@ -164,7 +164,11 @@ export function AttendantPaymentForm({
                       field.onChange(date);
                       setIsCalendarOpen(false);
                     }}
-                    disabled={(date) => date > new Date()}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(23, 59, 59, 999);
+                      return date > today;
+                    }}
                     initialFocus
                     className={cn("p-3 pointer-events-auto")}
                   />
