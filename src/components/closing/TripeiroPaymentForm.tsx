@@ -35,6 +35,12 @@ export function TripeiroPaymentForm({
     },
   });
 
+  const parseLocalDate = (iso?: string) => {
+    if (!iso) return undefined;
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1, 12, 0, 0, 0);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -73,7 +79,7 @@ export function TripeiroPaymentForm({
                       )}
                     >
                       {field.value ? (
-                        format(new Date(field.value), "PPP", { locale: ptBR })
+                        format(parseLocalDate(field.value)!, "PPP", { locale: ptBR })
                       ) : (
                         <span>Selecione uma data</span>
                       )}
@@ -84,7 +90,7 @@ export function TripeiroPaymentForm({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={field.value ? new Date(field.value) : undefined}
+                    selected={parseLocalDate(field.value)}
                     onSelect={(date) => {
                       if (date) {
                         field.onChange(format(date, "yyyy-MM-dd"));
@@ -97,6 +103,7 @@ export function TripeiroPaymentForm({
                     }}
                     locale={ptBR}
                     initialFocus
+                    className={cn("p-3 pointer-events-auto")}
                   />
                 </PopoverContent>
               </Popover>
