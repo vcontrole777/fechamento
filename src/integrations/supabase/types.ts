@@ -537,6 +537,7 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       limpar_dados_equipe: { Args: { equipe_id: number }; Returns: undefined }
+      limpar_todos_dados: { Args: never; Returns: undefined }
       make_user_admin: { Args: { user_email: string }; Returns: undefined }
     }
     Enums: {

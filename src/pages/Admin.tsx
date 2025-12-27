@@ -4,7 +4,8 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { NotificationsManager } from "@/components/admin/NotificationsManager";
-import { Shield, Users, Bell } from "lucide-react";
+import { ClearAllDataSection } from "@/components/admin/ClearAllDataSection";
+import { Shield, Users, Bell, Database } from "lucide-react";
 
 export default function Admin() {
   const { isAdmin, loading } = useAdminAuth();
@@ -44,7 +45,7 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Usuários
@@ -52,6 +53,10 @@ export default function Admin() {
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />
             Notificações
+          </TabsTrigger>
+          <TabsTrigger value="data" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Dados
           </TabsTrigger>
         </TabsList>
 
@@ -61,6 +66,10 @@ export default function Admin() {
 
         <TabsContent value="notifications" className="space-y-4">
           <NotificationsManager />
+        </TabsContent>
+
+        <TabsContent value="data" className="space-y-4">
+          <ClearAllDataSection />
         </TabsContent>
       </Tabs>
     </div>
