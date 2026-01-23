@@ -10,6 +10,7 @@ interface ExtractedValue {
   id: string;
   fileName: string;
   valor: number;
+  hash: string;
 }
 
 interface ReceiptUploadButtonProps {
@@ -22,17 +23,18 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
   const [progress, setProgress] = useState(0);
   const [currentFile, setCurrentFile] = useState<string>("");
   const [extractedValues, setExtractedValues] = useState<ExtractedValue[]>([]);
+  const [processedHashes, setProcessedHashes] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const processFile = async (file: File): Promise<number | null> => {
-    // Convert to base64
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  const computeHash = async (base64: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(base64);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
 
+  const processFile = async (base64: string): Promise<number | null> => {
     // Call edge function
     const { data, error } = await supabase.functions.invoke("extract-payment-value", {
       body: { image: base64 },
@@ -87,8 +89,10 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
     setIsProcessing(true);
     setProgress(0);
     const newExtractedValues: ExtractedValue[] = [];
+    const newHashes = new Set(processedHashes);
     let successCount = 0;
     let failCount = 0;
+    let duplicateCount = 0;
 
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
@@ -96,13 +100,30 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
       setProgress(Math.round(((i) / validFiles.length) * 100));
 
       try {
-        const valor = await processFile(file);
+        // Convert to base64 first to compute hash
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        // Check for duplicates
+        const hash = await computeHash(base64);
+        if (newHashes.has(hash) || extractedValues.some(v => v.hash === hash)) {
+          duplicateCount++;
+          continue;
+        }
+
+        const valor = await processFile(base64);
         if (valor !== null) {
           newExtractedValues.push({
             id: `${Date.now()}-${i}`,
             fileName: file.name,
             valor,
+            hash,
           });
+          newHashes.add(hash);
           successCount++;
         } else {
           failCount++;
@@ -112,6 +133,8 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
         failCount++;
       }
     }
+
+    setProcessedHashes(newHashes);
 
     setProgress(100);
     setIsProcessing(false);
@@ -131,6 +154,14 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
         title: "Alguns comprovantes não foram processados",
         description: `${failCount} imagem${failCount > 1 ? 'ns' : ''} não teve${failCount > 1 ? 'ram' : ''} o valor identificado.`,
         variant: "destructive",
+      });
+    }
+
+    if (duplicateCount > 0) {
+      toast({
+        title: "Comprovantes duplicados ignorados",
+        description: `${duplicateCount} imagem${duplicateCount > 1 ? 'ns já foram enviadas' : ' já foi enviada'} anteriormente.`,
+        variant: "default",
       });
     }
 
