@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { tripeiroPaymentSchema, TripeiroPaymentFormData } from "./schemas/tripeiroPaymentSchema";
 import { CurrencyInput } from "@/components/ui/currency-input";
+import { ReceiptUploadButton } from "./ReceiptUploadButton";
 
 interface TripeiroPaymentFormProps {
   onSubmit: (data: TripeiroPaymentFormData) => void;
@@ -44,23 +44,30 @@ export function TripeiroPaymentForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="valor_pago"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor Pago *</FormLabel>
-              <FormControl>
-                <CurrencyInput
-                  value={field.value}
-                  onChange={(value) => field.onChange(value)}
-                  placeholder="R$ 0,00"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-3">
+          <ReceiptUploadButton 
+            onValueExtracted={(value) => form.setValue("valor_pago", value)}
+            disabled={isSubmitting}
+          />
+          
+          <FormField
+            control={form.control}
+            name="valor_pago"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valor Pago *</FormLabel>
+                <FormControl>
+                  <CurrencyInput
+                    value={field.value}
+                    onChange={(value) => field.onChange(value)}
+                    placeholder="R$ 0,00"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
