@@ -67,22 +67,22 @@ export default function Payments() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header Moderno */}
+    <div className="p-4 md:p-6 space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight glow-text">💰 Gestão de Pagamentos</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-headline text-foreground">Pagamentos</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Registre e acompanhe todos os pagamentos do sistema
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={openAddPaymentDialog} className="glow-border" size="default">
+          <Button onClick={openAddPaymentDialog}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Novo Pagamento
           </Button>
-          <PaymentsExportMenu 
-            payments={payments} 
+          <PaymentsExportMenu
+            payments={payments}
             filters={filters}
             dateRange={dateRange}
             isLoading={isLoading}
@@ -106,8 +106,8 @@ export default function Payments() {
       />
 
       {/* Seção de Filtros e Tabela */}
-      <Card className="border-2">
-        <CardContent className="pt-6 space-y-4">
+      <Card>
+        <CardContent className="space-y-4">
           <PaymentFiltersComponent 
             filters={filters} 
             onUpdateFilters={updateFilters} 

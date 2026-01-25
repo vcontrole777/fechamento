@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Banknote, TrendingDown, TrendingUp, Users, Percent } from "lucide-react";
+import { Banknote, TrendingDown, TrendingUp, Users, Target } from "lucide-react";
 import { StatCardEnhanced } from "@/components/dashboard/StatCardEnhanced";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { TopAttendants } from "@/components/dashboard/TopAttendants";
@@ -35,14 +34,13 @@ export default function Dashboard() {
 
   const { updateSharedDateFilter } = useSharedDateFilter();
   const isMobile = useIsMobile();
-  
-  // Estado para controlar o dialog de notas
+
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
 
   const formatCurrency = (value: number): string => {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     });
   };
 
@@ -60,7 +58,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold glow-text">Dashboard</h1>
+          <h1 className="text-headline text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Visão geral do seu negócio
           </p>
@@ -75,14 +73,14 @@ export default function Dashboard() {
       <QuickActions onOpenNoteDialog={handleOpenNoteDialog} />
 
       {/* Main Stats - 5 cards */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
         <StatCardEnhanced
           title="Faturamento Total"
           value={formatCurrency(enhancedStats.totalRevenue)}
           icon={Banknote}
           trend={enhancedStats.revenueTrend}
           count={enhancedStats.paymentsCount}
-          className="glow-card border-2 border-primary"
+          variant="primary"
           isLoading={isLoading}
           sparklineData={sparklineData}
           navigateTo="/pagamentos"
@@ -93,7 +91,7 @@ export default function Dashboard() {
           icon={TrendingDown}
           trend={enhancedStats.expensesTrend}
           count={enhancedStats.expensesCount}
-          className="glow-card border-2 border-destructive"
+          variant="destructive"
           isLoading={isLoading}
           navigateTo="/despesas"
         />
@@ -103,7 +101,7 @@ export default function Dashboard() {
           description="Faturamento - Comissões - Despesas"
           icon={TrendingUp}
           trend={enhancedStats.profitTrend}
-          className="glow-card border-2 border-success"
+          variant="success"
           isLoading={isLoading}
         />
         <StatCardEnhanced
@@ -111,7 +109,7 @@ export default function Dashboard() {
           value={formatCurrency(enhancedStats.totalCommissions)}
           description="Atendentes + Tripeiros"
           icon={Users}
-          className="glow-card border-2 border-warning"
+          variant="warning"
           isLoading={isLoading}
           navigateTo="/fechamento"
         />
@@ -119,31 +117,28 @@ export default function Dashboard() {
           title="Ticket Médio"
           value={formatCurrency(enhancedStats.avgTicket)}
           description="Média por pagamento"
-          icon={Percent}
-          className="glow-card border-2 border-primary"
+          icon={Target}
+          variant="default"
           isLoading={isLoading}
         />
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-5 grid-cols-1 lg:grid-cols-2">
         <RevenueExpenseChart data={revenueExpenseData} />
         <DistributionPieChart data={distributionData} />
       </div>
 
       {/* Weekly Summary + Bar Chart */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-3">
-        <WeeklySummary 
-          {...weeklySummary}
-          formatCurrency={formatCurrency}
-        />
+      <div className="grid gap-4 md:gap-5 grid-cols-1 lg:grid-cols-3">
+        <WeeklySummary {...weeklySummary} formatCurrency={formatCurrency} />
         <div className="lg:col-span-2">
           <AttendantsBarChart data={attendantsBarData} />
         </div>
       </div>
 
       {/* Notes and Reminders + Upcoming Reminders */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-5 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <NotesAndReminders onOpenDialog={handleOpenNoteDialog} />
         </div>
@@ -151,10 +146,14 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Section - Top Attendants and Recent Transactions */}
-      <div className={`grid gap-4 md:gap-6 grid-cols-1 ${isMobile ? "" : "md:grid-cols-3"}`}>
-        <TopAttendants 
-          attendants={topAttendants} 
-          className={isMobile ? "" : "md:col-span-1"} 
+      <div
+        className={`grid gap-4 md:gap-5 grid-cols-1 ${
+          isMobile ? "" : "md:grid-cols-3"
+        }`}
+      >
+        <TopAttendants
+          attendants={topAttendants}
+          className={isMobile ? "" : "md:col-span-1"}
         />
         <RecentTransactions
           transactions={recentPayments}

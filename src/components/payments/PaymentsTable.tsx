@@ -96,16 +96,16 @@ export default function PaymentsTable({
 
   const totalValue = sortedPayments.reduce((sum, payment) => sum + Number(payment.valor), 0);
 
-  const getStatusBadgeColor = (status: string) => {
+  const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "concluido":
-        return "bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600";
+        return "success" as const;
       case "pendente":
-        return "bg-yellow-600 dark:bg-yellow-500 hover:bg-yellow-700 dark:hover:bg-yellow-600";
+        return "warning" as const;
       case "bloqueado":
-        return "bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600";
+        return "destructive" as const;
       default:
-        return "bg-gray-600 dark:bg-gray-500";
+        return "muted" as const;
     }
   };
 
@@ -170,7 +170,7 @@ export default function PaymentsTable({
   );
 
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -323,7 +323,7 @@ export default function PaymentsTable({
                       {payment.tipo === "pix" ? "PIX" : payment.tipo}
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusBadgeColor(payment.status)}>
+                      <Badge variant={getStatusBadgeVariant(payment.status)}>
                         {formatStatus(payment.status)}
                       </Badge>
                     </TableCell>
