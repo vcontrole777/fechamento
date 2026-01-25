@@ -34,7 +34,7 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
-  const processFile = async (base64: string): Promise<number | null> => {
+  const processFile = async (base64: string): Promise<number[]> => {
     // Call edge function
     const { data, error } = await supabase.functions.invoke("extract-payment-value", {
       body: { image: base64 },
@@ -44,10 +44,10 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
       throw error;
     }
 
-    if (data.success && data.valor) {
-      return data.valor;
+    if (data.success && Array.isArray(data.valores) && data.valores.length > 0) {
+      return data.valores;
     }
-    return null;
+    return [];
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,16 +115,18 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
           continue;
         }
 
-        const valor = await processFile(base64);
-        if (valor !== null) {
-          newExtractedValues.push({
-            id: `${Date.now()}-${i}`,
-            fileName: file.name,
-            valor,
-            hash,
+        const valores = await processFile(base64);
+        if (valores.length > 0) {
+          valores.forEach((valor, idx) => {
+            newExtractedValues.push({
+              id: `${Date.now()}-${i}-${idx}`,
+              fileName: valores.length > 1 ? `${file.name} (#${idx + 1})` : file.name,
+              valor,
+              hash: `${hash}-${idx}`,
+            });
           });
           newHashes.add(hash);
-          successCount++;
+          successCount += valores.length;
         } else {
           failCount++;
         }
