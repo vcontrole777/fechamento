@@ -40,21 +40,21 @@ serve(async (req) => {
             role: "system",
             content: `Você é um especialista em extrair valores monetários de comprovantes de pagamento brasileiros (PIX, transferências, depósitos).
             
-Analise a imagem e extraia o VALOR PRINCIPAL do pagamento/transferência.
+Analise a imagem e extraia TODOS os valores de pagamentos/transferências encontrados.
 
 REGRAS:
-1. Retorne APENAS o valor numérico principal do comprovante
-2. O valor deve estar em formato numérico (ex: 150.00, 1234.56)
-3. Ignore taxas, saldos anteriores ou outros valores secundários
-4. Se houver múltiplos valores, extraia o valor da transferência/pagamento principal
-5. Se não conseguir identificar um valor, retorne null`
+1. A imagem pode conter UM ou MÚLTIPLOS comprovantes (ex: colagem, print com vários comprovantes)
+2. Extraia o valor PRINCIPAL de CADA comprovante encontrado
+3. Os valores devem estar em formato numérico (ex: 150.00, 1234.56)
+4. Ignore taxas, saldos anteriores ou outros valores secundários de cada comprovante
+5. Se não conseguir identificar nenhum valor, retorne array vazio`
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Extraia o valor do pagamento/transferência deste comprovante. Responda APENAS com um JSON no formato: {\"valor\": 123.45} ou {\"valor\": null} se não encontrar."
+                text: "Extraia os valores de pagamento/transferência de todos os comprovantes nesta imagem. Responda APENAS com um JSON no formato: {\"valores\": [123.45, 67.89]} ou {\"valores\": []} se não encontrar nenhum."
               },
               {
                 type: "image_url",
@@ -92,29 +92,31 @@ REGRAS:
     console.log("Resposta da IA:", content);
 
     // Extract JSON from response
-    let extractedValue = null;
+    let extractedValues: number[] = [];
     try {
       // Try to find JSON in the response
-      const jsonMatch = content.match(/\{[\s\S]*"valor"[\s\S]*\}/);
+      const jsonMatch = content.match(/\{[\s\S]*"valores"[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
-        if (parsed.valor !== null && !isNaN(Number(parsed.valor))) {
-          extractedValue = Number(parsed.valor);
+        if (Array.isArray(parsed.valores)) {
+          extractedValues = parsed.valores
+            .filter((v: unknown) => v !== null && !isNaN(Number(v)))
+            .map((v: unknown) => Number(v));
         }
       }
     } catch (parseError) {
       console.error("Erro ao parsear resposta:", parseError);
     }
 
-    if (extractedValue !== null) {
-      console.log("Valor extraído com sucesso:", extractedValue);
+    if (extractedValues.length > 0) {
+      console.log("Valores extraídos com sucesso:", extractedValues);
       return new Response(
-        JSON.stringify({ success: true, valor: extractedValue }),
+        JSON.stringify({ success: true, valores: extractedValues }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
       return new Response(
-        JSON.stringify({ success: false, error: "Não foi possível identificar o valor no comprovante." }),
+        JSON.stringify({ success: false, error: "Não foi possível identificar valores no comprovante." }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
