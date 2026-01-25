@@ -101,7 +101,7 @@ export default function Expenses() {
           <h1 className="text-3xl font-bold mb-1">Despesas</h1>
           <p className="text-muted-foreground">Gerencie todas as despesas da equipe</p>
         </div>
-        <Button onClick={openAddExpenseDialog}>
+        <Button onClick={openAddExpenseDialog} className="glow-border">
           <Plus className="h-4 w-4 mr-2" />
           Nova Despesa
         </Button>
@@ -136,7 +136,7 @@ export default function Expenses() {
       </div>
 
       {/* Main Card */}
-      <Card>
+      <Card className="glow-card border-2 border-primary">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle>Todas as Despesas</CardTitle>

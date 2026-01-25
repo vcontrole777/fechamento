@@ -126,17 +126,17 @@ export default function Tripeiros() {
       </div>
 
       {/* Main Card */}
-      <Card>
+      <Card className="glow-card border-2 border-primary">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <CardTitle>Tripeiros</CardTitle>
+            <CardTitle className="glow-text">Tripeiros</CardTitle>
             <div className="flex flex-col sm:flex-row gap-3">
-              <SearchBar
+              <SearchBar 
                 value={searchQuery}
                 onChange={setSearchQuery}
                 placeholder="Buscar tripeiro..."
               />
-              <Button onClick={handleOpenNewTrypeiroDialog}>
+              <Button onClick={handleOpenNewTrypeiroDialog} className="glow-border">
                 <Plus className="mr-2 h-4 w-4" /> Novo Tripeiro
               </Button>
             </div>

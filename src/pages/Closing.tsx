@@ -230,12 +230,12 @@ export default function Closing() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 animate-fade-in">
+    <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
         <div>
-          <h1 className="text-headline text-foreground">Fechamento Financeiro</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gerencie recebimentos e pagamentos do período</p>
+          <h1 className="text-3xl font-bold tracking-tight glow-text">Fechamento Financeiro</h1>
+          <p className="text-muted-foreground mt-1">Gerencie recebimentos e pagamentos do período</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <DateFilter onFilterChange={handleDateFilterChange} />
@@ -252,8 +252,8 @@ export default function Closing() {
       </div>
 
       {/* Resumo Consolidado */}
-      <Card>
-        <CardContent>
+      <Card className="border-2 shadow-lg">
+        <CardContent className="pt-6">
           <ClosingSummary 
             summary={closingSummary} 
             formatCurrency={formatCurrency} 
