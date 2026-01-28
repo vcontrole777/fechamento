@@ -7,7 +7,7 @@ export type AttendantPayment = {
   data_pagamento: string;
   periodo_inicio: string;
   periodo_fim: string;
-  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outro';
+  metodo_pagamento: 'dinheiro' | 'pix' | 'deposito' | 'transferencia' | 'outro';
   observacoes?: string | null;
   status: 'pendente' | 'pago_parcial' | 'pago_total';
   criado_em: string;
@@ -22,6 +22,6 @@ export type AttendantPayment = {
 export type AttendantPaymentFormValues = {
   valor_pago: number;
   data_pagamento: Date;
-  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outro';
+  metodo_pagamento: 'dinheiro' | 'pix' | 'deposito' | 'transferencia' | 'outro';
   observacoes?: string;
 };

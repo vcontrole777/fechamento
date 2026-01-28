@@ -7,7 +7,7 @@ export interface TripeiroPayment {
   periodo_fim: string;
   valor_a_receber: number;
   valor_pago: number;
-  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outros';
+  metodo_pagamento: 'dinheiro' | 'pix' | 'deposito' | 'transferencia' | 'outros';
   status: 'pendente' | 'pago_parcial' | 'pago_total';
   observacoes?: string;
   criado_por?: string;
@@ -22,6 +22,6 @@ export interface TripeiroPayment {
 export interface TripeiroPaymentFormValues {
   valor_pago: number;
   data_pagamento: string;
-  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outros';
+  metodo_pagamento: 'dinheiro' | 'pix' | 'deposito' | 'transferencia' | 'outros';
   observacoes?: string;
 }

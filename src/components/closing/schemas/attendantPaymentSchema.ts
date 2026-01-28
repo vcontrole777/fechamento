@@ -11,7 +11,7 @@ export const attendantPaymentSchema = z.object({
     const today = endOfDay(new Date());
     return date <= today;
   }, "Data não pode ser futura"),
-  metodo_pagamento: z.enum(['dinheiro', 'pix', 'transferencia', 'outro'], {
+  metodo_pagamento: z.enum(['dinheiro', 'pix', 'deposito', 'transferencia', 'outro'], {
     required_error: "Método de pagamento é obrigatório"
   }),
   observacoes: z.string().max(500, "Observações devem ter no máximo 500 caracteres").optional()

@@ -193,6 +193,7 @@ export function AttendantPaymentForm({
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="pix">PIX</SelectItem>
+                  <SelectItem value="deposito">Depósito</SelectItem>
                   <SelectItem value="transferencia">Transferência</SelectItem>
                   <SelectItem value="dinheiro">Dinheiro</SelectItem>
                   <SelectItem value="outro">Outro</SelectItem>
