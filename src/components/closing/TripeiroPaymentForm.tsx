@@ -131,9 +131,10 @@ export function TripeiroPaymentForm({
                     <SelectValue placeholder="Selecione o método" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+              <SelectContent>
                   <SelectItem value="dinheiro">Dinheiro</SelectItem>
                   <SelectItem value="pix">PIX</SelectItem>
+                  <SelectItem value="deposito">Depósito</SelectItem>
                   <SelectItem value="transferencia">Transferência</SelectItem>
                   <SelectItem value="outros">Outros</SelectItem>
                 </SelectContent>

@@ -11,7 +11,7 @@ interface AddTripeiroPaymentData {
   periodo_fim: string;
   valor_a_receber: number;
   valor_pago: number;
-  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outros';
+  metodo_pagamento: 'dinheiro' | 'pix' | 'deposito' | 'transferencia' | 'outros';
   observacoes?: string;
 }
 

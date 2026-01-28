@@ -10,7 +10,7 @@ export const tripeiroPaymentSchema = z.object({
     required_error: "Data é obrigatória",
   }),
   
-  metodo_pagamento: z.enum(["dinheiro", "pix", "transferencia", "outros"], {
+  metodo_pagamento: z.enum(["dinheiro", "pix", "deposito", "transferencia", "outros"], {
     required_error: "Método de pagamento é obrigatório",
   }),
   

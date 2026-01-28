@@ -11,7 +11,7 @@ type AddAttendantPaymentParams = {
   data_pagamento: Date;
   periodo_inicio: Date;
   periodo_fim: Date;
-  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outro';
+  metodo_pagamento: 'dinheiro' | 'pix' | 'deposito' | 'transferencia' | 'outro';
   observacoes?: string;
 };
 

@@ -6,7 +6,7 @@ interface UpdateTripeiroPaymentData {
   id: string;
   valor_pago: number;
   data_pagamento: string;
-  metodo_pagamento: 'dinheiro' | 'pix' | 'transferencia' | 'outros';
+  metodo_pagamento: 'dinheiro' | 'pix' | 'deposito' | 'transferencia' | 'outros';
   observacoes?: string;
   valor_a_receber: number;
 }
