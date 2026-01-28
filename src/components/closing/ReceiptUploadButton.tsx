@@ -244,7 +244,7 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
             <Alert className="border-primary bg-primary/5">
               <AlertDescription className="flex items-center justify-between">
                 <span>
-                  <strong>Total ({extractedValues.length} comprovantes):</strong>{" "}
+                  <strong>Total ({extractedValues.length}):</strong>{" "}
                   <span className="text-primary font-semibold">R$ {totalExtracted.toFixed(2)}</span>
                 </span>
                 <div className="flex gap-1">
@@ -274,37 +274,39 @@ export function ReceiptUploadButton({ onValueExtracted, disabled }: ReceiptUploa
             </Alert>
           )}
 
-          {extractedValues.map((extracted) => (
-            <Alert key={extracted.id} className="border-muted">
-              <AlertDescription className="flex items-center justify-between text-sm">
-                <span className="truncate max-w-[180px]" title={extracted.fileName}>
-                  {extracted.fileName}: <strong className="text-primary">R$ {extracted.valor.toFixed(2)}</strong>
-                </span>
-                <div className="flex gap-1 flex-shrink-0">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleConfirmSingle(extracted)}
-                    className="h-7 px-2 text-green-600 hover:text-green-700 hover:bg-green-100"
-                    title="Usar este valor"
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleRejectSingle(extracted.id)}
-                    className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-100"
-                    title="Descartar"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          ))}
+          <div className="max-h-[200px] overflow-y-auto space-y-1.5 pr-1">
+            {extractedValues.map((extracted) => (
+              <Alert key={extracted.id} className="border-muted py-2">
+                <AlertDescription className="flex items-center justify-between text-sm">
+                  <span className="truncate max-w-[180px]" title={extracted.fileName}>
+                    {extracted.fileName}: <strong className="text-primary">R$ {extracted.valor.toFixed(2)}</strong>
+                  </span>
+                  <div className="flex gap-1 flex-shrink-0">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleConfirmSingle(extracted)}
+                      className="h-6 px-1.5 text-green-600 hover:text-green-700 hover:bg-green-100"
+                      title="Usar este valor"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleRejectSingle(extracted.id)}
+                      className="h-6 px-1.5 text-red-600 hover:text-red-700 hover:bg-red-100"
+                      title="Descartar"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ))}
+          </div>
         </div>
       )}
     </div>
