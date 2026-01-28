@@ -15,15 +15,15 @@ export function useAttendantPaymentsQuery(dateRange: DateRange) {
         `)
         .order('data_pagamento', { ascending: false });
 
-      // Apply date range filter if provided
-      if (dateRange.from) {
-        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
-        query = query.gte('periodo_inicio', fromDate);
-      }
-      
-      if (dateRange.to) {
-        const toDate = format(dateRange.to, 'yyyy-MM-dd');
-        query = query.lte('periodo_fim', toDate);
+      // Apply date range filter using overlap logic
+      // Payment period overlaps with selected range if:
+      // periodo_inicio <= rangeEnd AND periodo_fim >= rangeStart
+      if (dateRange.from && dateRange.to) {
+        const rangeStart = format(dateRange.from, 'yyyy-MM-dd');
+        const rangeEnd = format(dateRange.to, 'yyyy-MM-dd');
+        query = query
+          .lte('periodo_inicio', rangeEnd)
+          .gte('periodo_fim', rangeStart);
       }
 
       const { data, error } = await query;
