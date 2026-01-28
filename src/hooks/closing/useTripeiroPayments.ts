@@ -17,20 +17,22 @@ export function useTripeiroPayments(dateRange: DateRange) {
   const addPayment = useAddTripeiroPayment();
   const deletePayment = useDeleteTripeiroPayment();
 
-  // Fetch all payments for the current date range
+  // Fetch all payments that overlap with the current date range
   const { data: allPayments = [] } = useQuery({
     queryKey: ["all-tripeiro-payments", dateRange.from, dateRange.to, viewingTeamId],
     queryFn: async () => {
       if (!dateRange.from || !dateRange.to) return [];
 
-      const periodoInicio = format(dateRange.from, 'yyyy-MM-dd');
-      const periodoFim = format(dateRange.to, 'yyyy-MM-dd');
+      const rangeStart = format(dateRange.from, 'yyyy-MM-dd');
+      const rangeEnd = format(dateRange.to, 'yyyy-MM-dd');
 
+      // Use overlap logic: payment period overlaps with selected range if
+      // periodo_inicio <= rangeEnd AND periodo_fim >= rangeStart
       let query = supabase
         .from("pagamentos_tripeiros")
         .select("*")
-        .eq("periodo_inicio", periodoInicio)
-        .eq("periodo_fim", periodoFim);
+        .lte("periodo_inicio", rangeEnd)
+        .gte("periodo_fim", rangeStart);
 
       if (viewingTeamId !== null) {
         query = query.eq("id_equipe", viewingTeamId);
