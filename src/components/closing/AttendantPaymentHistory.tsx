@@ -75,6 +75,7 @@ export function AttendantPaymentHistory({
   const getMethodLabel = (method: string) => {
     const labels: Record<string, string> = {
       pix: 'PIX',
+      deposito: 'Depósito',
       transferencia: 'Transferência',
       dinheiro: 'Dinheiro',
       outro: 'Outro',
