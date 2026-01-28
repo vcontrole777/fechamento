@@ -65,6 +65,7 @@ export function TripeiroPaymentHistory({
     const labels: Record<string, string> = {
       dinheiro: "Dinheiro",
       pix: "PIX",
+      deposito: "Depósito",
       transferencia: "Transferência",
       outros: "Outros",
     };

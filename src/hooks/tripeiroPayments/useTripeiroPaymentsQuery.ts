@@ -9,14 +9,16 @@ export function useTripeiroPaymentsQuery(tripeiroId: number, periodoInicio: stri
   return useQuery({
     queryKey: ["tripeiro-payments", tripeiroId, periodoInicio, periodoFim, viewingTeamId],
     queryFn: async () => {
+      // Use overlap logic: payment period overlaps with selected range if
+      // periodo_inicio <= rangeEnd AND periodo_fim >= rangeStart
       let query = supabase
         .from("pagamentos_tripeiros")
         .select(`
           *
         `)
         .eq("id_tripeiro", tripeiroId)
-        .eq("periodo_inicio", periodoInicio)
-        .eq("periodo_fim", periodoFim);
+        .lte("periodo_inicio", periodoFim)
+        .gte("periodo_fim", periodoInicio);
 
       if (viewingTeamId !== null) {
         query = query.eq("id_equipe", viewingTeamId);
