@@ -542,8 +542,18 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      metodo_pagamento: "dinheiro" | "pix" | "transferencia" | "outros"
-      metodo_pagamento_atendente: "dinheiro" | "pix" | "transferencia" | "outro"
+      metodo_pagamento:
+        | "dinheiro"
+        | "pix"
+        | "transferencia"
+        | "outros"
+        | "deposito"
+      metodo_pagamento_atendente:
+        | "dinheiro"
+        | "pix"
+        | "transferencia"
+        | "outro"
+        | "deposito"
       status_pagamento: "concluido" | "pendente" | "bloqueado"
       status_pagamento_atendente: "pendente" | "pago_parcial" | "pago_total"
       tipo_pagamento: "boleto" | "pix" | "link"
@@ -677,8 +687,20 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      metodo_pagamento: ["dinheiro", "pix", "transferencia", "outros"],
-      metodo_pagamento_atendente: ["dinheiro", "pix", "transferencia", "outro"],
+      metodo_pagamento: [
+        "dinheiro",
+        "pix",
+        "transferencia",
+        "outros",
+        "deposito",
+      ],
+      metodo_pagamento_atendente: [
+        "dinheiro",
+        "pix",
+        "transferencia",
+        "outro",
+        "deposito",
+      ],
       status_pagamento: ["concluido", "pendente", "bloqueado"],
       status_pagamento_atendente: ["pendente", "pago_parcial", "pago_total"],
       tipo_pagamento: ["boleto", "pix", "link"],
