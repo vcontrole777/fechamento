@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "clean-console": "node scripts/remove-console-logs.js"
+  }
+}

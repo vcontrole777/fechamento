@@ -1,0 +1,142 @@
+import { useCallback, useEffect } from "react";
+import { usePayments } from "@/hooks/usePayments";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PlusCircle } from "lucide-react";
+import { PaymentStats } from "@/components/payments/PaymentStats";
+import PaymentsTable from "@/components/payments/PaymentsTable";
+import NewPaymentDialog from "@/components/payments/NewPaymentDialog";
+import EditPaymentDialog from "@/components/payments/EditPaymentDialog";
+import DeletePaymentDialog from "@/components/payments/DeletePaymentDialog";
+import EmptyPaymentsState from "@/components/payments/EmptyPaymentsState";
+import { PaymentFiltersComponent } from "@/components/payments/PaymentFilters";
+import { DateFilter, DateFilterOption } from "@/components/common/DateFilter";
+import { format } from "date-fns";
+import { useSharedDateFilter } from "@/hooks/useSharedDateFilter";
+import { PaymentsExportMenu } from "@/components/payments/PaymentsExportMenu";
+import { formatCurrency } from "@/utils/currency";
+
+export default function Payments() {
+  const {
+    payments,
+    isLoading,
+    totalPayments,
+    totalAttendantCommission,
+    totalTripeiroReceivable,
+    filters,
+    dateRange,
+    updateFilters,
+    updateDateRange,
+    refetch,
+    isAddingPayment,
+    isEditingPayment,
+    isDeletingPayment,
+    selectedPayment,
+    openAddPaymentDialog,
+    closeAddPaymentDialog,
+    openEditPaymentDialog,
+    closeEditPaymentDialog,
+    openDeletePaymentDialog,
+    closeDeletePaymentDialog,
+  } = usePayments();
+
+  const { updateSharedDateFilter } = useSharedDateFilter();
+
+  const hasActiveFilters = filters.attendantIds.length > 0 || filters.tripeiroIds.length > 0;
+
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleDateFilterChange = useCallback((newDateRange, option: DateFilterOption) => {
+    updateDateRange(newDateRange);
+    updateSharedDateFilter(newDateRange, option);
+  }, [updateDateRange, updateSharedDateFilter]);
+
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Header Moderno */}
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight glow-text">💰 Gestão de Pagamentos</h1>
+          <p className="text-muted-foreground mt-1">
+            Registre e acompanhe todos os pagamentos do sistema
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={openAddPaymentDialog} className="glow-border" size="default">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Novo Pagamento
+          </Button>
+          <PaymentsExportMenu 
+            payments={payments} 
+            filters={filters}
+            dateRange={dateRange}
+            isLoading={isLoading}
+            formatCurrency={formatCurrency}
+          />
+        </div>
+      </div>
+
+      {/* Filtro de Data */}
+      <div className="flex justify-start">
+        <DateFilter onFilterChange={handleDateFilterChange} />
+      </div>
+
+      {/* Cards de Estatísticas */}
+      <PaymentStats
+        totalPayments={totalPayments}
+        attendantCommission={totalAttendantCommission}
+        tripeiroReceivable={totalTripeiroReceivable}
+        isLoading={isLoading}
+        formatCurrency={formatCurrency}
+      />
+
+      {/* Seção de Filtros e Tabela */}
+      <Card className="border-2">
+        <CardContent className="pt-6 space-y-4">
+          <PaymentFiltersComponent 
+            filters={filters} 
+            onUpdateFilters={updateFilters} 
+          />
+
+          {isLoading ? (
+            <div className="w-full h-96 flex items-center justify-center">
+              <div className="animate-pulse text-lg">Carregando pagamentos...</div>
+            </div>
+          ) : payments && payments.length > 0 ? (
+            <PaymentsTable
+              payments={payments}
+              onEditClick={openEditPaymentDialog}
+              onDeleteClick={openDeletePaymentDialog}
+              formatCurrency={formatCurrency}
+            />
+          ) : (
+            <EmptyPaymentsState onAddClick={openAddPaymentDialog} />
+          )}
+        </CardContent>
+      </Card>
+
+      <NewPaymentDialog
+        open={isAddingPayment}
+        onOpenChange={closeAddPaymentDialog}
+        onSuccess={refetch}
+      />
+
+      <EditPaymentDialog
+        open={isEditingPayment}
+        onOpenChange={closeEditPaymentDialog}
+        payment={selectedPayment}
+        onSuccess={refetch}
+      />
+
+      <DeletePaymentDialog
+        open={isDeletingPayment}
+        onOpenChange={closeDeletePaymentDialog}
+        payment={selectedPayment}
+        onSuccess={refetch}
+      />
+    </div>
+  );
+}

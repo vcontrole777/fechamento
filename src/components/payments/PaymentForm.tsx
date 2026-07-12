@@ -1,0 +1,224 @@
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { paymentFormSchema, PaymentFormValues } from "./schemas/paymentFormSchema";
+import { Payment } from "@/types/payment.types";
+import { useAttendantsAndTripeiros } from "./hooks/useAttendantsAndTripeiros";
+import { useState, useEffect } from "react";
+import { DatePickerField } from "./form-components/DatePickerField";
+import { TotalAmountField } from "./form-components/TotalAmountField";
+import { AttendantTrypeiroFields } from "./form-components/AttendantTrypeiroFields";
+import { PercentageSlider } from "./form-components/PercentageSlider";
+import { PaymentDetailsFields } from "./form-components/PaymentDetailsFields";
+import { CalculationPreview } from "./form-components/CalculationPreview";
+
+interface PaymentFormProps {
+  onSubmit: (
+    values: PaymentFormValues,
+    attendantPercentage: number,
+    tripeiroPercentage: number,
+    idIndicador: number | null,
+    percentageIndicacao: number
+  ) => void;
+  payment?: Payment;
+  isSubmitting?: boolean;
+}
+
+export function PaymentForm({ onSubmit, payment, isSubmitting = false }: PaymentFormProps) {
+  const { attendants, tripeiros } = useAttendantsAndTripeiros();
+  const [selectedAttendantPercentage, setSelectedAttendantPercentage] = useState<number>(0);
+  const [selectedTripeiroPercentage, setSelectedTripeiroPercentage] = useState<number>(0);
+  const [useCustomTripeiroPercentage, setUseCustomTripeiroPercentage] = useState<boolean>(false);
+  const [customTripeiroPercentage, setCustomTripeiroPercentage] = useState<number>(0);
+  const [referrerName, setReferrerName] = useState<string | undefined>(undefined);
+  const [referralPercentage, setReferralPercentage] = useState<number | undefined>(undefined);
+
+  
+
+  const getInitialDate = () => {
+    if (payment) {
+      
+      try {
+        // Parse the date string in YYYY-MM-DD format
+        const [year, month, day] = payment.data.split('-').map(num => parseInt(num));
+        
+        
+        // Create a new date with the year, month (0-indexed), and day
+        return new Date(year, month - 1, day);
+      } catch (error) {
+        
+        return new Date();
+      }
+    }
+    return new Date();
+  };
+
+  const form = useForm<PaymentFormValues>({
+    resolver: zodResolver(paymentFormSchema),
+    defaultValues: payment
+      ? {
+          data: getInitialDate(),
+          valor: payment.valor,
+          id_atendente: payment.id_atendente?.toString() || undefined,
+          id_tripeiro: payment.id_tripeiro?.toString() || undefined,
+          tipo: payment.tipo,
+          status: payment.status,
+        }
+      : {
+          data: new Date(),
+          valor: 0,
+          tipo: "pix",
+          status: "pendente",
+        },
+  });
+
+  useEffect(() => {
+    const attendantId = form.watch("id_atendente");
+    const tripeiroId = form.watch("id_tripeiro");
+
+    if (attendantId) {
+      const attendant = attendants.find(a => a.id.toString() === attendantId);
+      if (attendant) {
+        setSelectedAttendantPercentage(attendant.porcentagem);
+        
+        // Check if attendant has a referrer
+        if (attendant.id_indicador && attendant.porcentagem_indicacao) {
+          const referrer = attendants.find(a => a.id === attendant.id_indicador);
+          if (referrer) {
+            setReferrerName(referrer.nome);
+            setReferralPercentage(attendant.porcentagem_indicacao);
+          } else {
+            setReferrerName(undefined);
+            setReferralPercentage(undefined);
+          }
+        } else {
+          setReferrerName(undefined);
+          setReferralPercentage(undefined);
+        }
+      }
+    } else {
+      setReferrerName(undefined);
+      setReferralPercentage(undefined);
+    }
+
+    if (tripeiroId) {
+      const tripeiro = tripeiros.find(t => t.id.toString() === tripeiroId);
+      if (tripeiro) {
+        setSelectedTripeiroPercentage(tripeiro.porcentagem);
+        // Only update custom percentage if we're not already using a custom one
+        if (!useCustomTripeiroPercentage) {
+          setCustomTripeiroPercentage(tripeiro.porcentagem);
+        }
+      }
+    }
+  }, [
+    form.watch("id_atendente"), 
+    form.watch("id_tripeiro"), 
+    attendants, 
+    tripeiros, 
+    useCustomTripeiroPercentage
+  ]);
+
+  // Initialize percentages for editing mode - run once when component mounts
+  useEffect(() => {
+    if (payment && tripeiros.length > 0) {
+      const selectedTripeiro = tripeiros.find(t => t.id === payment.id_tripeiro);
+      
+      if (selectedTripeiro) {
+        setSelectedTripeiroPercentage(selectedTripeiro.porcentagem);
+        
+        // If payment percentage differs from tripeiro default, enable custom mode
+        if (payment.porcentagem_tripeiro !== selectedTripeiro.porcentagem) {
+          setUseCustomTripeiroPercentage(true);
+          setCustomTripeiroPercentage(payment.porcentagem_tripeiro);
+        } else {
+          setUseCustomTripeiroPercentage(false);
+          setCustomTripeiroPercentage(selectedTripeiro.porcentagem);
+        }
+      }
+    }
+  }, [payment?.id, tripeiros]); // Only depend on payment ID and tripeiros
+
+  const handleTripeiroChange = (value: string) => {
+    // Only reset custom percentage if we're not in editing mode with a custom percentage
+    if (!payment || !useCustomTripeiroPercentage) {
+      setUseCustomTripeiroPercentage(false);
+    }
+  };
+
+  const handleSliderChange = (value: number[]) => {
+    setCustomTripeiroPercentage(value[0]);
+  };
+
+  const handleToggleCustomPercentage = (value: boolean) => {
+    setUseCustomTripeiroPercentage(value);
+  };
+
+  const handleSubmit = (values: PaymentFormValues) => {
+    // Ensure date is properly recorded as a Date object
+    const date = values.data instanceof Date ? values.data : new Date(values.data);
+    
+    // Pass the values with a guaranteed Date object
+    const submissionValues = {
+      ...values,
+      data: date
+    };
+    
+    const tripeiroPercentageToSubmit = useCustomTripeiroPercentage
+      ? customTripeiroPercentage
+      : selectedTripeiroPercentage;
+
+    const selectedAttendant = attendants.find(a => a.id.toString() === values.id_atendente);
+    const idIndicador = selectedAttendant?.id_indicador || null;
+    const percentageIndicacao = idIndicador ? (selectedAttendant?.porcentagem_indicacao || 0) : 0;
+
+    onSubmit(submissionValues, selectedAttendantPercentage, tripeiroPercentageToSubmit, idIndicador, percentageIndicacao);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <DatePickerField control={form.control} />
+        
+        <TotalAmountField control={form.control} />
+        
+        <AttendantTrypeiroFields 
+          control={form.control}
+          attendants={attendants}
+          tripeiros={tripeiros}
+          onTripeiroChange={handleTripeiroChange}
+        />
+
+        {form.watch("id_tripeiro") && (
+          <PercentageSlider 
+            useCustomPercentage={useCustomTripeiroPercentage}
+            customPercentage={customTripeiroPercentage}
+            defaultPercentage={selectedTripeiroPercentage}
+            onPercentageChange={handleSliderChange}
+            onToggleCustomPercentage={handleToggleCustomPercentage}
+          />
+        )}
+
+        <PaymentDetailsFields control={form.control} />
+
+        <CalculationPreview 
+          totalValue={form.watch("valor") || 0}
+          tripeiroPercentage={useCustomTripeiroPercentage ? customTripeiroPercentage : selectedTripeiroPercentage}
+          attendantPercentage={selectedAttendantPercentage}
+          useCustomTripeiroPercentage={useCustomTripeiroPercentage}
+          selectedTripeiroPercentage={selectedTripeiroPercentage}
+          referrerName={referrerName}
+          referralPercentage={referralPercentage}
+        />
+
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting}>
+            {payment ? "Atualizar Pagamento" : "Adicionar Pagamento"}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
